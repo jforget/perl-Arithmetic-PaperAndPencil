@@ -57,7 +57,3 @@ close $fh
     or die "closing $html_name $!";
 $result = $sheet->html('fr', 1, 0, $css);
 is($result, $ref, "HTML generation with css");
-
-open my $toto, '>', 'toto';
-print $toto $result;
-close $toto;

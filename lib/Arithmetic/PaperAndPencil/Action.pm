@@ -64,7 +64,7 @@ method w1val { $w1val } # waiting for :reader
 method w2l   { $w2l   } # waiting for :reader
 method w2c   { $w2c   } # waiting for :reader
 method w2val { $w2val } # waiting for :reader
-  
+
 'CQFD'; # End of Arithmetic::PaperAndPencil::Action
 
 =head1 NAME
