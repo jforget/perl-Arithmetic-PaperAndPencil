@@ -484,3 +484,23 @@ d'être épineux à l'avenir, c'est l'appel des fonctions ou des méthodes
 avec  des  paramètres  définis  par mots-clés.  Il  faudra  revenir  à
 l'ancienne  méthode  où  l'on  récupérait la  variable  `@_`  pour  la
 recopier dans un hachage.
+
+### Problèmes pour la méthode `subtraction`
+
+Pas  de problème  en fait.  En revanche,  j'ai (re)découvert  que l'on
+pouvait attribuer un type à une déclaration `my`, si le type est connu
+en tant que classe d'objet. Ainsi,
+
+```
+  my Arithmetic::PaperAndPencil::Action $action;
+```
+
+est valide, mais
+
+```
+  my Int $i;
+```
+
+ne l'est pas. Est-ce que cela permet de raccourcir les appels de `new`
+pour faire  aussi bref qu'en  Raku ? Je ne le  pense pas. Je  n'ai pas
+essayé.

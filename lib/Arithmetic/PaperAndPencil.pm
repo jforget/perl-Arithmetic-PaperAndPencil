@@ -10,9 +10,10 @@ use experimental qw/class/;
 use Arithmetic::PaperAndPencil::Action;
 use Arithmetic::PaperAndPencil::Char;
 use Arithmetic::PaperAndPencil::Label;
-use Arithmetic::PaperAndPencil::Number;
 
 class Arithmetic::PaperAndPencil 0.01;
+
+use Arithmetic::PaperAndPencil::Number qw/max_unit adjust_sub/;
 
 use Carp;
 use Exporter 'import';
@@ -99,7 +100,7 @@ method html(%param) {
   my sub filling_spaces($l, $c) {
     # putting spaces into all uninitialised boxes
     for my $l1 (0 .. l2p_lin($l)) {
-      $sheet[$l1][0] //=  Arithmetic::PaperAndPencil::Char->space_char;
+      $sheet[$l1][0] //= Arithmetic::PaperAndPencil::Char->space_char;
     }
     for my $c1 (0 .. l2p_col($c)) {
       $sheet[l2p_lin($l)][$c1] //= Arithmetic::PaperAndPencil::Char->space_char;
@@ -143,7 +144,7 @@ method html(%param) {
       # making the vertical line
       for my $l ($action->w1l .. $action->w2l) {
         filling_spaces($l, $action->w1c);
-        $sheet[l2p_lin($l)][l2p_col($action->w1c) + 1] =  Arithmetic::PaperAndPencil::Char->pipe_char;
+        $sheet[l2p_lin($l)][l2p_col($action->w1c) + 1] = Arithmetic::PaperAndPencil::Char->pipe_char;
       }
     }
 
@@ -482,6 +483,76 @@ method addition(@numbers) {
   return Arithmetic::PaperAndPencil::Number->new(value => $result, radix => $radix);
 }
 
+method subtraction(%param) {
+  my $high = $param{high};
+  my $low  = $param{low};
+  my $type = $param{type}  // 'std';
+
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $radix = $high->radix;
+  my $leng  = $high->chars;
+  if ($low->radix != $radix) {
+    croak "The two numbers have different bases: $radix != @{[$low->radix]}";
+  }
+  if ($type ne 'std' && $type ne 'compl') {
+    croak "Subtraction type '$type' unknown";
+  }
+  if ($high < $low) {
+    croak "The high number @{[$high->value]} must be greater than or equal to the low number @{[$low->value]}";
+  }
+  if (@action) {
+    $action[-1]->set_level(0);
+  }
+  if (($type eq 'std')) {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'TIT02', val1 => $high->value, val2 => $low->value, val3 => $radix);
+    push(@action, $action);
+    # set-up
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => 0, w1c => $leng, w1val => $high->value);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => 1, w1c => $leng, w1val => $low->value);
+    push(@action, $action);
+
+    # computation
+    my $result = '';
+    $result = $self->_embedded_sub(basic_level => 0, l_hi => 0, c_hi => $leng, high => $high
+                                                   , l_lo => 1, c_lo => $leng, low  => $low
+                                                   , l_re => 2, c_re => $leng);
+    $action[-1]->set_level(0);
+    return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+  }
+  else {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'TIT15', val1 => $high->value, val2 => $low->value, val3 => $radix);
+    push(@action, $action);
+    my Arithmetic::PaperAndPencil::Number $complement = $low->complement($leng);
+    # set-up
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'SUB03', val1 => $radix, val2 => $low->value, val3 => $complement->value
+                                               , w1l => 0, w1c => $leng, w1val => $high->value
+                                               , w2l => 1, w2c => $leng, w2val => $complement->value);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'DRA02', w1l => 1, w1c => 1
+                                               , w2l => 1, w2c => $leng);
+    push(@action, $action);
+
+    my @digits; # storing the numbers' digits
+    my @result; # storing the result's digit positions
+    my $compl_val = '0' x ($leng - $complement->chars) . $complement->value;
+    for my $i (0 .. $leng - 1) {
+      $digits[$i][0] = { lin => 0, col => $leng - $i, val => substr($high->value, $leng - $i - 1, 1) };
+      $digits[$i][1] = { lin => 1, col => $leng - $i, val => substr($compl_val  , $leng - $i - 1, 1) };
+      $result[$i]    = { lin => 2, col => $leng - $i };
+    }
+    my $result = substr($self->_adding(\@digits, \@result, 0, $radix), 1);
+    # getting rid of leading zeroes except if the result is zero
+    $result =~ s/^0*//;
+    if ($result eq '') {
+      $result = '0';
+    }
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 0, label => 'SUB04', val1 => $result, r1l => 2, r1c => 0, r1val => '1', r1str => 1);
+    push(@action, $action);
+    return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+  }
+}
+
 method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
   my @digits = @$digits;
   my @pos    = @$pos;
@@ -494,7 +565,7 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
     my $l = $digits[$i];
     my @l = grep { $_ } @$l; # removing empty entries
     if (0+ @l == 0) {
-      $action =  Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI04'           , val1  => $carry
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI04'           , val1  => $carry
                                                                    , w1l => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $carry
                                                                    );
       push(@action, $action);
@@ -558,9 +629,9 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
         if ($carry eq '0') {
           $code = 'WRI03';
         }
-        $action =  Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3
-                             , label => $code        , val1 => $digit       , val2 => $carry
-                             , w1l   => $pos[$i]{lin}, w1c  => $pos[$i]{col}, w1val => $digit
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3
+                            , label => $code        , val1 => $digit       , val2 => $carry
+                            , w1l   => $pos[$i]{lin}, w1c  => $pos[$i]{col}, w1val => $digit
                              );
         push(@action, $action);
         $result = $digit . $result;
@@ -569,6 +640,110 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
   }
   return $result;
 }
+
+method _embedded_sub(%param) {
+  my $basic_level = $param{basic_level};
+  my $l_hi        = $param{l_hi};
+  my $c_hi        = $param{c_hi};
+  my $high        = $param{high};
+  my $l_lo        = $param{l_lo};
+  my $c_lo        = $param{c_lo};
+  my $low         = $param{low};
+  my $l_re        = $param{l_re};
+  my $c_re        = $param{c_re};
+
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $radix = $high->radix;
+  my $leng  = $high->chars;
+  # set-up
+  $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 2, label => 'DRA02', w1l => $l_lo, w1c => $c_lo - $leng + 1
+                                                            , w2l => $l_lo, w2c => $c_lo);
+  push(@action, $action);
+
+  my $carry  = '0';
+  my $result = '';
+  my $label;
+
+  # First subphase, looping over the low number's digits
+  for my $i (0 .. $low->chars - 1) {
+    my $high1 = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($high->value, $leng      - $i - 1, 1));
+    my $low1  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($low->value, $low->chars - $i - 1, 1));
+    my $adj1;
+    my $res1;
+    my $low2;
+    if ($carry eq '0') {
+      ($adj1, $res1) = adjust_sub($high1, $low1);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'SUB01', val1  => $low1->value, val2 => $res1->value, val3 => $adj1->value
+                   , r1l => $l_hi, r1c => $c_hi - $i, r1val => $high1->value
+                   , r2l => $l_lo, r2c => $c_lo - $i, r2val => $low1->value
+                   );
+    }
+    else {
+      $low2 = $low1 + Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $carry);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'ADD01'   , val1  => $low1->value, val2 => $carry, val3 => $low2->value
+                   , r1l => $l_lo, r1c => $c_lo - $i, r1val => $low1->value
+                   );
+      push(@action, $action);
+      ($adj1, $res1) = adjust_sub($high1, $low2);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'SUB02'   , val1  => $res1->value, val2 => $adj1->value
+                   , r1l => $l_hi, r1c => $c_hi - $i, r1val => $high1->value
+                   );
+    }
+    push(@action, $action);
+    $result = $res1->unit->value . $result;
+    $carry  = $adj1->carry->value;
+    if ($carry eq '0') {
+      $label = 'WRI03';
+    }
+    else {
+      $label = 'WRI02';
+    }
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => $label    , val1  => $res1->unit->value, val2 => $carry
+                                                    , w1l   => $l_re           , w1c   => $c_re - $i, w1val => $res1->unit->value
+                                                    );
+    push(@action, $action);
+  }
+  # Second subphase, dealing with the carry
+  my $pos = $low->chars;
+  while ($carry ne '0') {
+    my $high1   = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($high->value, $leng - $pos - 1, 1));
+    my $carry1  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $carry);
+    my $adj1;
+    my $res1;
+    ($adj1, $res1) = adjust_sub($high1, $carry1);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'SUB01', val1  => $carry, val2 => $res1->value, val3 => $adj1->value
+                 , r1l => $l_hi, r1c => $c_hi - $pos, r1val => $high1->value
+                 );
+    push(@action, $action);
+    $result = $res1->unit->value . $result;
+    $carry  = $adj1->carry->value;
+    if ($carry eq '0') {
+      $label = 'WRI03';
+    }
+    else {
+      $label = 'WRI02';
+    }
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => $label      , val1  => $res1->unit->value, val2 => $carry
+                                                    , w1l   => $l_re           , w1c   => $c_re - $pos, w1val => $res1->unit->value
+                                                    );
+    # no need to write the final zero if there is no carry
+    if ($res1->unit->value ne '0' or $carry ne '0' or $pos < $leng - 1) {
+      push(@action, $action);
+    }
+    $pos++;
+  }
+  # Third subphase, a single copy
+  if ($pos < $leng) {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level, label => 'WRI05'     , val1  => substr($high->value, 0, $leng - $pos)
+                                                      , w1l   => $l_re       , w1c   => $c_re - $pos, w1val => substr($high->value, 0, $leng - $pos)
+                                                    );
+    push(@action, $action);
+    $result = substr($high->value, 0, $leng - $pos) . $result;
+  }
+
+  return $result;
+}
+
 
 '0 + 0 = (:-|)'; # End of Arithmetic::PaperAndPencil
 
