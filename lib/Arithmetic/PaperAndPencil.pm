@@ -38,7 +38,11 @@ method csv {
   return $result;
 }
 
-method html($lang, $silent, $level, $css) {
+method html(%param) {
+  my $lang   = $param{lang}   // 'fr';
+  my $silent = $param{silent} // 0;
+  my $level  = $param{level}  // 3;
+  my $css    = $param{css};
   my $talkative = 1 - $silent; # "silent" better for API, "talkative" better for programming
   my $result    = '';
   my @sheet     = ();

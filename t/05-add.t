@@ -50,6 +50,6 @@ $sum = $operation->addition($dead, $beef);
 is($sum->value, '19D9C', "DEAD + BEEF = 19D9C (radix 16)");
 
 is($operation->csv, $refcsv, "Checking CSV file");
-my $html = $operation->html('fr', 0, 3, {});
+my $html = $operation->html(lang => 'fr', silent => 0, level => 3, css => {});
 is($html, $refhtml, "Checking HTML file");
 

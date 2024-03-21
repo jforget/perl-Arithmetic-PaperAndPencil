@@ -36,7 +36,7 @@ $ref = '';
 }
 close $fh
     or die "closing $html_name $!";
-my $result = $sheet->html('fr', 1, 0, {});
+my $result = $sheet->html(silent => 1, level => 0);
 is($result, $ref, "HTML generation without css");
 
 
@@ -55,5 +55,5 @@ $ref = '';
 }
 close $fh
     or die "closing $html_name $!";
-$result = $sheet->html('fr', 1, 0, $css);
+$result = $sheet->html(lang => 'fr', silent => 1, level => 0, css => $css);
 is($result, $ref, "HTML generation with css");
