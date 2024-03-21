@@ -14,20 +14,30 @@ use Arithmetic::PaperAndPencil::Number;
 
 class Arithmetic::PaperAndPencil 0.01;
 
+use Carp;
+use Exporter 'import';
+use POSIX qw/floor/;
+
 field @action;
 
 method from_csv {
   my ($csv) = @_;
   @action = ();
   for my $line (split("\n", $csv)) {
-    my $action = Arithmetic::PaperAndPencil::Action->new;
+    my $action = Arithmetic::PaperAndPencil::Action->new(level => 0, label => 'dummy');
     $action->from_csv($line);
     push @action, $action;
   }
 }
+
 method csv {
-  join "\n", map { $_->csv } @action;
+  my $result = join "\n", map { $_->csv } @action;
+  if (substr($result, -1, 1) ne "\n") {
+    $result .= "\n";
+  }
+  return $result;
 }
+
 method html($lang, $silent, $level, $css) {
   my $talkative = 1 - $silent; # "silent" better for API, "talkative" better for programming
   my $result    = '';
@@ -423,6 +433,139 @@ method html($lang, $silent, $level, $css) {
   return $result;
 }
 
+method addition(@numbers) {
+  if (@numbers == 0) {
+    croak "The addition needs at least one number to add";
+  }
+
+  my $action;
+  my $nb         = 0+ @numbers;
+  my $radix      = $numbers[0]->radix;
+  my $max_length = 0;
+  my @digits; # storing the numbers' digits
+  my @total;  # storing the total's digit positions
+
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => "TIT01", val1 => "$radix");
+  push @action, $action;
+
+  for my $i (0 .. $#numbers) {
+    my $n = $numbers[$i];
+    # checking the number
+    if ($n->radix != $radix) {
+      croak "All numbers must have the same radix";
+    }
+    # writing the number
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => $i, w1c => 0, w1val => $n->value);
+    push(@action, $action);
+    # preparing the horizontal line
+    if ($max_length < $n->chars) {
+      $max_length = $n->chars;
+    }
+    # feeding the table of digits
+    my $val = reverse($n->value);
+    for my $j (0 .. length($val) - 1) {
+      my $x = substr($val, $j, 1);
+      push(@{$digits[$j]}, { lin => $i, col => -$j, val => $x } );
+    }
+  }
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'DRA02', w1l => $nb - 1, w1c => 1 - $max_length
+                                                                                , w2l => $nb - 1, w2c => 0);
+  push(@action, $action);
+  for my $j (0 .. $max_length -1) {
+    $total[$j] = { lin => $nb, col => -$j };
+  }
+  my $result = $self->_adding(\@digits, \@total, 0, $radix);
+  return Arithmetic::PaperAndPencil::Number->new(value => $result, radix => $radix);
+}
+
+method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
+  my @digits = @$digits;
+  my @pos    = @$pos;
+  my $action;
+  my $sum;
+  my $result = '';
+  my $carry  = 0;
+
+  for my $i (0 .. $#digits) {
+    my $l = $digits[$i];
+    my @l = grep { $_ } @$l; # removing empty entries
+    if (0+ @l == 0) {
+      $action =  Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI04'           , val1  => $carry
+                                                                   , w1l => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $carry
+                                                                   );
+      push(@action, $action);
+      $result = $carry . $result;
+    }
+    elsif (0+ @l == 1 && $carry eq '0') {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3
+                          , label => 'WRI04'                          , val1  => $l[0]{val}
+                          , r1l => $l[ 0  ]{lin}, r1c => $l[ 0  ]{col}, r1val => $l[0]{val}, r1str => $striking
+                          , w1l => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $l[0]{val}
+                          );
+      push(@action, $action);
+      $result = $l[0]{val} . $result;
+    }
+    else {
+      my $first;
+      $sum = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $l[0]{val});
+      if ($carry eq '0') {
+        $sum   += Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $l[1]{val});
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6
+                            , label => 'ADD01' , val1  => $l[0]{val}, val2  => $l[1]{val}, val3  => $sum->value
+                            , r1l => $l[0]{lin}, r1c   => $l[0]{col}, r1val => $l[0]{val}, r1str => $striking
+                            , r2l => $l[1]{lin}, r2c   => $l[1]{col}, r2val => $l[1]{val}, r2str => $striking
+                            );
+        $first = 2;
+      }
+      else {
+        $sum   += Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $carry);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6
+                            , label => 'ADD01'   , val1 => $l[0]{val}, val2  => $carry    , val3  => $sum->value
+                            , r1l   => $l[0]{lin}, r1c  => $l[0]{col}, r1val => $l[0]{val}, r1str => $striking
+                            );
+        $first = 1;
+      }
+      push(@action, $action);
+      for my $j ($first .. $#l) {
+        $sum   += Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $l[$j]{val});
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6
+                          , label => 'ADD02'    , val1 => $l[$j]{val}, val2  => $sum->value
+                          , r1l   => $l[$j]{lin}, r1c  => $l[$j]{col}, r1val => $l[$j]{val}, r1str => $striking
+                          );
+        push(@action, $action);
+      }
+      if ($i == @digits - 1) {
+        my $last_action = pop(@action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 2
+                          , label => $last_action->label, val1  => $last_action->val1, val2   => $last_action->val2 , val3  => $last_action->val3
+                          , r1l   => $last_action->r1l  , r1c   => $last_action->r1c , r1val  => $last_action->r1val, r1str => $striking
+                          , r2l   => $last_action->r2l  , r2c   => $last_action->r2c , r2val  => $last_action->r2val, r2str => $striking
+                          , w1l   => $pos[$i]{lin}      , w1c   => $pos[$i]{col}     ,  w1val => $sum->value
+                          );
+        push(@action, $action);
+        $result = $sum->value . $result;
+      }
+      else {
+        my $digit = $sum->unit->value;
+        $carry    = $sum->carry->value;
+        my $lin;
+        my $col;
+        my $code = 'WRI02';
+        if ($carry eq '0') {
+          $code = 'WRI03';
+        }
+        $action =  Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3
+                             , label => $code        , val1 => $digit       , val2 => $carry
+                             , w1l   => $pos[$i]{lin}, w1c  => $pos[$i]{col}, w1val => $digit
+                             );
+        push(@action, $action);
+        $result = $digit . $result;
+      }
+    }
+  }
+  return $result;
+}
+
 '0 + 0 = (:-|)'; # End of Arithmetic::PaperAndPencil
 
 =head1 NAME
@@ -466,15 +609,11 @@ Please report any bugs or feature requests to C<bug-arithmetic-paperandpencil at
 the web interface at L<https://rt.cpan.org/NoAuth/ReportBug.html?Queue=Arithmetic-PaperAndPencil>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
-
-
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Arithmetic::PaperAndPencil
-
 
 You can also look for information at:
 

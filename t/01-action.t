@@ -25,7 +25,7 @@ close $fh
     or die "closing $csv_name $!";
 my $sheet = Arithmetic::PaperAndPencil->new();
 $sheet->from_csv($ref);
-is($sheet->csv . "\n", $ref, "There and back again");
+is($sheet->csv, $ref, "There and back again");
 
 my $html_name = 't/data/01-action-simple.html';
 open $fh, '<', $html_name

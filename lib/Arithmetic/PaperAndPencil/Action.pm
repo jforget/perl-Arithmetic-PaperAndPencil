@@ -10,25 +10,25 @@ use experimental qw/class/;
 
 class Arithmetic::PaperAndPencil::Action 0.01;
 
-field $level;
-field $label;
-field $val1   = '';
-field $val2   = '';
-field $val3   = '';
-field $r1l    = 0;
-field $r1c    = 0;
-field $r1val  = '';
-field $r1str  = 0;
-field $r2l    = 0;
-field $r2c    = 0;
-field $r2val  = '';
-field $r2str  = 0;
-field $w1l    = 0;
-field $w1c    = 0;
-field $w1val  = '';
-field $w2l    = 0;
-field $w2c    = 0;
-field $w2val  = '';
+field $level :param ;
+field $label :param ;
+field $val1  :param = '';
+field $val2  :param = '';
+field $val3  :param = '';
+field $r1l   :param = 0;
+field $r1c   :param = 0;
+field $r1val :param = '';
+field $r1str :param = 0;
+field $r2l   :param = 0;
+field $r2c   :param = 0;
+field $r2val :param = '';
+field $r2str :param = 0;
+field $w1l   :param = 0;
+field $w1c   :param = 0;
+field $w1val :param = '';
+field $w2l   :param = 0;
+field $w2c   :param = 0;
+field $w2val :param = '';
 
 method from_csv($csv) {
   ($level, $label, $val1, $val2, $val3, $r1l, $r1c, $r1val, $r1str
