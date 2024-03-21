@@ -18,4 +18,25 @@
   (define-key global-map "\C-c+"      'raku-add)
   (define-key global-map "\C-cx"      'raku-times)
   (define-key global-map "\C-c:"      'raku-divide)
+
+(defun adapte () (interactive)
+   ;; replacing proper multiplication sign with stupid star ersatz
+   (save-excursion (query-replace-regexp "×" "*"  nil nil nil) )
+   (save-excursion (query-replace-regexp "≤" "<=" nil nil nil) )
+   (save-excursion (query-replace-regexp "≥" ">=" nil nil nil) )
+
+   ;; replacing kebab-case with snake-case, e.g. "basic-level" → "basic_level"
+   (save-excursion (query-replace-regexp "\\([a-z]\\)-\\([a-z]\\)" "\\1_\\2" nil nil nil) )
+
+   ;; replacing Raku method invocation with Perl method invocation
+   (save-excursion (query-replace-regexp "\\([a-z]\\)\\.\\([a-z]\\)" "\\1->\\2" nil nil nil) )
+
+   ;; put again parentheses around "if" conditions
+   (save-excursion (query-replace-regexp " if \\(.*\\) {$" "if (\\1) {" nil nil nil) )
+
+   ;; Replacing typed Raku variables with untyped Perl variables in object instantiations
+   (save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Number \\(.*\\)\.= new" " \\1 =  Arithmetic::PaperAndPencil::Number->new" nil nil nil) )
+   (save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Action \\(.*\\)\.= new" " \\1 =  Arithmetic::PaperAndPencil::Action->new" nil nil nil) )
+)
+
 )

@@ -441,3 +441,46 @@ l'[opérateur Vénus](https://metacpan.org/dist/perlsecret/view/lib/perlsecret.p
 pour tester les résultats booléens sous la forme `0` ou `1`
 et l'[opérateur landau](https://metacpan.org/dist/perlsecret/view/lib/perlsecret.pod#Baby-cart)
 pour insérer des appels de méthode dans des chaînes de caractères.
+
+### Problèmes pour la méthode `addition`
+
+Je n'ai  pas vraiment eu  de problèmes, si ce  n'est que c'est  un peu
+gonflant  de changer  `if condition  {` en  `if (condition)  {` ou  de
+changer
+
+```
+my Arithmetic::PaperAndPencil::Number $x .= new(radix => $radix, value => '10');
+```
+
+en
+
+```
+my $x =  Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '10');
+```
+
+J'ai donc adapté le fichier  de configuration d'Emacs pour automatiser
+ces modifications. J'en ai profité pour ajouter d'autres modifications
+répétitives. C'est quand même  la version interactive du remplacement,
+commençant par  `query-`, car  certaines modifications  sont inutiles,
+voire à éviter, comme par exemple  remplacer un point par un `->` dans
+un nom  de fichier `toto.csv`  sous prétexte  que cela ressemble  à un
+appel de méthode.  Je n'ai pas tout codé,  car certaines modifications
+sont   plus    délicates,   comme   remplacer    `%label<TIT01>`   par
+`$label{TIT01}` ou changer
+
+```
+  for @numbers.kv -> $i, $n {
+```
+
+en
+
+```
+  for my $i (0 .. $#numbers) {
+    my $n = $numbers[$i];
+```
+
+Un problème qui, pour l'instant, ne m'a pas trop gêné, mais qui risque
+d'être épineux à l'avenir, c'est l'appel des fonctions ou des méthodes
+avec  des  paramètres  définis  par mots-clés.  Il  faudra  revenir  à
+l'ancienne  méthode  où  l'on  récupérait la  variable  `@_`  pour  la
+recopier dans un hachage.
