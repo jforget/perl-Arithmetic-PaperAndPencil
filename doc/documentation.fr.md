@@ -84,6 +84,40 @@ besoins du module principal. Pour le module Perl, chaque module annexe
 est traité d'un seul bloc et testé avec les données de tests recopiées
 à partir de la distribution Raku et converties pour la syntaxe Perl.
 
+Équivalence entre fichiers de tests
+-----------------------------------
+
+Pour le module Raku comme pour le module Perl, j'ai numéroté les
+fichiers de tests dans l'ordre où je les ai écrits (ou convertis)
+ou à peu près. Du coup, il est difficile de s'y retrouver. Voici
+donc la correspondance.
+
+| Raku                        | Perl              |
+|:----------------------------|:------------------|
+| 01-basic.rakutest           | 00-load.t         |
+| 02-test-meta.rakutest       | pas repris        |
+| 03-number.rakutest          | 03-number.t       |
+| 04-number-fatal.rakutest    | 04-number-fatal.t |
+| 05-action-csv.rakutest      | pas repris        |
+| 06-html.rakutest            | 01-action.t       |
+| 06-mult.rakutest            | 02-html.t         |
+| 07-mult.rakutest            | 07-mult.t         |
+| 08-mult.rakutest            | 08-mult.t         |
+| 09-mult-shortcut.rakutest   | à faire           |
+| 10-add.rakutest             | à faire           |
+| 11-mult-prepared.rakutest   | à faire           |
+| 12-mult-boat.rakutest       | à faire           |
+| 13-conversion.rakutest      | à faire           |
+| 14-subtraction.rakutest     | à faire           |
+| 15-prep-division.rakutest   | à faire           |
+| 16-division.rakutest        | à faire           |
+| 17-square-root.rakutest     | à faire           |
+| 18-div-boat.rakutest        | à faire           |
+| 19-division.rakutest        | à faire           |
+| 20-conversion-div.rakutest  | à faire           |
+| 21-gcd.rakutest             | à faire           |
+| 22-russ-mult.rakutest       | à faire           |
+
 Premières impressions sur Corinna
 ---------------------------------
 
@@ -96,7 +130,7 @@ version provisoire  et incomplète  de Corinna,  mais je  pensais qu'au
 moins il y aurait les attributs `:reader` pour les champs d'objets, ce
 qui me dispenserait d'écrire les accesseurs élémentaires. Éh bien non,
 les attributs `:reader` ne sont pas  implémentés en 5.38.2 et j'ai été
-obligé d'écrire les cinq accesseurs  des cinq champs de `A::PNP::Char`
+obligé d'écrire les cinq accesseurs  des cinq champs de `A::P&P::Char`
 et  les 19  accesseurs des  19 champs  de `A::PBP::Action`.  Peut-être
 devrais-je installer Perl 5.39.xx avec perlbrew ?
 
@@ -150,8 +184,19 @@ le fichier de destination.
 Je n'ai pas  vu s'il existait dans Corinna des  méthodes privées. Dans
 l'immédiat, j'ai adopté  la méthode de nommage  traditionelle de Perl,
 une méthode est  privée si son nom commence par  un souligné, comme la
-méthode `_native_int`  de `A::PNP::Number`. Elle est  publique dans le
+méthode `_native_int`  de `A::P&P::Number`. Elle est  publique dans le
 cas inverse.
+
+Assez souvent, dans  les méthodes, je commence par  créer une variable
+lexicale `$radix`  qui contient la  base de numération. Avec  Raku, il
+n'y avait aucun risque de confusion entre cette variable et l'attribut
+`radix` d'une instance de nombre, qui s'écrit `$.radix` dans la classe
+`A::P&P::Number`  ou  `$toto.radix`  dans  les  autres  classes.  Avec
+Corinna, dans la classe `A::P&P::Number`, l'attribut s'écrit `$radix`.
+Il y  a donc un risque  de confusion. Pour l'instant,  chaque fois que
+j'ai  utilisé  une variable  `$radix`,  c'était  dans une  méthode  de
+`A::P&P`, donc il n'y avait pas de confusion avec l'unique attribut de
+cette classe. Néanmoins, le risque existe.
 
 Premières impressions en dehors de Corinna
 ------------------------------------------
@@ -230,14 +275,14 @@ use open ':encoding(UTF-8)';
 Problèmes recontrés
 -------------------
 
-### Premier problème pour `A:PNP::Char`
+### Premier problème pour `A:P&P::Char`
 
 Le premier  problème s'est manifesté  lors de la génération  du source
 HTML à partir d'une liste d'actions.
 
 À un  moment, il faut  insérer une ou  plusieurs colonnes au  début de
 chaque ligne de  l'opération et remplir ces colonnes  avec des espaces
-(en fait des instances de `A::PNP::Char`). Le module calcule le nombre
+(en fait des instances de `A::P&P::Char`). Le module calcule le nombre
 de  colonnes à  insérer  `$delta_c` (ou,  en  Raku, `$delta-c`),  puis
 lance :
 
@@ -248,7 +293,7 @@ lance :
 ```
 
 La fonction `space-char`  est la fonction qui fournit  une instance de
-`A::PNP::Char` contenant  un espace. Ma  première tentative en  Perl a
+`A::P&P::Char` contenant  un espace. Ma  première tentative en  Perl a
 été :
 
 ```
@@ -264,7 +309,7 @@ l'instruction  `unshift`  insérait  deux  fois  la  même  instance  de
 `space_char` au début  de la ligne. En revanche, en  Raku, le problème
 ne se  manifestait pas. Soit  `space-char() xx $delta-c`  appelle deux
 fois la fonction `space-char` pour créer deux instances différentes de
-`A::PNP::Char`,  soit  l'instruction   `prepend`  effectue  une  copie
+`A::P&P::Char`,  soit  l'instruction   `prepend`  effectue  une  copie
 profonde (_deep copy_). Toujours est-il  que, pour corriger la version
 Perl, j'ai dû écrire :
 
@@ -276,7 +321,7 @@ Perl, j'ai dû écrire :
       }
 ```
 
-### Deuxième problème pour `A:PNP::Char`
+### Deuxième problème pour `A:P&P::Char`
 
 Le  programme  de  test  `01-action.t` comporte  deux  générations  de
 sources HTML. J'ai commencé par  tester seulement la première, jusqu'à
@@ -342,10 +387,10 @@ temps, je  ne lui  ai pas ajouté  de déclaration `my`.  Et le  test de
 effectué. Et  lorsque j'ai  collé la déclaration  `my` à  `draw_h`, le
 test a réussi.
 
-### Problèmes rencontrés pour `A::PNP::Number`
+### Problèmes rencontrés pour `A::P&P::Number`
 
 À  quelques endroits  du module,  j'ai besoin  de convertir  un nombre
-`A::PNP::Number` d'un seul chiffre en  un entier natif. Pour ce faire,
+`A::P&P::Number` d'un seul chiffre en  un entier natif. Pour ce faire,
 en Raku, j'utilise le tableau à 36 éléments
 
 ```
@@ -501,6 +546,63 @@ est valide, mais
   my Int $i;
 ```
 
-ne l'est pas. Est-ce que cela permet de raccourcir les appels de `new`
-pour faire  aussi bref qu'en  Raku ? Je ne le  pense pas. Je  n'ai pas
-essayé.
+ne  l'est  pas.  Pour  le  cas  d'un  objet  tel  qu'une  instance  de
+`A::P&P::Action`, est-ce que  cela permet de raccourcir  les appels de
+`new` pour faire aussi  bref qu'en Raku ? Je ne le  pense pas. Je n'ai
+pas essayé.
+
+### Problèmes pour la méthode `multiplication`
+
+Un problème  de méthode  de développement. La  multiplication comporte
+plusieurs variantes.  Je ne vais pas  faire un Git commit  global pour
+toutes les variantes, je vais faire un Git commit à chaque variante, à
+la  rigueur  pour  deux  variantes.  Or,  les  fichiers  de  tests  ne
+correspondent pas rigoureusement à telle  ou telle variante. Donc tant
+pis,  j'ai  décidé de  publier  le  fichier `07-mult.t`  (anciennement
+`07-mult.rakutest`)  avec  le premier  commit,  celui  de la  variante
+standard,  même si  ce fichier  de  test inclut  la multiplication  en
+jalousie.  Le fichier  de test  plantera,  mais au  moins nous  sommes
+prévenus. Je  n'ai pas trouvé utile  de masquer les tests  par `TODO`,
+car la situation normale devrait être rapidement rétablie.
+
+Un  problème de  codage. En  Raku, il  existe deux  syntaxes pour  les
+« paires », la  syntaxe avec la flèche  épaisse et la syntaxe  avec le
+deux-points, qui possède une variante avec guillemets automatiques.
+
+```
+clé => valeur
+:clé(valeur)
+:clé<valeur>
+```
+
+Ainsi, on peut créer une instance de nombre avec, au choix :
+
+```
+  my Arithmetic::PaperAndPencil::Number $un .= new(radix => $radix, value => '1');
+  my Arithmetic::PaperAndPencil::Number $un .= new(:radix($radix), :value('1'));
+  my Arithmetic::PaperAndPencil::Number $un .= new(:radix($radix), :value<1>);
+
+```
+
+Jusqu'à présent, lors de la transcription vers Perl, j'ai toujours été
+confronté  à  la  syntaxe  avec  la flèche  épaisse.  C'est  facile  à
+convertir, surtout depuis que la macro Emacs `adapte` contient
+
+```
+(save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Number \\(.*\\)\.= new" " \\1 = Arithmetic::PaperAndPencil::Number->new" nil nil nil) )
+```
+
+Cela donne automatiquement :
+
+```
+  my $un = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '1');
+
+```
+
+qui est  valide pour Perl et  Corinna. Mais la deuxième  syntaxe et la
+troisième  vont déclencher  une erreur  de compilation.  Tant pis,  je
+ferai les  adaptations à la main,  je n'ai pas le  courage de chercher
+comment écrire une  instruction `query-replace-regexp` qui modifierait
+automatiquement une paire avec la syntaxe des deux-points.
+
+

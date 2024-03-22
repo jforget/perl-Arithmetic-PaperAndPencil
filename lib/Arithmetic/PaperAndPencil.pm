@@ -18,6 +18,7 @@ use Arithmetic::PaperAndPencil::Number qw/max_unit adjust_sub/;
 use Carp;
 use Exporter 'import';
 use POSIX qw/floor/;
+use List::Util qw/min max/;
 
 field @action;
 
@@ -553,6 +554,115 @@ method subtraction(%param) {
   }
 }
 
+method multiplication(%param) {
+  my $multiplicand = $param{multiplicand};
+  my $multiplier   = $param{multiplier};
+  my $type         = $param{type}         // 'std';
+  my $direction    = $param{direction}    // 'ltr';        # for the 'boat' type, elementary products are processed left-to-right or right-to-left ('rtl')
+  my $mult_and_add = $param{mult_and_add} // 'separate';   # for the 'boat' type, addition is a separate subphase (contrary: 'combined')
+  my $product      = $param{product}      // 'L-shaped';   # for the 'jalousie-?" types, the product is L-shaped along the rectangle (contrary: 'straight' on the bottom line)
+
+  my Arithmetic::PaperAndPencil::Action $action;
+  if ($multiplicand->radix != $multiplier->radix) {
+    die "Multiplicand and multiplier have different bases: @{[$multiplicand->radix]} != @{[$multiplier->radix]}";
+  }
+  my $title = '';
+  my $radix = $multiplicand->radix;
+  if    ($type eq 'std'       ) { $title = 'TIT03' ; }
+  elsif ($type eq 'shortcut'  ) { $title = 'TIT04' ; }
+  elsif ($type eq 'prepared'  ) { $title = 'TIT05' ; }
+  elsif ($type eq 'jalousie-A') { $title = 'TIT06' ; }
+  elsif ($type eq 'jalousie-B') { $title = 'TIT07' ; }
+  elsif ($type eq 'boat'      ) { $title = 'TIT08' ; }
+  elsif ($type eq 'russian'   ) { $title = 'TIT19' ; }
+  if ($title eq '') {
+    die "Multiplication type '$type' unknown";
+  }
+  if ($type eq 'jalousie-A' || $type eq 'jalousie-B') {
+    if ($product ne 'L-shaped' && $product ne 'straight') {
+      die "Product shape '$product' should be 'L-shaped' or 'straight'";
+    }
+  }
+  if ($type eq 'boat') {
+    if ($direction ne 'ltr' && $direction ne 'rtl') {
+      die "Direction '$direction' should be 'ltr' (left-to-right) or 'rtl' (right-to-left)";
+    }
+    if ($mult_and_add ne 'separate' && $mult_and_add ne 'combined') {
+      die "Parameter mult_and_add '$mult_and_add' should be 'separate' or 'combined'";
+    }
+  }
+
+  my $len1 = $multiplicand->chars;
+  my $len2 = $multiplier->chars;
+  if (@action) {
+    $action[-1]->set_level(0);
+  }
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 9
+               , label => $title
+               , val1  => $multiplicand->value
+               , val2  => $multiplier->value
+               , val3  => $multiplier->radix
+               );
+  push(@action, $action);
+
+  # caching the partial products for prepared and shortcut multiplications
+  my %mult_cache = (1 => $multiplicand);
+  if ($type eq 'prepared') {
+    my $limit = max(split('', $multiplier->value));
+    $self->_preparation(factor => $multiplicand, limit => $limit, cache => %mult_cache);
+  }
+
+  if ($type eq 'std' || $type eq  'shortcut' || $type eq 'prepared') {
+    # set-up
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => 0, w1c => $len1 + $len2, w1val => $multiplicand->value
+                                                                                  , w2l => 1, w2c => $len1 + $len2, w2val => $multiplier->value);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'DRA02', w1l => 1, w1c => min($len1, $len2)
+                                                                                  , w2l => 1, w2c => $len1 + $len2);
+    push(@action, $action);
+
+    # multiplication of two single-digit numbers
+    if ($len1 == 1 && $len2 == 1) {
+      my Arithmetic::PaperAndPencil::Number $pdt = $multiplier * $multiplicand;
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 0, label => 'MUL02'
+                   , r1l => 0, r1c => 2, r1val => $multiplier->value   , val1 => $multiplier->value
+                   , r2l => 1, r2c => 2, r2val => $multiplicand->value , val2 => $multiplicand->value
+                   , w1l => 2, w1c => 2, w1val => $pdt->value          , val3 => $pdt->value
+                   );
+      push(@action, $action);
+      return $pdt;
+    }
+    # multiplication with a single-digit multiplier
+    if ($len2 == 1 && $type eq 'prepared') {
+      my Arithmetic::PaperAndPencil::Number $pdt;
+      $pdt = $mult_cache{$multiplier->value};
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 0, label => 'WRI05', val1 => $pdt->value
+                   , w1l => 2, w1c => $len1 + 1, w1val => $pdt->value
+                   );
+      push(@action, $action);
+      return $pdt;
+    }
+    if ($len2 == 1) {
+      my Arithmetic::PaperAndPencil::Number $pdt;
+      $pdt = $self->_simple_mult(basic_level => 0, l_md => 0, c_md => $len1 + 1, multiplicand => $multiplicand
+                                                 , l_mr => 1, c_mr => $len1 + 1, multiplier   => $multiplier
+                                                 , l_pd => 2, c_pd => $len1 + 1 );
+      $action[-1]->set_level(0);
+      return $pdt;
+    }
+    # multiplication with a multi-digit multiplier
+    my Arithmetic::PaperAndPencil::Number $pdt;
+    $pdt = $self->_adv_mult(basic_level => 0, l_md => 0, c_md => $len1 + $len2, multiplicand => $multiplicand
+                                            , l_mr => 1, c_mr => $len1 + $len2, multiplier   => $multiplier
+                                            , l_pd => 2, c_pd => $len1 + $len2
+                                            , type => $type, cache => \%mult_cache);
+    $action[-1]->set_level(0);
+    return $pdt;
+  }
+my $result = '0';
+  return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+}
+
 method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
   my @digits = @$digits;
   my @pos    = @$pos;
@@ -566,8 +676,8 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
     my @l = grep { $_ } @$l; # removing empty entries
     if (0+ @l == 0) {
       $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI04'           , val1  => $carry
-                                                                   , w1l => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $carry
-                                                                   );
+                                                                  , w1l => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $carry
+                                                                  );
       push(@action, $action);
       $result = $carry . $result;
     }
@@ -742,6 +852,136 @@ method _embedded_sub(%param) {
   }
 
   return $result;
+}
+
+method _adv_mult(%param) {
+  my $basic_level  = $param{basic_level};
+  my $type         = $param{type} // 'std';
+  my $l_md         = $param{l_md}; # coordinates of the multiplicand
+  my $c_md         = $param{c_md};
+  my $l_mr         = $param{l_mr}; # coordinates of the multiplier
+  my $c_mr         = $param{c_mr};
+  my $l_pd         = $param{l_pd}; # coordinates of the product
+  my $c_pd         = $param{c_pd};
+  my %cache        = %{$param{cache}};
+  my $multiplicand = $param{multiplicand};
+  my $multiplier   = $param{multiplier};
+
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $result     = '';
+  my $radix      = $multiplier->radix;
+  my $line       = $l_pd;
+  my $pos        = $multiplier->chars - 1;
+  my $shift      = 0;
+  my $shift_char = '0';
+  my @partial; # storing the partial products' digits
+  my @final  ; # storing the final product's digit positions
+
+  while ($pos >= 0) {
+    # shifting the current simple multiplication because of embedded zeroes
+    if (substr($multiplier->value, 0, $pos + 1) =~ /(0+)$/) {
+      $shift += length($1);
+      $pos   -= length($1);
+    }
+    if ($shift != 0) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => 'WRI00', w1l => $line, w1c => $c_pd, w1val => $shift_char x $shift);
+      push(@action, $action);
+      if ($shift_char eq '0') {
+        for my $i (0 .. $shift - 1) {
+          push @{$partial[$i]}, { lin => $line, col => $c_pd - $i, val => '0'};
+        }
+      }
+    }
+    # computing the simple multiplication
+    my $mul = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplier->value, $pos, 1));
+    my Arithmetic::PaperAndPencil::Number $pdt;
+    if ($type ne 'std' && $cache{$mul->value}) {
+      $pdt = $cache{$mul->value};
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI05', val1 => $pdt->value
+                                                             , w1l => $line, w1c => $c_pd - $shift, w1val => $pdt->value
+                                                             );
+      push(@action, $action);
+
+    }
+    else {
+      $pdt = $self->_simple_mult(basic_level => $basic_level
+                            , l_md => $l_md, c_md => $c_md         , multiplicand => $multiplicand
+                            , l_mr => $l_mr, c_mr => $c_mr - $shift, multiplier   => $mul
+                            , l_pd => $line, c_pd => $c_pd - $shift);
+      # filling the cache
+      $cache{$mul->value} = $pdt;
+    }
+    # storing the digits of $pdt
+    my @digit_list = reverse(split('', $pdt->value));
+    for my $i (0 .. $#digit_list) {
+      my $x = $digit_list[$i];
+      push @{$partial[$i + $shift]}, { lin => $line, col => $c_pd - $shift - $i, val => $x };
+    }
+    # shifting the next simple multiplication
+    $pos--;
+    $shift++;
+    $shift_char = '.';
+    $line++;
+  }
+  $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 2, label => 'DRA02'
+               , w1l => $line - 1, w1c => $c_pd + 1 - $multiplicand->chars - $multiplier->chars
+               , w2l => $line - 1, w2c => $c_pd);
+  push(@action, $action);
+  for my $i (0 .. $multiplicand->chars + $multiplier->chars) {
+    $final[$i] = { lin => $line, col => $c_pd - $i };
+  }
+  $result = $self->_adding(\@partial, \@final, $basic_level, $radix);
+  return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+}
+
+method _simple_mult(%param) {
+  my $basic_level  = $param{basic_level};
+  my $l_md         = $param{l_md}; # coordinates of the multiplicand
+  my $c_md         = $param{c_md};
+  my $l_mr         = $param{l_mr}; # coordinates of the multiplier (single digit)
+  my $c_mr         = $param{c_mr};
+  my $l_pd         = $param{l_pd}; # coordinates of the product
+  my $c_pd         = $param{c_pd};
+  my $multiplicand = $param{multiplicand};
+  my $multiplier   = $param{multiplier};
+  my $result = '';
+  my $radix  = $multiplier->radix;
+  my $carry  = '0';
+  my $len1   = $multiplicand->chars;
+  my Arithmetic::PaperAndPencil::Action $action;
+  my Arithmetic::PaperAndPencil::Number $pdt;
+  for my $i (0 .. $len1 - 1) {
+    my $mul = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplicand->value, $len1 - $i - 1, 1));
+    $pdt = $multiplier * $mul;
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'MUL01'                , val3 => $pdt->value
+                                                   , r1l => $l_mr, r1c => $c_mr     , r1val => $multiplier->value, val1 => $multiplier->value
+                                                   , r2l => $l_md, r2c => $c_md - $i, r2val => $mul->value       , val2 => $mul->value
+                                                   );
+    push(@action, $action);
+    if ($carry ne '0') {
+      $pdt += Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $carry);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'ADD02', val1 => $carry, val2 => $pdt->value);
+      push(@action, $action);
+    }
+    my $unit  = $pdt->unit->value;
+    $carry    = $pdt->carry->value;
+    my $code = 'WRI02';
+    if ($carry eq '0') {
+      $code = 'WRI03';
+    }
+    if ($i < $len1 - 1) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => $code, val1 => $unit, val2 => $carry
+                   , w1l => $l_pd, w1c => $c_pd - $i, w1val => $unit
+                     );
+      push(@action, $action);
+      $result = $unit . $result;
+    }
+  }
+  $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI00'
+               , w1l => $l_pd, w1c => $c_pd + 1 - $len1, w1val => $pdt->value
+                 );
+  push(@action, $action);
+  return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $pdt->value . $result);
 }
 
 

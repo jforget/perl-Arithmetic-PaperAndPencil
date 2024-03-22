@@ -27,6 +27,9 @@
    (save-excursion (query-replace-regexp "≤" "<=" nil nil nil) )
    (save-excursion (query-replace-regexp "≥" ">=" nil nil nil) )
 
+   (save-excursion (query-replace-regexp "False" "0"  nil nil nil) )
+   (save-excursion (query-replace-regexp "True"  "1"  nil nil nil) )
+
    ;; replacing kebab-case with snake-case, e.g. "basic-level" → "basic_level"
    (save-excursion (query-replace-regexp "\\([a-z]\\)-\\([a-z]\\)" "\\1_\\2" nil nil nil) )
 
@@ -37,8 +40,8 @@
    (save-excursion (query-replace-regexp "if \\(.*\\) {$" "if (\\1) {" nil nil nil) )
 
    ;; Replacing typed Raku variables with untyped Perl variables in object instantiations
-   (save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Number \\(.*\\)\.= new" " \\1 =  Arithmetic::PaperAndPencil::Number->new" nil nil nil) )
-   (save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Action \\(.*\\)\.= new" " \\1 =  Arithmetic::PaperAndPencil::Action->new" nil nil nil) )
+   (save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Number \\(.*\\)\.= new" " \\1 = Arithmetic::PaperAndPencil::Number->new" nil nil nil) )
+   (save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Action \\(.*\\)\.= new" " \\1 = Arithmetic::PaperAndPencil::Action->new" nil nil nil) )
    (save-excursion (query-replace-regexp "$action \.= new" "$action = Arithmetic::PaperAndPencil::Action->new" nil nil nil) )
 )
 
