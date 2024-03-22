@@ -606,3 +606,9 @@ comment écrire une  instruction `query-replace-regexp` qui modifierait
 automatiquement une paire avec la syntaxe des deux-points.
 
 
+
+Licence
+=======
+
+Texte diffusé sous la licence  CC-BY-ND : Creative Commons avec clause
+de paternité, excluant la modification.
