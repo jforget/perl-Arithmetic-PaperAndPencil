@@ -102,10 +102,17 @@ CPAN's request tracker (report bugs here)
 
 * [Search CPAN](https://metacpan.org/release/Arithmetic-PaperAndPencil)
 
+And you can  find some additional documentation in  the repository for
+the Raku module:
+
+* [English version](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md)
+
+* [French version](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-fr.md)
+
 AUTHOR
 ======
 
-Jean Forget <J2N-FORGET@orange.fr>
+Jean Forget <J2N-FORGET at orange dot fr>
 
 DEDICATION
 ==========

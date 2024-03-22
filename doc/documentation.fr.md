@@ -43,7 +43,7 @@ Initialisation
 --------------
 
 J'ai initialisé le répertoire de développement du module avec
-[Module::Starter](https://metacpan.org/search?q=module%3A%3Astarter)
+[Module::Starter](https://metacpan.org/pod/Module::Starter)
 version 1.77.
 
 Une première surprise. Depuis très longtemps, j'entends dire du mal de
@@ -104,11 +104,11 @@ donc la correspondance.
 | 07-mult.rakutest            | 07-mult.t         |
 | 08-mult.rakutest            | 08-mult.t         |
 | 09-mult-shortcut.rakutest   | à faire           |
-| 10-add.rakutest             | à faire           |
+| 10-add.rakutest             | 05-add.t          |
 | 11-mult-prepared.rakutest   | à faire           |
 | 12-mult-boat.rakutest       | à faire           |
 | 13-conversion.rakutest      | à faire           |
-| 14-subtraction.rakutest     | à faire           |
+| 14-subtraction.rakutest     | 06-subtraction.t  |
 | 15-prep-division.rakutest   | à faire           |
 | 16-division.rakutest        | à faire           |
 | 17-square-root.rakutest     | à faire           |
@@ -131,7 +131,7 @@ moins il y aurait les attributs `:reader` pour les champs d'objets, ce
 qui me dispenserait d'écrire les accesseurs élémentaires. Éh bien non,
 les attributs `:reader` ne sont pas  implémentés en 5.38.2 et j'ai été
 obligé d'écrire les cinq accesseurs  des cinq champs de `A::P&P::Char`
-et  les 19  accesseurs des  19 champs  de `A::PBP::Action`.  Peut-être
+et  les 19  accesseurs des  19 champs  de `A::P&P::Action`.  Peut-être
 devrais-je installer Perl 5.39.xx avec perlbrew ?
 
 Une autre  mauvaise surprise :  lorsque je lance  un fichier  de test,
@@ -163,7 +163,7 @@ class Arithmetic::PaperAndPencil {
 ```
 
 mais chaque  fois que  je copiais-collais des  pavés de  traitement du
-module Raku  vers le  module Perl, il  fallait remettre  la pagination
+module Raku  vers le  module Perl, il  fallait remettre  l'indentation
 d'aplomb. Puis en relisant
 [la documentation](https://perldoc.perl.org/perlclass)
 et pas seulement les exemples, j'ai découvert que
@@ -425,12 +425,11 @@ Ou alors,  la solution était  la même que  pour le second  problème de
 `Number.pm`.  Voici  ce second  problème.  J'ai  besoin d'émettre  des
 messages d'erreur avec `croak` et  j'ai besoin de calculer des parties
 entières  avec `floor`.  J'ai donc  appelé les  modules correspondants
-avec :
+au début du fichier source avec :
 
 ```
 use Carp;
 use POSIX qw/floor/;
-
 class Arithmetic::PaperAndPencil::Number 0.01;
 ```
 
@@ -440,12 +439,12 @@ Cela m'a donné des messages d'erreur tels que
 Undefined subroutine &Arithmetic::PaperAndPencil::Number::floor called at lib/Arithmetic/PaperAndPencil/Number.pm line 179.
 ```
 
-Cela allait mieux avec `Carp::croak` et `POSIX::floor`, mais ce n'est pas idéal. Puis
-j'ai codé :
+Cela   allait  mieux   avec  les   noms  qualifiés   `Carp::croak`  et
+`POSIX::floor`, mais ce n'est pas idéal. Puis j'ai interverti quelques
+lignes :
 
 ```
 class Arithmetic::PaperAndPencil::Number 0.01;
-
 use Carp;
 use POSIX qw/floor/;
 ```
@@ -567,7 +566,8 @@ car la situation normale devrait être rapidement rétablie.
 
 Un  problème de  codage. En  Raku, il  existe deux  syntaxes pour  les
 « paires », la  syntaxe avec la flèche  épaisse et la syntaxe  avec le
-deux-points, qui possède une variante avec guillemets automatiques.
+deux-points,  qui possède  une variante  avec guillemets  automatiques
+(_auto-quote_).
 
 ```
 clé => valeur
