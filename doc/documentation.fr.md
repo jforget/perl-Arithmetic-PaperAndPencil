@@ -92,31 +92,31 @@ fichiers de tests dans l'ordre où je les ai écrits (ou convertis)
 ou à peu près. Du coup, il est difficile de s'y retrouver. Voici
 donc la correspondance.
 
-| Raku                        | Perl              |
-|:----------------------------|:------------------|
-| 01-basic.rakutest           | 00-load.t         |
-| 02-test-meta.rakutest       | pas repris        |
-| 03-number.rakutest          | 03-number.t       |
-| 04-number-fatal.rakutest    | 04-number-fatal.t |
-| 05-action-csv.rakutest      | pas repris        |
-| 06-html.rakutest            | 01-action.t       |
-| 06-mult.rakutest            | 02-html.t         |
-| 07-mult.rakutest            | 07-mult.t         |
-| 08-mult.rakutest            | 08-mult.t         |
-| 09-mult-shortcut.rakutest   | à faire           |
-| 10-add.rakutest             | 05-add.t          |
-| 11-mult-prepared.rakutest   | à faire           |
-| 12-mult-boat.rakutest       | à faire           |
-| 13-conversion.rakutest      | à faire           |
-| 14-subtraction.rakutest     | 06-subtraction.t  |
-| 15-prep-division.rakutest   | à faire           |
-| 16-division.rakutest        | à faire           |
-| 17-square-root.rakutest     | à faire           |
-| 18-div-boat.rakutest        | à faire           |
-| 19-division.rakutest        | à faire           |
-| 20-conversion-div.rakutest  | à faire           |
-| 21-gcd.rakutest             | à faire           |
-| 22-russ-mult.rakutest       | à faire           |
+| Raku                        | Perl                       |
+|:----------------------------|:---------------------------|
+| 01-basic.rakutest           | 00-load.t                  |
+| 02-test-meta.rakutest       | pas repris                 |
+| 03-number.rakutest          | 03-number.t                |
+| 04-number-fatal.rakutest    | 04-number-fatal.t          |
+| 05-action-csv.rakutest      | pas repris                 |
+| 06-html.rakutest            | 01-action.t                |
+| 06-mult.rakutest            | 02-html.t                  |
+| 07-mult.rakutest            | 07-mult.t                  |
+| 08-mult.rakutest            | 08-mult.t                  |
+| 09-mult-shortcut.rakutest   | 09-mult-shortcut.rakutest  |
+| 10-add.rakutest             | 05-add.t                   |
+| 11-mult-prepared.rakutest   | à faire                    |
+| 12-mult-boat.rakutest       | à faire                    |
+| 13-conversion.rakutest      | à faire                    |
+| 14-subtraction.rakutest     | 06-subtraction.t           |
+| 15-prep-division.rakutest   | à faire                    |
+| 16-division.rakutest        | à faire                    |
+| 17-square-root.rakutest     | à faire                    |
+| 18-div-boat.rakutest        | à faire                    |
+| 19-division.rakutest        | à faire                    |
+| 20-conversion-div.rakutest  | à faire                    |
+| 21-gcd.rakutest             | à faire                    |
+| 22-russ-mult.rakutest       | à faire                    |
 
 Premières impressions sur Corinna
 ---------------------------------

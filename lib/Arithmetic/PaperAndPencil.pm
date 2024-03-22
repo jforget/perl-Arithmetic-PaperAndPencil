@@ -1052,7 +1052,7 @@ method _adv_mult(%param) {
     # computing the simple multiplication
     my $mul = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplier->value, $pos, 1));
     my Arithmetic::PaperAndPencil::Number $pdt;
-    if ($type ne 'std' && $cache{$mul->value}) {
+    if ($type ne 'std' && defined $cache{$mul->value}) {
       $pdt = $cache{$mul->value};
       $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI05', val1 => $pdt->value
                                                              , w1l => $line, w1c => $c_pd - $shift, w1val => $pdt->value
