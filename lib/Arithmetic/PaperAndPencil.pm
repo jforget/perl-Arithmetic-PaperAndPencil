@@ -526,9 +526,10 @@ method subtraction(%param) {
     push(@action, $action);
     my Arithmetic::PaperAndPencil::Number $complement = $low->complement($leng);
     # set-up
-    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'SUB03', val1 => $radix, val2 => $low->value, val3 => $complement->value
-                                               , w1l => 0, w1c => $leng, w1val => $high->value
-                                               , w2l => 1, w2c => $leng, w2val => $complement->value);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5
+                                   , label => 'SUB03', val1 => $radix, val2 => $low->value, val3  => $complement->value
+                                                     , w1l  => 0     , w1c  => $leng      , w1val => $high->value
+                                                     , w2l  => 1     , w2c  => $leng      , w2val => $complement->value);
     push(@action, $action);
     $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'DRA02', w1l => 1, w1c => 1
                                                , w2l => 1, w2c => $leng);
@@ -614,11 +615,13 @@ method multiplication(%param) {
 
   if ($type eq 'std' || $type eq  'shortcut' || $type eq 'prepared') {
     # set-up
-    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => 0, w1c => $len1 + $len2, w1val => $multiplicand->value
-                                                                                  , w2l => 1, w2c => $len1 + $len2, w2val => $multiplier->value);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5
+                          , label => 'WRI00', w1l => 0, w1c => $len1 + $len2, w1val => $multiplicand->value
+                                            , w2l => 1, w2c => $len1 + $len2, w2val => $multiplier->value);
     push(@action, $action);
-    $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'DRA02', w1l => 1, w1c => min($len1, $len2)
-                                                                                  , w2l => 1, w2c => $len1 + $len2);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 2
+                          , label => 'DRA02', w1l => 1, w1c => min($len1, $len2)
+                                            , w2l => 1, w2c => $len1 + $len2);
     push(@action, $action);
 
     # multiplication of two single-digit numbers
@@ -658,6 +661,160 @@ method multiplication(%param) {
                                             , type => $type, cache => \%mult_cache);
     $action[-1]->set_level(0);
     return $pdt;
+  }
+  if ($type eq 'jalousie-A' || $type eq 'jalousie-B') {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5
+                          , label => 'DRA02', w1l => 0, w1c => 1
+                                            , w2l => 0, w2c => 2 * $len1);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5
+                  , label => 'DRA01', w1l => 1        , w1c => 0
+                                    , w2l => 2 * $len2, w2c => 0);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5
+                  , label => 'DRA01', w1l => 1        , w1c => 2 * $len1
+                                    , w2l => 2 * $len2, w2c => 2 * $len1);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5
+                  , label => 'DRA02', w1l => 2 * $len2, w1c => 1
+                                    , w2l => 2 * $len2, w2c => 2 * $len1);
+    push(@action, $action);
+  }
+  if ($type eq 'jalousie-A') {
+    for my $i (1 .. $len1) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => 0, w1c => 2 * $i - 1, w1val => substr($multiplicand->value, $i - 1, 1));
+      push(@action, $action);
+    }
+    for my $i (1 .. $len2) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => 2 * $i, w1c => 2 * $len1 + 1, w1val => substr($multiplier->value, $i - 1, 1));
+      push(@action, $action);
+    }
+    for my $i (1 .. $len1 + $len2 - 1) {
+      my $l1 = 1;
+      my $c1 = 2 * $i;
+      my $l2 = 2 * $len2;
+      my $c2 = 2 * ($i - $len2) + 1;
+      if ($c1 >= 2 * $len1) {
+        $l1 += $c1 - 2 * $len1;
+        $c1  = 2 * $len1;
+      }
+      if ($c2 <= 0 && $product eq 'L-shaped') {
+        $l2 -= 1 - $c2;
+        $c2  = 1;
+      }
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DRA04', w1l => $l1, w1c => $c1, w2l => $l2, w2c => $c2);
+      push(@action, $action);
+    }
+    # end of set-up phase
+    $action[-1]->set_level(2);
+
+    # multiplication phase
+    my @partial;
+    for my $l (1 .. $len2) {
+      my $x = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplier->value, $l - 1, 1));
+      for my $c (1 .. $len1) {
+        my $y = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplicand->value, $c - 1, 1));
+        my Arithmetic::PaperAndPencil::Number $pdt   = $x * $y;
+        my Arithmetic::PaperAndPencil::Number $unit  = $pdt->unit;
+        my Arithmetic::PaperAndPencil::Number $carry = $pdt->carry;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 5
+                     , label => 'MUL01', r1l => 2 * $l    , r1c => 2 * $len1 + 1, r1val => $x->value    , val1 => $x->value
+                                       , r2l => 0         , r2c => 2 * $c - 1   , r2val => $y->value    , val2 => $y->value
+                                       , w1l => 2 * $l - 1, w1c => 2 * $c - 1   , w1val => $carry->value, val3 => $pdt->value
+                                       , w2l => 2 * $l    , w2c => 2 * $c       , w2val => $unit->value
+                                       );
+        push(@action, $action);
+        $partial[$len1 + $len2 - $l - $c    ][2 * $l    ] = { lin => 2 * $l    , col => 2 * $c    , val => $unit->value };
+        $partial[$len1 + $len2 - $l - $c + 1][2 * $l - 1] = { lin => 2 * $l - 1, col => 2 * $c - 1, val => $carry->value };
+      }
+      # end of line
+      $action[-1]->set_level(3);
+    }
+    # end of multiplication phase
+    $action[-1]->set_level(2);
+
+    # Addition phase
+    my @final;
+    my $limit;
+    if    ($product eq 'L-shaped') { $limit = $len1;         }
+    elsif ($product eq 'straight') { $limit = $len1 + $len2; }
+    for my $i (0 .. $limit - 1) {
+      $final[$i] = { lin => 2 * $len2 + 1, col => 2 * ($len1 - $i) - 1 };
+    }
+    for my $i ($limit .. $len1 + $len2 - 1) {
+      $final[$i] = { lin => 2 * ($len1 + $len2 - $i), col => 0 };
+    }
+    my $result = $self->_adding(\@partial, \@final, 0, $radix);
+    $action[-1]->set_level(0);
+    return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+  }
+  if ($type eq 'jalousie-B') {
+    for my $i (1 .. $len1) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => 0, w1c => 2 * $i, w1val => substr($multiplicand->value, $i - 1, 1));
+      push(@action, $action);
+    }
+    for my $i (1 .. $len2) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l => 2 * ($len2 - $i + 1), w1c => 0, w1val => substr($multiplier->value, $i - 1, 1));
+      push(@action, $action);
+    }
+    for my $i (1 - $len2 .. $len1 - 1) {
+      my $l1 = 1;
+      my $c1 = 1 + 2 * $i;
+      my $l2 = 2 * $len2;
+      my $c2 = 2 * ($i + $len2);
+      if ($c1 <= 0) {
+        $l1 += 1 - $c1;
+        $c1  = 1;
+      }
+      if ($c2 >= 2 * $len1 && $product eq 'L-shaped') {
+        $l2 -= $c2 - 2 * $len1;
+        $c2  = 2 * $len1;
+      }
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DRA03', w1l => $l1, w1c => $c1, w2l => $l2, w2c => $c2);
+      push(@action, $action);
+    }
+    # end of set-up phase
+    $action[-1]->set_level(2);
+
+    # multiplication phase
+    my @partial;
+    for my $l (1 .. $len2) {
+      my $x = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplier->value, $len2 - $l, 1));
+      for my $c (1 .. $len1) {
+        my $y = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplicand->value, $c - 1, 1));
+        my Arithmetic::PaperAndPencil::Number $pdt   = $x * $y;
+        my Arithmetic::PaperAndPencil::Number $unit  = $pdt->unit;
+        my Arithmetic::PaperAndPencil::Number $carry = $pdt->carry;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 5
+                     , label => 'MUL01', r1l => 2 * $l    , r1c => 0         , r1val => $x->value    , val1 => $x->value
+                                       , r2l => 0         , r2c => 2 * $c    , r2val => $y->value    , val2 => $y->value
+                                       , w1l => 2 * $l    , w1c => 2 * $c - 1, w1val => $carry->value, val3 => $pdt->value
+                                       , w2l => 2 * $l - 1, w2c => 2 * $c    , w2val => $unit->value
+                                       );
+        push(@action, $action);
+        $partial[$len1 - $c + $l - 1][2 * $l - 1] = { lin => 2 * $l - 1, col => 2 * $c    , val => $unit->value };
+        $partial[$len1 - $c + $l    ][2 * $l    ] = { lin => 2 * $l    , col => 2 * $c - 1, val => $carry->value };
+      }
+      # end of line
+      $action[-1]->set_level(3);
+    }
+    # end of multiplication phase
+    $action[-1]->set_level(2);
+
+    # Addition phase
+    my @final;
+    my $limit;
+    if    ($product eq 'L-shaped') { $limit = $len2; }
+    elsif ($product eq 'straight') { $limit = 0;     }
+    for my $i (0 .. $limit - 1) {
+      $final[$i] = { lin => 2 * $i + 2, col => 2 * $len1 + 1 };
+    }
+    for my $i ($limit .. $len1 + $len2 - 1) {
+      $final[$i] = { lin => 2 * $len2 + 1, col => 2 * ($len1 + $len2 - $i) };
+    }
+    my $result = $self->_adding(\@partial, \@final, 0, $radix);
+    $action[-1]->set_level(0);
+    return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
   }
 my $result = '0';
   return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
