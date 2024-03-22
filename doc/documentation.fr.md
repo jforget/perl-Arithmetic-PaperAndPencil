@@ -103,9 +103,9 @@ donc la correspondance.
 | 06-mult.rakutest            | 02-html.t                  |
 | 07-mult.rakutest            | 07-mult.t                  |
 | 08-mult.rakutest            | 08-mult.t                  |
-| 09-mult-shortcut.rakutest   | 09-mult-shortcut.rakutest  |
+| 09-mult-shortcut.rakutest   | 09-mult-shortcut.t         |
 | 10-add.rakutest             | 05-add.t                   |
-| 11-mult-prepared.rakutest   | à faire                    |
+| 11-mult-prepared.rakutest   | 10-mult-prepared.t         |
 | 12-mult-boat.rakutest       | à faire                    |
 | 13-conversion.rakutest      | à faire                    |
 | 14-subtraction.rakutest     | 06-subtraction.t           |

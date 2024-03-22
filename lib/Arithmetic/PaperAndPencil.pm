@@ -610,7 +610,7 @@ method multiplication(%param) {
   my %mult_cache = (1 => $multiplicand);
   if ($type eq 'prepared') {
     my $limit = max(split('', $multiplier->value));
-    $self->_preparation(factor => $multiplicand, limit => $limit, cache => %mult_cache);
+    $self->_preparation(factor => $multiplicand, limit => $limit, cache => \%mult_cache);
   }
 
   if ($type eq 'std' || $type eq  'shortcut' || $type eq 'prepared') {
@@ -1009,6 +1009,65 @@ method _embedded_sub(%param) {
   }
 
   return $result;
+}
+
+method _preparation(%param) {
+  my $factor      = $param{factor};
+  my $limit       = $param{limit};
+  my $cache       = $param{cache};
+  my $basic_level = $param{basic_level} // 0;
+
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $one = Arithmetic::PaperAndPencil::Number->new(radix => $factor->radix, value => '1');
+  my $radix = $factor->radix;
+  my $col   = $factor->chars + 3;
+
+  # cache first entry
+  $cache->{1} = $factor;
+  $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI00'
+                                                    , w1l => 0, w1c => 0   , w1val => '1'
+                                                    , w2l => 0, w2c => $col, w2val => $factor->value);
+  push(@action, $action);
+
+  my @digits; # storing the numbers' digits
+  my @total;  # storing the total's digit positions
+  my @digit_list = reverse(split('', $factor->value));
+  for my $i (0 .. $#digit_list) {
+    my $ch = $digit_list[$i];
+    $digits[$i][0] = { lin => 0, col => $col - $i, val => $ch };
+    $total[ $i]    = { lin => 1, col => $col - $i };
+  }
+  # in case the last partial products are longer than the factor
+  $total[$factor->chars] = { lin => 1, col => $col - $factor->chars };
+
+  my $result = $factor->value;
+  my $lin    = 1;
+  my Arithmetic::PaperAndPencil::Number $mul = $one + $one; # starting from 2; yet stopping immediately with a 2-digit $mul if $radix == 2
+  while ($mul->value le $limit && $mul->chars == 1) {
+    # displaying the line number
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 9, label => 'WRI00', w1l => $lin, w1c => 0, w1val => $mul->value);
+    push(@action, $action);
+
+    # computation
+    my @digit_list = reverse(split('', $result));
+    for my $i (0 .. $#digit_list) {
+      my $ch = $digit_list[$i];
+      $digits[$i][1]  = { lin => $lin - 1, col => $col - $i, val => $ch };
+      $total[$i]{lin} = $lin;
+    }
+    $result = $self->_adding(\@digits, \@total, $basic_level + 1, $radix);
+    $action[-1]->set_level($basic_level + 3);
+
+    # storing into cache
+    $cache->{$mul->value} = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+
+    # loop iteration
+    $lin++;
+    $mul += $one;
+  }
+
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 1, label => 'NXP01');
+  push(@action, $action);
 }
 
 method _adv_mult(%param) {
