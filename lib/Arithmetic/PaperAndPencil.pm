@@ -816,6 +816,69 @@ method multiplication(%param) {
     $action[-1]->set_level(0);
     return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
   }
+  if ($type eq 'boat') {
+    # set up phase
+    my $tot_len = $len1 + $len2 - 1;
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI00', w1l =>  0, w1c => $tot_len, w1val => $multiplicand->value);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DRA02', w1l => -1, w1c => 0, w2l => -1, w2c => $tot_len);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'DRA02', w1l =>  0, w1c => 0, w2l =>  0, w2c => $tot_len);
+    push(@action, $action);
+
+    # arrays of line numbers per column
+    my @lines_below = ( 1 ) x ($len1 + $len2);
+    my @lines_above = (-1 ) x ($len1 + $len2);
+    my @result      = ('0') x ($len1 + $len2);
+
+    # multiplication phase
+    my @partial;
+    for my $col ($len2 .. $tot_len) {
+      my $x  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplicand->value, $col - $len2, 1));
+      # write the multiplier at the proper column
+      $self->_push_below($multiplier, $col, \@lines_below);
+
+      # partial products
+      my @range = (1 .. $len2);
+      my $last  = $len2;
+      if ($direction eq 'rtl') {
+        @range = reverse(@range);
+        $last  = 1;
+      }
+      for my $c (@range) {
+        my $y  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplier->value, $c - 1, 1));
+        my Arithmetic::PaperAndPencil::Number $pdt = $x * $y;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 6
+                     , label => 'MUL01', val1 => $y->value, r1l => $lines_below[$col - $len2 + $c] - 1, r1c => $col - $len2 + $c, r1val => $y->value, r1str => 1
+                                       , val2 => $x->value, r2l => 0                                  , r2c => $col             , r2val => $x->value, r2str => 0+ ($c == $last)
+                                       , val3 => $pdt->value);
+        push(@action, $action);
+        if ($mult_and_add eq 'separate') {
+          $self->_push_above($pdt, $col - $len2 + $c, \@lines_above, \@partial, $tot_len);
+        }
+        else {
+          $self->_add_above($pdt, $col - $len2 + $c, \@lines_above, \@result);
+        }
+        $action[-1]->set_level(4);
+      }
+      $action[-1]->set_level(3);
+    }
+
+    # addition phase
+    my @final;
+    my $result;
+    if ($mult_and_add eq 'separate') {
+      for my $col (0 .. -1 + @lines_above) {
+        $final[$col] = { lin => $lines_above[$tot_len - $col], col => $tot_len - $col };
+      }
+      $result = $self->_adding(\@partial, \@final, 0, $radix, 1);
+    }
+    else {
+       $result = join('', @result);
+    }
+    $action[-1]->set_level(0);
+    return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+  }
 my $result = '0';
   return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
 }
@@ -1198,6 +1261,63 @@ method _simple_mult(%param) {
                  );
   push(@action, $action);
   return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $pdt->value . $result);
+}
+
+method _push_below($number, $col, $lines_below) {
+  my Arithmetic::PaperAndPencil::Action $action;
+  for my $digit (split('', reverse($number->value))) {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'WRI00', w1l => $lines_below->[$col]++, w1c => $col, w1val => $digit);
+    push(@action, $action);
+    $col--;
+  }
+  $action[- 1]->set_level(4);
+}
+
+method _push_above($number, $col, $lines_above, $addition, $bias) {
+  my Arithmetic::PaperAndPencil::Action $action;
+  for my $digit (split('', reverse($number->value))) {
+    $addition->[$bias - $col][- $lines_above->[$col] ] = { lin => $lines_above->[$col], col => $col, val => $digit };
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'WRI00', w1l => $lines_above->[$col]--, w1c => $col, w1val => $digit);
+    push(@action, $action);
+    $col--;
+  }
+}
+
+method _add_above($number, $col, $lines_above, $result) {
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $radix = $number->radix;
+  while ($number->value ne '0') {
+    if ($lines_above->[$col] == -1) {
+      my $code = 'WRI02';
+      if ($number->chars == 1) {
+        $code = 'WRI04';
+      }
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => $code,  val1 => $number->unit->value, val2 => $number->carry->value
+                                   , w1l   => $lines_above->[$col]--, w1c => $col , w1val => $number->unit->value);
+      push(@action, $action);
+      $result->[$col] = $number->unit->value;
+      $number         = $number->carry;
+    }
+    else {
+      my $already_there  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result->[$col]);
+      my Arithmetic::PaperAndPencil::Number $sum = $number + $already_there;
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'ADD01', val1  => $number->value, val2  => $already_there->value, val3 => $sum->value
+                                                   , r2l => $lines_above->[$col] + 1, r2c   => $col          , r2val => $already_there->value, r2str => 1
+                                                   );
+      push(@action, $action);
+      my $code = 'WRI02';
+      if ($sum->chars == 1) {
+        $code = 'WRI03';
+      }
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => $code, val1  => $sum->unit->value, val2 => $sum->carry->value
+                                   , w1l => $lines_above->[$col]--, w1c   => $col , w1val => $sum->unit->value
+                                   );
+      push(@action, $action);
+      $result->[$col] = $sum->unit->value;
+      $number         = $sum->carry;
+    }
+    --$col;
+  }
 }
 
 

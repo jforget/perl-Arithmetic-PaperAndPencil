@@ -106,7 +106,7 @@ donc la correspondance.
 | 09-mult-shortcut.rakutest   | 09-mult-shortcut.t         |
 | 10-add.rakutest             | 05-add.t                   |
 | 11-mult-prepared.rakutest   | 10-mult-prepared.t         |
-| 12-mult-boat.rakutest       | à faire                    |
+| 12-mult-boat.rakutest       | 11-mult-boat.t             |
 | 13-conversion.rakutest      | à faire                    |
 | 14-subtraction.rakutest     | 06-subtraction.t           |
 | 15-prep-division.rakutest   | à faire                    |
@@ -213,6 +213,8 @@ essentiellement de la 5.10 :
 * la structure `given` / `when`
 
 * un petit peu de _smart match_ pour accomagner `given` / `when`
+
+* l'opérateur _defined or_ `//` (en particulier sa forme `//=`)
 
 * la déclaration de variables lexicales à durée de vie étendue avec `state`,
 
@@ -605,6 +607,13 @@ ferai les  adaptations à la main,  je n'ai pas le  courage de chercher
 comment écrire une  instruction `query-replace-regexp` qui modifierait
 automatiquement une paire avec la syntaxe des deux-points.
 
+Et un problème de codage déjà évoqué.  En Raku, on a le droit d'écrire
+des `given  ... when`. En Perl  on a eu  le droit mais bientôt,  on ne
+l'aura  plus, même  si  l'on  ajoute un  `use  experimental`. D'où  le
+remplacement par une série de  `if ... elsif` disgracieux. J'aurais pu
+appeler
+[le module `Switch`](https://metacpan.org/pod/Switch),
+mais tant pis, nous en resterons aux `elsif`.
 
 
 Licence
