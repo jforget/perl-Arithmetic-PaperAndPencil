@@ -848,10 +848,10 @@ method multiplication(%param) {
       for my $c (@range) {
         my $y  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplier->value, $c - 1, 1));
         my Arithmetic::PaperAndPencil::Number $pdt = $x * $y;
-        $action = Arithmetic::PaperAndPencil::Action->new(level => 6
-                     , label => 'MUL01', val1 => $y->value, r1l => $lines_below[$col - $len2 + $c] - 1, r1c => $col - $len2 + $c, r1val => $y->value, r1str => 1
-                                       , val2 => $x->value, r2l => 0                                  , r2c => $col             , r2val => $x->value, r2str => 0+ ($c == $last)
-                                       , val3 => $pdt->value);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'MUL01'
+                       , val1 => $y->value, r1l => $lines_below[$col - $len2 + $c] - 1, r1c => $col - $len2 + $c, r1val => $y->value, r1str => 1
+                       , val2 => $x->value, r2l => 0                                  , r2c => $col             , r2val => $x->value, r2str => 0+ ($c == $last)
+                       , val3 => $pdt->value);
         push(@action, $action);
         if ($mult_and_add eq 'separate') {
           $self->_push_above($pdt, $col - $len2 + $c, \@lines_above, \@partial, $tot_len);
@@ -879,8 +879,67 @@ method multiplication(%param) {
     $action[-1]->set_level(0);
     return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
   }
-my $result = '0';
-  return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+  if ($type eq 'russian') {
+    # set-up
+    my Arithmetic::PaperAndPencil::Number $md = $multiplicand;
+    my Arithmetic::PaperAndPencil::Number $mr = $multiplier;
+    my $c_md = 2 * $len2 + 1 + $len1;
+    my $c_mr = $len2;
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 3, label => 'WRI00'
+                                        , w1l => 0, w1c => $c_md, w1val => $md->value
+                                        , w2l => 0, w2c => $c_mr, w2val => $mr->value);
+    push(@action, $action);
+
+    # first phase, doubling the multiplicand and halving the multiplier
+    my $l = 0;
+    my @lines = ();
+    push(@lines, { mr => $mr, md => $md });
+    while ($mr->value ne '1') {
+      $mr = $self->_halving( l1 => $l, c1 => $c_mr, l2 => $l + 1, c2 => $c_mr, number => $mr);
+      $md = $self->_doubling(l1 => $l, c1 => $c_md, l2 => $l + 1, c2 => $c_md, number => $md);
+      push(@lines, { mr => $mr, md => $md });
+      $l++;
+    }
+    $action[-1]->set_level(2);
+
+    # second phase, testing even numbers and striking
+    my @partial;
+    my @final;
+    for my $l (0 .. $#lines) {
+      my $line = $lines[$l];
+      $mr = $line->{mr};
+      $md = $line->{md};
+      if ($mr->is_odd) {
+        my @digit_list = split('', reverse($md->value));
+        for my $i (0 .. $#digit_list) {
+          push @{$partial[$i]}, { lin => $l, col => $c_md - $i, val => $digit_list[$i] };
+        }
+      }
+      else {
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 4, label => 'MUL03'
+                       , val1 => $mr->value, r1l => $l, r1c => $c_mr, r1val => $mr->value
+                       , val2 => $md->value, r2l => $l, r2c => $c_md, r2val => $md->value, r2str => 1);
+        push(@action, $action);
+      }
+      if ($mr->value eq '1') {
+        my @digit_list = split('', reverse($md->value));
+        for my $i(0 .. $#digit_list) {
+          $final[$i] = { lin => 0+ @lines, col => $c_md - $i };
+        }
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'DRA02'
+                       , w1l => $l, w1c => $c_md + 1 - $md->chars
+                       , w2l => $l, w2c => $c_md);
+        push(@action, $action);
+      }
+    }
+    $action[-1]->set_level(2);
+
+    # third phase, adding
+    my $result = $self->_adding(\@partial, \@final, 0, $radix);
+    $action[-1]->set_level(0);
+
+    return  Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $result);
+  }
 }
 
 method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
@@ -1318,6 +1377,122 @@ method _add_above($number, $col, $lines_above, $result) {
     }
     --$col;
   }
+}
+
+method _halving(%param) {
+  my $l1           = $param{l1};
+  my $c1           = $param{c1};
+  my $l2           = $param{l2};
+  my $c2           = $param{c2};
+  my $number       = $param{number};
+  my $basic_level  = $param{basic_level} // 0;
+
+  my $radix = $number->radix;
+  my $res   = '';
+  my Arithmetic::PaperAndPencil::Action $action;
+  if ($radix == 2) {
+    if ($number->chars > 1) {
+      $res = substr($number->value, 0, $number->chars - 1);
+    }
+    else {
+      $res = '0';
+    }
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 4, label => 'SHF01'
+                            , r1l => $l1, r1c => $c1, r1val => $number->value  , val1  => $number->value
+                            , w1l => $l2, w1c => $c2, w1val => $res            , val2  => $res
+                 );
+    push(@action, $action);
+  }
+  else {
+    my $one = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '1');
+    my $two = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '2');
+    my $len = $number->chars;
+    my $carry = 0;
+    my @digit_list = split('', $number->value);
+    for my $n (0 .. $#digit_list) {
+      my $digit = $digit_list[$n];
+      my Arithmetic::PaperAndPencil::Number $dividend;
+      if ($carry == 0) {
+        $dividend = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $digit);
+      }
+      else {
+        $dividend = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '1' . $digit);
+      }
+      my Arithmetic::PaperAndPencil::Number $quotient = $dividend / $two;
+      if ($dividend->is_odd) {
+        $carry = 1;
+      }
+      else {
+        $carry = 0;
+      }
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => 'DIV07', val1 => $dividend->value, val2 => $quotient->value, val3 => $carry
+                   , r1l => $l1, r1c => $c1 -$len + $n + 1, r1val => $digit
+                   , w1l => $l2, w1c => $c2 -$len + $n + 1, w1val => $quotient->value
+                   );
+      push(@action, $action);
+      $res .= $quotient->value;
+    }
+  }
+  return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $res);
+}
+
+method _doubling(%param) {
+  my $l1           = $param{l1};
+  my $c1           = $param{c1};
+  my $l2           = $param{l2};
+  my $c2           = $param{c2};
+  my $number       = $param{number};
+  my $basic_level  = $param{basic_level} // 0;
+
+  my $radix = $number->radix;
+  my $res   = '';
+  my Arithmetic::PaperAndPencil::Action $action;
+  if ($radix == 2) {
+    $res = $number->value . '0';
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 4, label => 'SHF01'
+                            , r1l => $l1, r1c => $c1, r1val => $number->value  , val1  => $number->value
+                            , w1l => $l2, w1c => $c2, w1val => $res            , val2  => $res
+                            );
+    push(@action, $action);
+  }
+  else {
+    my $carry  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '0');
+    my $one    = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '1');
+    my $two    = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '2');
+    my @digit_list = split('', reverse($number->value));
+    for my $n (0 .. $#digit_list) {
+      my $digit   = $digit_list[$n];
+      my $product = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $digit);
+      $product *= $two;
+      if ($carry->value eq '0') {
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => 'MUL01'
+                         , val1 => '2', val2 => $digit  , val3  => $product->value
+                         , r1l  => $l1, r1c  => $c1 - $n, r1val => $digit
+                         , w1l  => $l2, w1c  => $c2 - $n, w1val => $product->value
+                         );
+        push(@action, $action);
+      }
+      else {
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'MUL01'
+                         , val1 => '2', val2 => $digit  , val3  => $product->value
+                         , r1l  => $l1, r1c  => $c1 - $n, r1val => $digit
+                         );
+        push(@action, $action);
+        $product += $one;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => 'ADD02'
+                         , val1 => '1'                  , val2  => $product->value
+                         , w1l  => $l2, w1c  => $c2 - $n, w1val => $product->value
+                         );
+        push(@action, $action);
+      }
+      $res = $product->unit->value . $res;
+      $carry = $product->carry;
+    }
+    if ($carry->value eq '1') {
+      $res = '1' . $res;
+    }
+  }
+  return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $res);
 }
 
 

@@ -21,6 +21,7 @@
 
 (defun adapte () (interactive)
    (save-excursion (query-replace-regexp "self.action.push($action);" "push(@action, $action);" nil nil nil) )
+   (save-excursion (query-replace-regexp "self.action\\[\\* - 1\\].level = \\(.\\);" "$action[-1]->set_level(\\1);" nil nil nil) )
 
    ;; replacing proper multiplication sign with stupid star ersatz
    (save-excursion (query-replace-regexp "×" "*"  nil nil nil) )

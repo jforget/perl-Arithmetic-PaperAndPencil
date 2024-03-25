@@ -116,7 +116,7 @@ donc la correspondance.
 | 19-division.rakutest        | à faire                    |
 | 20-conversion-div.rakutest  | à faire                    |
 | 21-gcd.rakutest             | à faire                    |
-| 22-russ-mult.rakutest       | à faire                    |
+| 22-russ-mult.rakutest       | 12-russ-mult.t             |
 
 Premières impressions sur Corinna
 ---------------------------------
