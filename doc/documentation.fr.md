@@ -109,11 +109,11 @@ donc la correspondance.
 | 12-mult-boat.rakutest       | 11-mult-boat.t             |
 | 13-conversion.rakutest      | à faire                    |
 | 14-subtraction.rakutest     | 06-subtraction.t           |
-| 15-prep-division.rakutest   | à faire                    |
-| 16-division.rakutest        | à faire                    |
+| 15-prep-division.rakutest   | 13-prep-division.t         |
+| 16-division.rakutest        | 14-division.t              |
 | 17-square-root.rakutest     | à faire                    |
 | 18-div-boat.rakutest        | à faire                    |
-| 19-division.rakutest        | à faire                    |
+| 19-division.rakutest        | 15-division.t              |
 | 20-conversion-div.rakutest  | à faire                    |
 | 21-gcd.rakutest             | à faire                    |
 | 22-russ-mult.rakutest       | 12-russ-mult.t             |
@@ -615,6 +615,33 @@ appeler
 [le module `Switch`](https://metacpan.org/pod/Switch),
 mais tant pis, nous en resterons aux `elsif`.
 
+### Problème pour la méthode `division`
+
+Ainsi que je l'ai écrit précédemment, lorsque je convertis une méthode
+Raku  pour laquelle  les  paramètres sont  appelés  par mots-clés,  la
+méthode Perl  correspondante simule cette convention  d'appel avec une
+table de hachage `%param`. Exemple :
+
+```
+method _mult_and_sub(%param) {
+  my $l_dd         = $param{l_dd};
+  my $c_dd         = $param{c_dd};
+  my $dividend     = $param{dividend};
+  my $l_dr         = $param{l_dr};
+  my $c_dr         = $param{c_dr};
+  my $divisor      = $param{divisor};
+  my $l_qu         = $param{l_qu};
+  my $c_qu         = $param{c_qu};
+  my $quotient     = $param{quotient};
+  my $l_re         = $param{l_re};
+  my $c_re         = $param{l_re};
+  my $basic_level  = $param{basic_level};
+  my $l_pr         = $param{l_pr};
+  my $c_pr         = $param{c_pr};
+  my $mult_and_sub = $param{mult_and_sub}  // 'combined';
+```
+
+Sauf que dans l'extrait ci-dessus, il y a un bug. L'avez-vous vu ?
 
 Licence
 =======

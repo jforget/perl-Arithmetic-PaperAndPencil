@@ -27,6 +27,7 @@
    (save-excursion (query-replace-regexp "×" "*"  nil nil nil) )
    (save-excursion (query-replace-regexp "≤" "<=" nil nil nil) )
    (save-excursion (query-replace-regexp "≥" ">=" nil nil nil) )
+   (save-excursion (query-replace-regexp "☈" ""   nil nil nil) )
 
    (save-excursion (query-replace-regexp "False" "0"  nil nil nil) )
    (save-excursion (query-replace-regexp "True"  "1"  nil nil nil) )
@@ -44,6 +45,8 @@
    (save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Number \\(.*\\)\.= new" " \\1 = Arithmetic::PaperAndPencil::Number->new" nil nil nil) )
    (save-excursion (query-replace-regexp " Arithmetic::PaperAndPencil::Action \\(.*\\)\.= new" " \\1 = Arithmetic::PaperAndPencil::Action->new" nil nil nil) )
    (save-excursion (query-replace-regexp "$action \.= new" "$action = Arithmetic::PaperAndPencil::Action->new" nil nil nil) )
+
+   (save-excursion (query-replace-regexp "\\(.*\\) \\(.*\\)\\.substr(" "\\1 substr(\\2, " nil nil nil) )
 )
 
 )
