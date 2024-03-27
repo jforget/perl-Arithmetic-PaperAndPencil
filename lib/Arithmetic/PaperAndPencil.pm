@@ -1049,6 +1049,146 @@ method division(%param) {
     elsif ($result eq 'remainder') { return   $rem; }
     elsif ($result eq 'both'     ) { return ( $quotient, $rem); }
   }
+  if ($type eq 'boat') {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'WRI00', w1val => $dividend->value . '{'
+                                                      , w1l => 0, w1c   => $len1 + 1);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DRA02', w1l => 0, w1c => 1
+                                                                                  , w2l => 0, w2c => $len1);
+
+    push(@action, $action);
+
+    # arrays of line numbers per column
+    my @lines_below = ( 1) x ($len1 + 1);
+    my @lines_above = (-1) x ($len1 + 1);
+    $self->_push_below($divisor, $col_r, \@lines_below);
+
+    $col_q++;
+    my $quotient = '';
+    my $rem      = '';
+    my Arithmetic::PaperAndPencil::Number $part_dvr1 = $divisor->carry($delta); # single-digit divisor to compute the quotient first candidate
+    my $part_dvd  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($dividend->value, 0, $col_r));
+
+    while ($col_r <= $len1) {
+      my Arithmetic::PaperAndPencil::Number $part_dvd1 = $part_dvd->carry($delta); # single-digit dividend or 2-digit dividend to compute the quotient first candidate
+      my Arithmetic::PaperAndPencil::Number $theo_quo  = $part_dvd1 / $part_dvr1;  # theoretical quotient first candidate
+      my Arithmetic::PaperAndPencil::Number $act_quo;                              # actual quotient first candidate
+      $rem = '';
+      my $label;
+      if ($part_dvd < $divisor) {
+        $theo_quo = $zero;
+        $act_quo  = $zero;
+      }
+      else {
+        my $dig  = max( grep { $div_cache{$_} <= $part_dvd } keys(%div_cache));
+        $act_quo = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $dig);
+        $label = 'DIV03';
+      }
+      if ($theo_quo->value eq '0') {
+        # cannot flag $part_dvd and $divisor as read, because there are not on a single line.
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV01', val1 => $part_dvd->value
+                                                                                      , val2 => $divisor ->value
+                                                                                      , val3 => '0', w1l => 0, w1c => $col_q, w1val => '0');
+        push(@action, $action);
+        # striking the useless divisor
+        for my $i (0 .. $len2 - 1) {
+          $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'WRI00'
+                                  , r1l => $lines_below[$col_r - $i] - 1, r1c => $col_r - $i, r1val => substr($divisor->value, -$i - 1, 1), r1str => 1);
+          push(@action, $action);
+        }
+        $rem = $part_dvd->value;
+        $quotient .= '0';
+        ++$col_q;
+        ++$col_r;
+        if ($col_r <= $len1) {
+          $self->_push_below($divisor, $col_r, \@lines_below);
+        }
+        $part_dvd = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $rem . substr($dividend->value, $col_r - 1, 1));
+        next;
+      }
+      elsif ($theo_quo->value eq $act_quo->value) {
+        # cannot flag $part_dvd and $divisor as read, because there are not on a single line.
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV01', val1 => $part_dvd1->value
+                                                                                      , val2 => $part_dvr1->value
+                                                                                      , val3 => $theo_quo ->value
+                                                                                      , w1l  => 0, w1c => $col_q, w1val => $act_quo->value);
+        push(@action, $action);
+      }
+      else {
+        # cannot flag $part_dvd and $divisor as read, because there are not on a single line.
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV01', val1 => $part_dvd1->value
+                                                                                      , val2 => $part_dvr1->value
+                                                                                      , val3 => $theo_quo->value);
+        push(@action, $action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => $label
+                                 , val1 => $act_quo->value, w1l => 0, w1c => $col_q, w1val => $act_quo->value);
+        push(@action, $action);
+      }
+      my $carry = '0';
+      for my $i (0 .. $divisor->chars - 1) {
+        my $divisor_digit = substr($divisor->value, - $i - 1, 1);
+        my $temp  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor_digit);
+        $temp *= $act_quo;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'MUL01'    , val3  => $temp->value
+                              , r1l => 1                            , r1c   => $col_q     , r1val => $act_quo->value           , val1 => $act_quo->value
+                              , r2l => $lines_below[$col_r - $i] - 1, r2c   => $col_r - $i, r2val => $divisor_digit, r2str => 1, val2 => $divisor_digit
+                              );
+        push(@action, $action);
+        if ($carry ne '0') {
+          $temp  += Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $carry);
+          $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'ADD02', val1 => $carry, val2 => $temp->value);
+          push(@action, $action);
+        }
+        my $dividend_digit = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($part_dvd->value, - $i - 1, 1));
+        my Arithmetic::PaperAndPencil::Number $adjusted_dividend;
+        my Arithmetic::PaperAndPencil::Number $rem_digit;
+        ($adjusted_dividend, $rem_digit) = adjust_sub($dividend_digit, $temp);
+        if ($i == $divisor->chars - 1) {
+          $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'SUB02'
+                                                          , val1  => $rem_digit->value, val2 => $adjusted_dividend->value
+                           , r1l => $lines_above[$col_r - $i] + 1, r1c => $col_r - $i, r1val => $adjusted_dividend->value, r1str => 1
+                           );
+          push(@action, $action);
+          $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'WRI04', val1  => $rem_digit->value
+                                , w1l => $lines_above[$col_r - $i]--, w1c => $col_r - $i, w1val => $rem_digit->value
+                                );
+          push(@action, $action);
+          $rem   = $rem_digit->value . $rem;
+        }
+        else {
+          $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'SUB02'
+                                                          , val1  => $rem_digit->value   , val2  => $adjusted_dividend->value
+                               , r1l => $lines_above[$col_r - $i] + 1, r1c => $col_r - $i, r1val => $adjusted_dividend->value, r1str => 1
+                               );
+          push(@action, $action);
+          my $label = 'WRI02';
+          if ($adjusted_dividend->carry->value eq '0') {
+            $label = 'WRI03';
+          }
+          $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => $label, val1  => $rem_digit->value, val2 => $adjusted_dividend->carry->value
+                               , w1l => $lines_above[$col_r - $i]--, w1c => $col_r - $i, w1val => $rem_digit->value
+                               );
+          push(@action, $action);
+          $rem   = $rem_digit->value . $rem;
+          $carry = $adjusted_dividend->carry->value;
+        }
+      }
+      $action[-1]->set_level(4);
+      $quotient .= $act_quo->value;
+      ++$col_q;
+      ++$col_r;
+      if ( $col_r <= $len1) {
+        $self->_push_below($divisor, $col_r, \@lines_below);
+      }
+      $part_dvd = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $rem . substr($dividend->value, $col_r - 1, 1));
+    }
+
+    $action[-1]->set_level(0);
+    if    ($result eq 'quotient' ) { return   Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $quotient); }
+    elsif ($result eq 'remainder') { return   Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $rem); }
+    elsif ($result eq 'both'     ) { return ( Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $quotient)
+                                            , Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $rem)); }
+  }
 
 }
 

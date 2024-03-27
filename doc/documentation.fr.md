@@ -112,7 +112,7 @@ donc la correspondance.
 | 15-prep-division.rakutest   | 13-prep-division.t         |
 | 16-division.rakutest        | 14-division.t              |
 | 17-square-root.rakutest     | à faire                    |
-| 18-div-boat.rakutest        | à faire                    |
+| 18-div-boat.rakutest        | 16-boat-div.t              |
 | 19-division.rakutest        | 15-division.t              |
 | 20-conversion-div.rakutest  | à faire                    |
 | 21-gcd.rakutest             | à faire                    |
