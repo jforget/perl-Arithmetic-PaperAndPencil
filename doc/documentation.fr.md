@@ -107,14 +107,14 @@ donc la correspondance.
 | 10-add.rakutest             | 05-add.t                   |
 | 11-mult-prepared.rakutest   | 10-mult-prepared.t         |
 | 12-mult-boat.rakutest       | 11-mult-boat.t             |
-| 13-conversion.rakutest      | à faire                    |
+| 13-conversion.rakutest      | 18-conversion.t            |
 | 14-subtraction.rakutest     | 06-subtraction.t           |
 | 15-prep-division.rakutest   | 13-prep-division.t         |
 | 16-division.rakutest        | 14-division.t              |
 | 17-square-root.rakutest     | 17-square-root.t           |
 | 18-div-boat.rakutest        | 16-boat-div.t              |
 | 19-division.rakutest        | 15-division.t              |
-| 20-conversion-div.rakutest  | à faire                    |
+| 20-conversion-div.rakutest  | 19-conversion-div.t        |
 | 21-gcd.rakutest             | à faire                    |
 | 22-russ-mult.rakutest       | 12-russ-mult.t             |
 
@@ -668,6 +668,35 @@ method square_root($number, %param) {
 [...]
   $result = $operation->square_root($number, mult_and_sub => 'separate');
 ```
+
+### Problème pour la méthode `conversion`
+
+Pour  la conversion  multiplicative,  selon le  schéma  de Horner,  le
+chiffre de gauche est traité à part et ensuite, tous les chiffres sont
+traités tour à tour avec une  multiplication et une addition. En Raku,
+cela se traduit par :
+
+```
+    for $number.value.substr(1).comb.kv -> $op1, $old-digit {
+```
+
+En d'autres termes,  pour la boucle, on supprime le  chiffre de gauche
+(`substr(1)`), on découpe  le reste (`comb`) et on lance  la boucle en
+stockant le chiffre dans `$old-digit`  et son rang commençant par zéro
+dans `$op1`.  Du coup,  pour tester  la fin de  la boucle,  on compare
+`$op1` avec `$number.chars - 2`. Avec une conversion directe et fidèle
+en  Perl,  on obtient  quelque  chose  d'assez compliqué,  en  faisant
+référence presque  continuellement à  `$op1 +  1` plutôt  qu'à `$op1`.
+Pour  simplifier,  j'ai changé  la  signification  de `$op1`,  qui  ne
+représente  plus le  rang  du chiffre  dans la  chaîne  privée de  son
+chiffre initial, mais le rang du chiffre dans la chaîne complète. Donc
+`$op1` commence à 1 et la boucle Raku se traduit par :
+
+```
+    for my $op1 (1 .. $number->chars - 1) {
+      my $old_digit = substr($number->value, $op1, 1);
+```
+
 
 Licence
 =======

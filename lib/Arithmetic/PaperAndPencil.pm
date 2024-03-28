@@ -1233,19 +1233,20 @@ method square_root($number, %param) {
     push(@action, $action);
     if ($x->carry->value eq '0') {
       $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI03', val1  => $y->value
-                                           , w1l   => 1, w1c   => -2 * ($nb_dig - 1), w1val => $y->value
-                                           );
+                                          , w1l   => 1, w1c   => -2 * ($nb_dig - 1) , w1val => $y->value
+                                          );
       push(@action, $action);
       $remainder = $y->value;
     }
     else {
       $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI02', val1  => $y->value, val2 => $x->carry->value
-                                           , w1l   => 1, w1c   => -2 * ($nb_dig - 1), w1val => $y->value
-                                            );
+                                          , w1l   => 1, w1c   => -2 * ($nb_dig - 1) , w1val => $y->value
+                                          );
       push(@action, $action);
       my ($z, $t) = adjust_sub($partial_number->carry, $x->carry);
-      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'SUB01', val1 => $x->carry->value, val2 => $t->value, val3 => $z->value
-                                                        , w1l => 1, w1c   => -2 * $nb_dig + 1                , w1val => $t->value);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'SUB01'
+                               , val1 => $x->carry->value         , val2  => $t->value, val3 => $z->value
+                               , w1l => 1, w1c => -2 * $nb_dig + 1, w1val => $t->value);
       push(@action, $action);
       $remainder = $t->value . $y->value;
     }
@@ -1408,6 +1409,220 @@ method square_root($number, %param) {
   return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $root);
 }
 
+method conversion(%param) {
+  my $number       = $param{number};
+  my $radix        = $param{radix};
+  my $nb_op        = $param{nb_op}        // 0;
+  my $type         = $param{type}         // 'mult';
+  my $div_type     = $param{div_type}     // 'std';
+  my $mult_and_sub = $param{mult_and_sub} // 'combined';
+  if ($radix < 2 or $radix > 36) {
+    die "Radix should be between 2 and 36, instead of $radix";
+  }
+  my $title = '';
+  if    ($type eq 'mult'  ) { $title = 'TIT14' ; }
+  elsif ($type eq 'Horner') { $title = 'TIT14' ; }
+  elsif ($type eq 'div'   ) { $title = 'TIT16' ; }
+  else                      { die "Conversion type '$type' unknown, should be 'mult', 'Horner' or 'div'"; }
+  if ($type eq 'div' and $div_type ne 'std'
+                     and $div_type ne 'cheating'
+                     and $div_type ne 'prepared') {
+    die "Division type '$div_type' unknown, should be 'std', 'cheating' or 'prepared'";
+  }
+  if ($type eq 'div' and $mult_and_sub ne 'combined'
+                     and $mult_and_sub ne 'separate') {
+    die "Mult and sub type '$mult_and_sub' unknown, should be 'combined' or 'separate'";
+  }
+  if ($type eq 'div' and $div_type eq 'std') {
+    $mult_and_sub = 'combined';
+  }
+  if ($type eq 'div' and $div_type eq 'prepared') {
+    $mult_and_sub = 'separate';
+  }
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $old_radix = $number->radix;
+
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => $title, val1 => $number->value, val2 => $old_radix, val3 => $radix);
+  push(@action, $action);
+
+  if ($radix == $old_radix or ($number->chars == 1 && $old_radix <= $radix)) {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 0, label => "CNV01", val1 => $number->value, val2 => $old_radix, val3 => $radix);
+    push(@action, $action);
+    return $number;
+  }
+  my %conv_cache;
+  my Arithmetic::PaperAndPencil::Number $new_radix;
+  my $zero  = Arithmetic::PaperAndPencil::Number->new(radix => $old_radix, value => '0');
+  my %mult_cache;
+  if ($type eq 'mult' || $type eq 'Horner') {
+    $self->_prep_conv($old_radix, $radix, \%conv_cache, basic_level => 2);
+  }
+  else {
+    %mult_cache = (0 => $zero, 1 => $new_radix);
+    my %tmp_cache;
+    $self->_prep_conv($radix, $old_radix, \%tmp_cache, basic_level => 2);
+    $new_radix = $tmp_cache{10};
+    for my $new (keys %tmp_cache) {
+      my $old = $tmp_cache{$new};
+      $conv_cache{$old->value} = $new;
+    }
+    if ($div_type eq 'prepared') {
+      my %tmp_cache;
+      $self->_preparation(factor => $new_radix, limit => 'Z', cache => \%mult_cache, basic_level => 2);
+      $action[-2]->set_level(1); # * - 2 to update the action **before** action NXP01
+      # the actual limit will be '9' for radix 10, 'F' for radix 16, etc. But 'Z' will give the same result
+    }
+    if ($div_type eq 'cheating') {
+      my $dummy = Arithmetic::PaperAndPencil->new;
+      $dummy->_preparation(factor => $new_radix, limit => 'Z', cache => \%mult_cache);
+    }
+  }
+
+  my Arithmetic::PaperAndPencil::Number $result;
+  if ($type eq 'mult' || $type eq 'Horner') {
+    my $old_digit = substr($number->value, 0,1);
+    $result   = $conv_cache{$old_digit};
+    my $line  = 1;
+    my $op    = 0;
+    my $width = $conv_cache{10}->chars;
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 3, label => "CNV02", val1 => $old_digit, val2  => $result->value
+                                                                , w1l   => $line  , w1c  => 0         , w1val => $result->value);
+    push(@action, $action);
+    for my $op1 (1 .. $number->chars - 1) {
+      my $old_digit = substr($number->value, $op1, 1);
+      # multiplication
+      my $pos_sign =  max($conv_cache{10}->chars, $result->chars);
+      ++$line;
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'WRI00'
+                            , w1l => $line, w1c => 0              , w1val => $conv_cache{10}->value
+                            , w2l => $line, w2c => - $pos_sign - 1, w2val => '×');
+      push(@action, $action);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DRA02', w1l => $line, w1c => 0
+                                                                                    , w2l => $line, w2c => - $width);
+      push(@action, $action);
+      if ($conv_cache{10}->chars == 1) {
+        $result = $self->_simple_mult(basic_level => 2
+                                , l_md => $line - 1, c_md => 0, multiplicand => $result
+                                , l_mr => $line    , c_mr => 0, multiplier   => $conv_cache{10}
+                                , l_pd => $line + 1, c_pd => 0);
+        $line++;
+      }
+      else {
+        my %dummy_cache;
+        $result = $self->_adv_mult(basic_level => 2
+                                , l_md => $line - 1, c_md => 0, multiplicand => $result
+                                , l_mr => $line    , c_mr => 0, multiplier   => $conv_cache{10}
+                                , l_pd => $line + 1, c_pd => 0, cache        => \%dummy_cache);
+        $line += $conv_cache{10}->chars + 1;
+      }
+      if ($width <= $result->chars) {
+        $width = $result->chars;
+      }
+      # addition
+      my $added = $conv_cache{$old_digit};
+      if ($added->value eq '0') {
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => "CNV02", val1 => '0', val2  => '0');
+        push(@action, $action);
+      }
+      else {
+        $pos_sign = max( $conv_cache{10}->chars, $width);
+        ++$line;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => "CNV02"
+                             , val1 => $old_digit                   , val2  => $added->value
+                             , w1l  => $line, w1c => 0              , w1val => $added->value
+                             , w2l  => $line, w2c => - $pos_sign - 1, w2val => '+');
+        push(@action, $action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 5    , label => 'DRA02'
+                                                         , w1l  => $line, w1c   => 0, w2l => $line, w2c => - $width);
+        push(@action, $action);
+        my @added;
+        my @total;
+        my @digit_list = reverse(split('', $result->value));
+        for my $i (0 .. $#digit_list) {
+          my $digit = $digit_list[$i];
+          $added[$i][0] = { lin => $line - 1, col => - $i, val => $digit};
+          $total[$i]    = { lin => $line + 1, col => - $i};
+        }
+        @digit_list = reverse(split('', $added->value));
+        for my $i (0 .. $#digit_list) {
+          my $digit = $digit_list[$i];
+          $added[$i][1] = { lin => $line    , col => - $i, val => $digit};
+          $total[$i]    = { lin => $line + 1, col => - $i};
+        }
+        $result = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $self->_adding(\@added, \@total, 2, $radix));
+        $line++;
+      }
+      $action[-1]->set_level(3);
+      # next step
+      $op++;
+      if ($op == $nb_op && $op1 != $number->chars - 1) {
+        $action[-1]->set_level(1);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'NXP01');
+        push(@action, $action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'CNV03'
+                                                        , val1  => $result->value, val2  => substr($number->value, $op1 + 1)
+                                                        , w1l   => 1, w1c => 0   , w1val => $result->value);
+        push(@action, $action);
+        $op = 0;
+        $line = 1;
+      }
+      if ($width <= $result->chars) {
+        $width = $result->chars;
+      }
+    }
+  }
+  else {
+    my $op   = 0;
+    my $l_dd = 1;
+    my $c_dd = 0;
+    my $res  = '';
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'WRI00', w1l => $l_dd, w1c => $c_dd, w1val => $number->value);
+    push(@action, $action);
+    my Arithmetic::PaperAndPencil::Number $x;
+    my Arithmetic::PaperAndPencil::Number $y;
+    while ($new_radix <= $number) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'DRA02'
+                                                      , w1l => $l_dd, w1c => $c_dd + 1
+                                                      , w2l => $l_dd, w2c => $c_dd + $new_radix->chars);
+      push(@action, $action);
+      ($x, $y) = $self->_embedded_div(l_dd => $l_dd    , c_dd => $c_dd                    , dividend => $number
+                                    , l_dr => $l_dd    , c_dr => $c_dd + $new_radix->chars, divisor  => $new_radix
+                                    , l_qu => $l_dd + 1, c_qu => $c_dd + 1
+                                    , basic_level => 3, type => $div_type, mult_and_sub => $mult_and_sub
+                                    , mult_cache => \%mult_cache);
+      $action[-1]->set_level(3);
+      $res = $conv_cache{$y->value} . $res;
+      $number = $x;
+      $op++;
+      $l_dd++;
+      $c_dd += $number->chars;
+      my $rewrite_dd = '';
+      if ($op == $nb_op && $new_radix <= $number) {
+        $action[-1]->set_level(1);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'NXP01');
+        push(@action, $action);
+        $op   = 0;
+        $l_dd = 1;
+        $c_dd = 0;
+        $rewrite_dd = $number->value;
+      }
+      if ($new_radix <= $number) {
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 9    , label => 'CNV03'
+                                                        , val1  => $res , val2  => $number->value
+                                                        , w1l   => $l_dd, w1c   => $c_dd, w1val => $rewrite_dd);
+        push(@action, $action);
+      }
+    }
+    $res = $conv_cache{$number->value} . $res;
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 0, label => 'CNV03', val1 => $res, val2 => '0');
+    push(@action, $action);
+    $result = Arithmetic::PaperAndPencil::Number->new(value => $res, radix => $radix);
+  }
+
+  $action[-1]->set_level(0);
+  return $result;
+}
+
 method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
   my @digits = @$digits;
   my @pos    = @$pos;
@@ -1420,9 +1635,9 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
     my $l = $digits[$i];
     my @l = grep { $_ } @$l; # removing empty entries
     if (0+ @l == 0) {
-      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI04'           , val1  => $carry
-                                                                  , w1l => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $carry
-                                                                  );
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI04' , val1  => $carry
+                                                       , w1l  => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $carry
+                                                       );
       push(@action, $action);
       $result = $carry . $result;
     }
@@ -1657,6 +1872,34 @@ method _preparation(%param) {
 
   $action = Arithmetic::PaperAndPencil::Action->new(level => 1, label => 'NXP01');
   push(@action, $action);
+}
+
+method _prep_conv($old_radix, $new_radix, $cache, %param) {
+  my $basic_level = $param{basic_level} // 0;
+
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $old_number = Arithmetic::PaperAndPencil::Number->new(value => '0', radix => $old_radix);
+  my $new_number = Arithmetic::PaperAndPencil::Number->new(value => '0', radix => $new_radix);
+  my $old_one    = Arithmetic::PaperAndPencil::Number->new(value => '1', radix => $old_radix);
+  my $new_one    = Arithmetic::PaperAndPencil::Number->new(value => '1', radix => $new_radix);
+  my $line = 1;
+  while ($old_number->value ne '11') {
+    $cache->{$old_number->value} = $new_number;
+    if ($new_number->chars > 1) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'WRI00'
+                             , w1l => $line, w1c =>  2, w1val => $old_number->value
+                             , w2l => $line, w2c => 10, w2val => $new_number->value);
+      push(@action, $action);
+      $line++;
+    }
+    $old_number += $old_one;
+    $new_number += $new_one;
+  }
+  if ($line != 1) {
+    $action[-1]->set_level(1);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 9, label => 'NXP01');
+    push(@action, $action);
+  }
 }
 
 method _adv_mult(%param) {
