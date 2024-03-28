@@ -17,7 +17,7 @@ use Arithmetic::PaperAndPencil::Number qw/max_unit adjust_sub/;
 
 use Carp;
 use Exporter 'import';
-use POSIX qw/floor/;
+use POSIX qw/floor ceil/;
 use List::Util qw/min max/;
 
 field @action;
@@ -1111,14 +1111,14 @@ method division(%param) {
         $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV01', val1 => $part_dvd1->value
                                                                                       , val2 => $part_dvr1->value
                                                                                       , val3 => $theo_quo ->value
-                                                                                      , w1l  => 0, w1c => $col_q, w1val => $act_quo->value);
+                                                           , w1l  => 0, w1c => $col_q, w1val => $act_quo  ->value);
         push(@action, $action);
       }
       else {
         # cannot flag $part_dvd and $divisor as read, because there are not on a single line.
         $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV01', val1 => $part_dvd1->value
                                                                                       , val2 => $part_dvr1->value
-                                                                                      , val3 => $theo_quo->value);
+                                                                                      , val3 => $theo_quo ->value);
         push(@action, $action);
         $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => $label
                                  , val1 => $act_quo->value, w1l => 0, w1c => $col_q, w1val => $act_quo->value);
@@ -1190,6 +1190,222 @@ method division(%param) {
                                             , Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $rem)); }
   }
 
+}
+
+method square_root($number, %param) {
+  my $mult_and_sub = $param{mult_and_sub} // 'combined';
+
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $radix = $number->radix;
+
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => "TIT13", val1 => $number->value, val2 => $radix);
+  push(@action, $action);
+
+  # set-up
+  my $nb_dig = ceil($number->chars / 2); # number of digits of the square root
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'WRI00', w1l => 0, w1c => 0, w1val => $number->value);
+  push(@action, $action);
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DRA01', w1l => 0, w1c => 0, w2l => 2, w2c => 0);
+  push(@action, $action);
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DRA02', w1l => 0, w1c => 1, w2l => 0, w2c => $nb_dig);
+  push(@action, $action);
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'WRI00', w1l => 0, w1c => $nb_dig, w1val => '.' x $nb_dig);
+  push(@action, $action);
+
+  # first phase, square root proper
+  my $col_first;
+  my $remainder = '';
+  my Arithmetic::PaperAndPencil::Number $partial_number = $number->carry(2 * ($nb_dig - 1));
+  my Arithmetic::PaperAndPencil::Number $partial_root   = $partial_number->square_root;
+  my $root = $partial_root->value;
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'SQR01', val1  => $partial_number->value, val2 => $root
+                                           , r1l => 0, r1c => -2 * ($nb_dig - 1), r1val => $partial_number->value
+                                           , w1l => 0, w1c => 1                 , w1val => $root
+                                           );
+  push(@action, $action);
+  my Arithmetic::PaperAndPencil::Number $partial_square = $partial_root * $partial_root;
+  if ($mult_and_sub eq 'combined') {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'MUL01', val1 => $root, val2 => $root, val3 => $partial_square->value);
+    push(@action, $action);
+    my ($x, $y) = adjust_sub($partial_number->unit, $partial_square);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'SUB02', val1 => $y->value
+                                                                                  , val2 => $x->value);
+    push(@action, $action);
+    if ($x->carry->value eq '0') {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI03', val1  => $y->value
+                                           , w1l   => 1, w1c   => -2 * ($nb_dig - 1), w1val => $y->value
+                                           );
+      push(@action, $action);
+      $remainder = $y->value;
+    }
+    else {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI02', val1  => $y->value, val2 => $x->carry->value
+                                           , w1l   => 1, w1c   => -2 * ($nb_dig - 1), w1val => $y->value
+                                            );
+      push(@action, $action);
+      my ($z, $t) = adjust_sub($partial_number->carry, $x->carry);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'SUB01', val1 => $x->carry->value, val2 => $t->value, val3 => $z->value
+                                                        , w1l => 1, w1c   => -2 * $nb_dig + 1                , w1val => $t->value);
+      push(@action, $action);
+      $remainder = $t->value . $y->value;
+    }
+  }
+  else {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'MUL01'
+                           , val1 => $root, val2 => $root       , val3  => $partial_square->value
+                           , w1l => 1, w1c => -2 * ($nb_dig - 1), w1val => $partial_square->value);
+    push(@action, $action);
+    $remainder = $self->_embedded_sub(basic_level => 0, l_hi => 0, c_hi => -2 * ($nb_dig - 1), high => $partial_number
+                                                      , l_lo => 1, c_lo => -2 * ($nb_dig - 1), low  => $partial_square
+                                                      , l_re => 2, c_re => -2 * ($nb_dig - 1));
+  }
+  my Arithmetic::PaperAndPencil::Number $divisor = $partial_root + $partial_root;
+  $col_first = $divisor->chars;
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 3, label => 'ADD01'
+                  , val1  => $partial_root->value , val2  => $partial_root->value, val3 => $divisor->value
+                  , r1l  => 0, r1c   => 1         , r1val => $partial_root->value
+                  , w1l  => 1, w1c   => $col_first, w1val => $divisor->value
+                );
+  push(@action, $action);
+
+  my $zero = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => 0);
+  my $one  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => 1);
+  my Arithmetic::PaperAndPencil::Number $divisor1;
+
+  # next phase, division
+  my $bot      = 2; # bottom line number of the vertical line
+  my $line_rem = 1; # line number of the partial remainder or partial dividend
+  my $line_div = 1; # line number of the divisor
+  if ($mult_and_sub eq 'separate') {
+    $line_rem = 2;
+  }
+  for my $i (1 .. $nb_dig - 1) {
+    my $pos = 2 * ($nb_dig - $i);
+    my $two_digits = substr($number->value, - $pos, 2);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 3        , label => 'DIV04'   , val1  => $two_digits
+                                                     , r1l  => 0        , r1c   => 2 - $pos  , r1val => $two_digits
+                                                     , w1l  => $line_rem, w1c   => 2 - $pos  , w1val => $two_digits
+                                                     );
+    push(@action, $action);
+    $remainder .= $two_digits;
+
+    $partial_number = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $remainder);
+    my Arithmetic::PaperAndPencil::Number $part_dvr1 = $divisor->carry($divisor->chars - 1); # single-digit divisor to compute the quotient first candidate
+    my Arithmetic::PaperAndPencil::Number $part_dvd1 = $partial_number->carry($i + $col_first - 1); # single-digit dividend or 2-digit dividend to compute the quotient first candidate
+    my Arithmetic::PaperAndPencil::Number $theo_quo = $part_dvd1 / $part_dvr1; # theoretical quotient first candidate
+    my Arithmetic::PaperAndPencil::Number $act_quo;                            # actual quotient first candidate and then all successive candidates
+    my $label;
+    if ($partial_number <= $divisor) {
+      $theo_quo = $zero;
+      $act_quo  = $zero;
+      $divisor1 = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor->value . '0');
+    }
+    elsif ($theo_quo->chars == 2) {
+      $act_quo = max_unit($radix);
+      $label   = 'DIV02';
+    }
+    else {
+      $act_quo = $theo_quo;
+    }
+    my $too_much = 1; # we must loop with the next lower candidate
+    if ($theo_quo->value eq '0') {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV01'
+                                         , val1 => $part_dvd1->value, r1l => $line_rem, r1c => - $pos         , r1val => $part_dvd1->value
+                                         , val2 => $part_dvr1->value, r2l => $line_div, r2c => 0              , r2val => $part_dvr1->value
+                                         , val3 => '0'              , w1l => $line_div, w1c => $i + $col_first, w1val => '0');
+      push(@action, $action);
+      $too_much = 0; # no need to loop on candidate values, no need to execute the mult_and_sub routine
+      $remainder = $partial_number->value;
+    }
+    elsif ($theo_quo->value eq $act_quo->value) {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV01'
+                                         , val1 => $part_dvd1->value, r1l => $line_rem     , r1c => - $pos         , r1val => $part_dvd1->value
+                                         , val2 => $part_dvr1->value, r2l => $line_div     , r2c => 0              , r2val => $part_dvr1->value
+                                         , val3 => $theo_quo->value , w1l => $line_div     , w1c => $i + $col_first, w1val => $act_quo  ->value
+                                                                    , w2l  => $line_div + 1, w2c => $i + $col_first, w2val => $act_quo  ->value);
+      push(@action, $action);
+    }
+    else {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV01'
+                                         , val1 => $part_dvd1->value, val2 => $part_dvr1->value, val3  => $theo_quo ->value
+                                         , r1l  => $line_rem        , r1c  => - $pos           , r1val => $part_dvd1->value
+                                         , r2l  => $line_div        , r2c  => 0                , r2val => $part_dvr1->value);
+      push(@action, $action);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => $label
+                               , val1 => $act_quo->value, w1l => $line_div, w1c  => $i + $col_first, w1val => $act_quo->value
+                               , w2l  => $line_div + 1  , w2c => $i + $col_first                   , w2val => $act_quo->value);
+      push(@action, $action);
+    }
+    my $rem;
+    my $l_re;
+    while ($too_much) {
+      if ($mult_and_sub eq 'separate') {
+        $l_re = $line_rem + 2;
+      }
+      else {
+        $l_re = $line_rem + 1;
+      }
+      if ($bot < $l_re) {
+        $bot = $l_re;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DRA01', w1l => 0, w1c => 0, w2l => $bot, w2c => 0);
+        push(@action, $action);
+      }
+      $divisor1 = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor->value . $act_quo->value);
+      ($too_much, $rem) = $self->_mult_and_sub(l_dd => $line_rem    , c_dd => 2 - 2 * ($nb_dig - $i), dividend     => $partial_number
+                                             , l_dr => $line_div    , c_dr => $i + $col_first       , divisor      => $divisor1
+                                             , l_qu => $line_div + 1, c_qu => $i + $col_first       , quotient     => $act_quo
+                                             , l_re => $l_re        , c_re => 2 - 2 * ($nb_dig - $i), basic_level  => 0
+                                             , l_pr => $line_rem + 1, c_pr => 2 - 2 * ($nb_dig - $i), mult_and_sub => $mult_and_sub);
+      if ($too_much) {
+        $action[-1]->set_level(4);
+        $act_quo -= $one;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'ERA01'
+                                                        , w1l   => $line_rem + 1, w1c => 0
+                                                        , w2l   => $line_rem + 1, w2c => 1 - $number->chars);
+        push(@action, $action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 4, label => 'DIV02', val1  => $act_quo->value
+                                        , w1l => $line_div    , w1c => $i + $col_first, w1val => $act_quo->value
+                                        , w2l => $line_div + 1, w2c => $i + $col_first, w2val => $act_quo->value);
+        push(@action, $action);
+      }
+    }
+    $action[-1]->set_level(4);
+
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'WRI04', val1  => $act_quo->value
+                                                    , w1l   => 0, w1c   => $i + 1 , w1val => $act_quo->value);
+    push(@action, $action);
+    $root .= $act_quo->value;
+
+    $divisor = $divisor1 + $act_quo;
+    if ($act_quo->value eq '0') {
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 3, label => 'ERA01'
+                                  , w1l => $line_div + 1, w1c => $i + $col_first
+                                  , w2l => $line_div + 1, w2c => $i + $col_first);
+      push(@action, $action);
+    }
+    elsif ($i < $nb_dig - 1) {
+      $remainder = $rem;
+      $line_rem = $l_re;
+      if ($bot < $line_div + 3) {
+        $bot = $line_div + 3;
+      }
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DRA01', w1l => 0, w1c => 0, w2l => $bot, w2c => 0);
+      push(@action, $action);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DRA02'
+                                                      , w1l   => $line_div + 1, w1c => 1
+                                                      , w2l   => $line_div + 1, w2c => $divisor->chars);
+      push(@action, $action);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 3, label => 'ADD01'
+                                  , r1l => $line_div    , r1c => $i + $col_first, r1val => $divisor1->value, val1 => $divisor1->value
+                                  , r2l => $line_div + 1, r2c => $i + $col_first, r2val => $act_quo ->value, val2 => $act_quo ->value
+                                  , w1l => $line_div + 2, w1c => $i + $col_first, w1val => $divisor ->value, val3 => $divisor ->value);
+      push(@action, $action);
+      $line_div += 2;
+    }
+  }
+
+  $action[-1]->set_level(0);
+  return Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $root);
 }
 
 method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {

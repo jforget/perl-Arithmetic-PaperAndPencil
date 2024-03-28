@@ -111,7 +111,7 @@ donc la correspondance.
 | 14-subtraction.rakutest     | 06-subtraction.t           |
 | 15-prep-division.rakutest   | 13-prep-division.t         |
 | 16-division.rakutest        | 14-division.t              |
-| 17-square-root.rakutest     | à faire                    |
+| 17-square-root.rakutest     | 17-square-root.t           |
 | 18-div-boat.rakutest        | 16-boat-div.t              |
 | 19-division.rakutest        | 15-division.t              |
 | 20-conversion-div.rakutest  | à faire                    |
@@ -642,6 +642,32 @@ method _mult_and_sub(%param) {
 ```
 
 Sauf que dans l'extrait ci-dessus, il y a un bug. L'avez-vous vu ?
+
+### Problème pour la méthode `square_root`
+
+Dans la  version Raku,  la méthode  `square-root` reçoit  un paramètre
+positionnel et un paramètre par mot-clé
+
+```
+method square-root(Arithmetic::PaperAndPencil::Number $number
+                 , Str :$mult-and-sub is copy = 'combined'
+                 --> Arithmetic::PaperAndPencil::Number
+                   ) {
+[...]
+  $result = $operation.square-root($number, mult-and-sub => 'separate');
+```
+
+Au  début, j'ai  converti en  Perl avec  deux paramètres  par mot-clé.
+Ensuite, j'ai réalisé qu'il était  possible de mélanger les paramètres
+positionnels et la simulation des  paramètres par mot-clé dans la même
+fonction ou la même méthode. Il suffit simplement d'écrire :
+
+```
+method square_root($number, %param) {
+  my $mult_and_sub = $param{mult_and_sub} // 'combined';
+[...]
+  $result = $operation->square_root($number, mult_and_sub => 'separate');
+```
 
 Licence
 =======
