@@ -115,7 +115,7 @@ donc la correspondance.
 | 18-div-boat.rakutest        | 16-boat-div.t              |
 | 19-division.rakutest        | 15-division.t              |
 | 20-conversion-div.rakutest  | 19-conversion-div.t        |
-| 21-gcd.rakutest             | à faire                    |
+| 21-gcd.rakutest             | 20-gcd.t                   |
 | 22-russ-mult.rakutest       | 12-russ-mult.t             |
 
 Premières impressions sur Corinna

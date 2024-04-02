@@ -1623,6 +1623,76 @@ method conversion(%param) {
   return $result;
 }
 
+method gcd(%param) {
+  my $first        = $param{first};
+  my $second       = $param{second};
+  my $div_type     = $param{div_type}     // 'std';
+
+  my Arithmetic::PaperAndPencil::Action $action;
+  my $radix = $first->radix;
+  if ($second->radix != $radix) {
+    die "The two numbers have different bases: $radix != {$second->radix}";
+  }
+  if (@action) {
+    $action[-1]->set_level(0);
+  }
+  if ($first < $second) {
+    ($first, $second) = ($second, $first);
+  }
+  my $title = '';
+  if    ($div_type eq 'std'     ) { $title = 'TIT17' ; }
+  elsif ($div_type eq 'cheating') { $title = 'TIT18' ; }
+  else  {
+    die "Division type '$div_type' unknown";
+  }
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 9
+                                                  , label => $title
+                                                  , val1  => $first->value
+                                                  , val2  => $second->value
+                                                  , val3  => $radix
+                                                  );
+  push(@action, $action);
+  my Arithmetic::PaperAndPencil::Number $quo;
+  my Arithmetic::PaperAndPencil::Number $rem;
+  my %mult_cache;
+
+  # set-up
+  my $len2 = $second->chars;
+  my $l_dd = 0;
+  my $c_dd = 0;
+  my $l_dr = 0;
+  my $c_dr = $len2;
+  my $l_qu = -1;
+  my $c_qu =  1;
+  $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'WRI00', w1l => $l_dd, w1c => $c_dd, w1val => $first->value);
+  push(@action, $action);
+
+  # computation
+  while ($second->value ne '0') {
+    if ($div_type eq 'cheating') {
+      my Arithmetic::PaperAndPencil $dummy = Arithmetic::PaperAndPencil->new;
+      $dummy->_preparation(factor => $second, limit => 'Z', cache => \%mult_cache);
+    }
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'DRA02', w1l => $l_qu, w1c => $c_dr - $len2 + 1
+                                                                                  , w2l => $l_qu, w2c => $c_dr);
+    push(@action, $action);
+    ($quo, $rem) = $self->_embedded_div(l_dd => $l_dd, c_dd => $c_dd, dividend => $first
+                                      , l_dr => $l_dr, c_dr => $c_dr, divisor  => $second
+                                      , l_qu => $l_qu, c_qu => $c_qu
+                                      , basic_level => 3, type => $div_type, mult_and_sub => 'combined'
+                                      , mult_cache => \%mult_cache);
+    $action[-1]->set_level(3);
+    $first  = $second;
+    $second = $rem;
+    $len2   = $rem->chars;
+    $c_dd   = $c_dr;
+    $c_qu  += max($quo->chars, $first->chars);
+    $c_dr   = $c_qu + $len2 - 1;
+  }
+  $action[-1]->set_level(0);
+  return $first;
+}
+
 method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
   my @digits = @$digits;
   my @pos    = @$pos;
