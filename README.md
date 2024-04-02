@@ -74,7 +74,11 @@ you can even send me a patch. Thank you in advance.
 INSTALLATION
 ============
 
-To install this module, run the following commands:
+To install this module, first check that the Perl version in use is 5.38
+or higher. If necessary, install a recent version with perlbrew or similar.
+
+Then download  the repository  from Github  or from  CPAN and  run the
+following commands:
 
 ```
   perl Makefile.PL

@@ -2586,16 +2586,15 @@ method _embedded_div(%param) {
 
 '0 + 0 = (:-|)'; # End of Arithmetic::PaperAndPencil
 
+=encoding utf8
+
 =head1 NAME
 
-Arithmetic::PaperAndPencil - The great new Arithmetic::PaperAndPencil!
+Arithmetic::PaperAndPencil - simulating paper and pencil techniques for basic arithmetic operations
 
 =head1 VERSION
 
 Version 0.01
-
-=cut
-
 
 =head1 SYNOPSIS
 
@@ -2605,17 +2604,640 @@ Perhaps a little code snippet.
 
     use Arithmetic::PaperAndPencil;
 
-    my $foo = Arithmetic::PaperAndPencil->new();
-    ...
+    my $operation = Arithmetic::PaperAndPencil->new;
+    my $x = Arithmetic::PaperAndPencil::Number->new(value => '355000000');
+    my $y = Arithmetic::PaperAndPencil::Number->new(value => '113');
+
+    $operation->division(dividend => $x, divisor => $y);
+    my $html = $operation->html(lang => 'fr', silent => 0, level => 3);
+    open my $fh, '>', 'division.html' or die "opening file $!";
+    print $fh $html;
+    close $fh or die "closing file $!";
+
+    $operation = Arithmetic::PaperAndPencil->new; # emptying previous content
+    my $dead = Arithmetic::PaperAndPencil::Number->new(value => 'DEAD', radix => 16);
+    my $beef = Arithmetic::PaperAndPencil::Number->new(value => 'BEEF', radix => 16);
+
+    $operation.addition($dead, $beef);
+    $html = $operation.html(lang => 'fr', silent => 0, level => 3);
+    open  $fh, '>', 'addition.html' or die "opening file $!";
+    print $fh $html;
+    close $fh or die "closing file $!";
+
+The first HTML file ends with
+
+    355000000|113
+    0160     |---
+     0470    |3141592
+      0180   |
+       0670  |
+        1050 |
+         0330|
+          104|
+
+and the second one with
+
+     DEAD
+     BEEF
+    -----
+    19D9C
+
+
+=head1 DESCRIPTION
+
+Arithmetic::PaperAndPencil  is a  module which  allows simulating  the
+paper  and  pencil  techniques  for  basic  arithmetic  operations  on
+integers: addition, subtraction, multiplication and division, but also
+square root extraction and conversion from a radix to another.
+
+An  object  from  the C<Arithmetic::PaperAndPencil>  class  is  called
+"paper  sheet", because  it  represents  a paper  sheet  on which  the
+simulated human scribbles  his computations. In some  cases, the human
+would use a wad of sheets instead of a single sheet. This is simulated
+in the module, but we still call the object a "paper sheet".
+
+=head2 Problems, known bugs and acceptable breaks from reality
+
+Most  humans  can only  compute  in  radix  10.  Some persons  have  a
+theoretical knowledge  of numeric bases  other than 10, and  a limited
+practical skill  of using radix  2, radix 8  and radix 16.  The module
+uses any radix from 2 to 36, without difference.
+
+The module  can use numbers  of any length.  Human beings will  not be
+able to  multiply two  100-digit numbers.  Or if  they try,  they will
+spend much effort  and the result may be wrong.  The module can easily
+multiply two 100-digit numbers. The  output may be lengthy and boring,
+but it will be correct.
+
+Humans can  detect situations where  the computation procedure  can be
+amended,  such as  a  multiplication where  the  multiplicand and  the
+multiplier contain many  "0" digits. The module does  not detect these
+cases and still uses the unaltered computation procedure.
+
+Human beings write their calculations on A4 paper (21 cm × 29,7 cm) or
+letter paper (21,6  cm × 27,9 cm). The module  writes its calculations
+on unlimited  sheets of paper. If  you want to compute  the product of
+two 1000-digit numbers, the multiplication will have a 2000-char width
+and a 1000-line height and still be on a single sheet of paper.
+
+If you  ask for the  operations with  the "talking" formulas,  most of
+these  formulas are  the traditional  sentences which  accompanies the
+writing of the  computation. But in some cases, the  module displays a
+non-standard sentence, to explain better what is happening.
 
 =head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+None.
 
-=head1 SUBROUTINES/METHODS
+=head1 UTILITY METHODS
 
-=head2 function1
+=head2 new
+
+Creates an  empty paper sheet.  Or removes  the content of  an already
+existing paper sheet.
+
+=head2 from_csv
+
+Creates  a  paper  sheet  containing  the  operations  listed  in  the
+parameter CSV string.
+
+=head2 csv
+
+Generates a string with a CSV format and listing all operations stored
+in the sheet  object. The opposite of C<from_csv>. This  string can be
+printed into a CSV file for later retrieval.
+
+=head2 html
+
+Generates a string using the HTML format.
+
+For a properly formatted HTML file, the module user should provide the
+beginning of the file, from the C<< <html> >> tag until the C<< <body>
+>> tag, and then  the end of the file, with  the C<< </body></html> >>
+tags.
+
+The parameters are the following:
+
+=over 4
+
+=item * C<lang>
+
+The  language for  the titles  and messages.  The C<"fr">  language is
+fully specified, and the C<"en"> language is still incomplete. For the
+moment, there are no other languages.
+
+=item * C<silent>
+
+Boolean parameter controlling the display of the "spoken" messages. If
+C<1>,  only  the titles  are  displayed.  It  C<0>, all  messages  are
+displayed.
+
+=item * C<level>
+
+Integer parameter  controlling the  display of partial  operations. If
+C<0>, only the final complete operation  is shown. If C<1>, each sheet
+is displayed  upon switching  to another  sheet (when  using a  wad of
+sheets). If C<2> or more, partial operations are displayed. The higher
+the parameter, the more often the partial operations are displayed.
+
+=item * C<css>
+
+Overrides  the default  HTML formatting.  This is  a hash  table, with
+entries among C<underline>, C<strike>,  C<write>, C<read> and C<talk>.
+If  an entry  exists,  the default  format is  replaced  by C<<  <span
+style='xxx'> >>. Exception: if the  C<talk> entry exists, the "spoken"
+messages are formatted with C<< <p style='xxx'> >>.
+
+=back
+
+=head1 ARITHMETIC METHODS
+
+All  these  methods   return  a  C<Arithmetic::PaperAndPencil::Number>
+instance,  equal to  the  result of  the  operation. Unless  specified
+otherwise,  all input  C<Arithmetic::PaperAndPencil::Number> instances
+must have the same numeric radix.
+
+=head2 addition
+
+Simulates the addition  of two or more numbers. The  numbers are given
+as a  list variable  C<@list> or  a list  of scalar  variables C<$nb1,
+$nb2,  $nb3>.  This is  a  positional  parameter.  Each number  is  an
+instance of the C<Arithmetic::PaperAndPencil::Number> class.
+
+=head2 subtraction
+
+Simulates   the  subtraction   of  two   numbers,  instances   of  the
+C<Arithmetic::PaperAndPencil::Number> class. The  keywords are C<high>
+and C<low>.  The C<high> number must  be greater than or  equal to the
+C<low> number. Negative results are not allowed.
+
+A third  keyword parameter  is C<type>. With  this parameter,  you can
+choose  between  a  standard subtraction  (parameter  value  C<"std">,
+default value) and a subtraction using the radix-complement of the low
+number (parameter value C<"compl">).
+
+Acceptable break from reality. When  using the C<"compl"> variant, the
+module will write the extra digit  and then strike it, while the human
+computer will stop before writing  this extra digit, especially in the
+context of assembly programming, where  for example the registers hold
+32 bits, not 33.
+
+=head2 multiplication
+
+Simulates the  multiplication of  two numbers. The  keyword parameters
+are:
+
+=over 4
+
+=item * C<multiplicand>, C<multiplier>
+
+The two numbers to be multiplied, instances of C<Arithmetic::PaperAndPencil::Number>.
+
+=item * C<type>
+
+Specifies the variant technique. This parameter is a string value. The
+default  variant  is  C<'std'>.   Other  values  are  C<'jalousie-A'>,
+C<'jalousie-B'>, C<'boat'> or C<'russian'> (see below).
+
+=item * C<direction>
+
+This  parameter  is  used  with the  C<'boat'>  type.  Value  C<'ltr'>
+(default value)  specifies that the elementary  products are processed
+left-to-right,  value  C<'rtl'>  specifies  that  these  products  are
+processed  right-to-left.   This  applies   only  to   processing  the
+multiplier's   digits.  Whatever   the  value,   the  digits   of  the
+multiplicand are processed left-to-right.
+
+This   parameter   has   no  use   with   C<'std'>,   C<'jalousie-A'>,
+C<'jalousie-B'> and C<'russian'> types.
+
+=item * C<mult-and-add>
+
+This parameter  is used with  the C<'boat'> type.  Value C<'separate'>
+(default value) means that in a first phase, the digits resulting from
+the elementary multiplications are written  and that in a second phase
+these  digits are  added together  to obtain  the final  result. Value
+C<'combined'> means that as soon  as a elementary product is computed,
+its digits  are added to the  running sum which will  become the final
+full product at the end.
+
+This   parameter   has   no  use   with   C<'std'>,   C<'jalousie-A'>,
+C<'jalousie-B'> and C<'russian'> types.
+
+=item * C<product>
+
+This  parameter   is  used  with  the   C<"jalousie-*">  types.  Value
+C<"L-shaped"> (default value) means that the product is written in two
+parts,  an horizontal  one  at  the bottom  of  the  operation and  an
+vertical one, on the left side of the operation for C<"jalousie-A"> or
+on the right side for  C<"jalousie-B">. Value C<"straight"> means than
+the product  is written horizontaly  on the  bottom line, even  if the
+bottom line is wider than the rectangle of the operation.
+
+This parameter  has no use  with C<'std'>, C<'boat'>  and C<'russian'>
+types.
+
+=back
+
+The various types are
+
+=over 4
+
+=item * C<std>
+
+The standard multiplication.
+
+Acceptable break  from reality:  remember that the  successive partial
+products  shifts by  one column.  These shifts  are materialised  with
+dots. When  the multiplier contains  a digit  C<0>, the line  with all
+zeroes is not printed and the shift  is more than one column, with the
+corresponding number of dots. Example:
+
+  .      628
+  .      203
+  .      ---
+  .     1884
+  .   1256..
+  .   ------
+  .   127484
+
+The actual acceptable  break from reality happens  when the multiplier
+contains zeroes on the right. In this case, are there dots in the very
+first line? Or do we write zeroes? See below both cases.
+
+  .      628          628
+  .      230          230
+  .      ---          ---
+  .    1884.        18840
+  .   1256..       1256..
+  .   ------       ------
+  .   144440       144440
+
+The module uses the second possibility, writing zeroes on the first line.
+
+=item * C<shortcut>
+
+The standard multiplication, but  if the multiplier  contains repeated
+digits, the  partial products  are computed only  once. When  the same
+digit appears a second time in the multiplier, the  partial product is
+copied from the first occurrence instead of being recomputed.
+
+=item * C<prepared>
+
+This  variant  is  inspired  from  the  C<prepared>  variant  for  the
+division.  Before  starting  the multiplication  proper,  all  partial
+products are  preemptively computed. Then, when  the multiplication is
+computed, all partial products are  simply copied from the preparation
+step.
+
+Acceptable  break  from  reality:  there  is  no  evidence  that  this
+technique  is taught  or used.  It is  just an  possible extension  to
+multiplication of the prepared division technique.
+
+=item * C<jalousie-A>
+
+The partial products are written in rectangular form. The multiplicand
+is  written  left-to-right on  the  top  side  of the  rectangle,  the
+multiplier  is  written  top-to-bottom  on   the  right  side  of  the
+rectangle, the  final product is  written first, top-to-bottom  on the
+left side  of the  rectangle and second,  left-to-right on  the bottom
+side of  the rectangle. For example,  the multiplication C<15 ×  823 =
+12345>  gives  the following  result  (omitting  the interior  of  the
+rectangle):
+
+  .     823
+  .    1   1
+  .    2   5
+  .     345
+
+If the C<product> parameter is C<"straight">, then the operation final
+aspect is:
+
+  .     823
+  .        1
+  .        5
+  .   12345
+
+Acceptable break from reality: the  outlying digits should be centered
+with respect  to the inner  grid. The module  writes them in  a skewed
+fashion. In addition, the inner  vertical and horizontal lines are not
+drawn. Below left, the theoretical  output, below right the simplified
+output:
+
+  .     8   2   3         8 2 3
+  .   -------------      --------
+  .   |0 /|0 /|0 /|      |0/0/0/|
+  .  1| / | / | / |1    1|/8/2/3|1
+  .   |/ 8|/ 2|/ 3|      |4/1/1/|
+  .   -------------     2|/0/0/5|5
+  .   |4 /|1 /|1 /|      --------
+  .  2| / | / | / |5      3 4 5
+  .   |/ 0|/ 0|/ 5|
+  .   -------------
+  .     3   4   5
+
+
+=item * C<jalousie-B>
+
+The partial products are written in rectangular form. The multiplicand
+is  written  left-to-right on  the  top  side  of the  rectangle,  the
+multiplier is written bottom-to-top on the left side of the rectangle,
+the final product  is written first, left-to-right on  the bottom side
+of the  rectangle and second, bottom-to-top  on the right side  of the
+rectangle. For  example, the multiplication C<15 × 823 =  12345> gives
+the following result (omitting the interior of the rectangle):
+
+  .  823
+  . 5   5
+  . 1   4
+  .  123
+
+If the C<product> parameter is C<"straight">, then the operation final
+aspect is:
+
+  .  823
+  . 5
+  . 1
+  .  12345
+
+Acceptable break from reality: same as for C<'jalousie-A'>.
+
+=item * C<boat>
+
+The  multiplicand  is  written   between  two  horizontal  lines.  The
+multiplier is written below the bottom line and stricken and rewritten
+as  the multiplication  progresses. The  partial products  are written
+above the  top line.  When the  partial products  are added,  they are
+stricken and the final product is written above the partial products.
+
+Acceptable  break from  reality: I  am not  sure the  explanation from
+I<Number Words and  Number Symbols> is authoritative. So  I have added
+two parameters, C<direction> and  C<mult-and-add>, to allow the module
+user to choose which subvariant he prefers.
+
+=item * C<russian>
+
+Better known  as the "Russian peasant  multiplication". The multiplier
+and  the multiplicand  are written  side-by-side. Then,  on each  line
+below, the multiplier is halved and the multiplicand is doubled, until
+the  multiplier  reaches C<1>.  On  some  lines, the  multiplicand  is
+stricken and then the unstricken lines are added together, which gives
+the final product.
+
+=back
+
+=head2 division
+
+Simulates the division of two numbers. The keyword parameters are:
+
+=over 4
+
+=item * C<dividend>, C<divisor>
+
+The two numbers to be divided, instances of C<Arithmetic::PaperAndPencil::Number>.
+
+=item * C<type>
+
+Specifies the variant technique. This parameter is a string value. The
+default variant is C<"std">.
+
+=item * C<result>
+
+This string parameter  can be either C<"quotient">  (default value) or
+C<"remainder">,  or  C<"both">.  It  controls  which  value  is  (are)
+returned by the method to the main programme.
+
+=item * C<mult-and-sub>
+
+This string parameter  can be either C<"combined">  (default value) or
+C<"separate">. It  controls the computation of  the successive partial
+remainders with  a multiplication (quotient digit  times full divisor)
+and a subtraction  (from the partial dividend).  If C<"combined">, the
+multiplication and  the subtraction are  done at the same  time, digit
+per digit. If C<"separate">, the multiplication is done first in full,
+then the subtraction is done.
+
+=back
+
+The various types are
+
+=over 4
+
+=item * C<std>
+
+The standard division.
+
+=item * C<cheating>
+
+This is the  standard division with a twist. The  standard division is
+usually a  trial-and-error process  in which several  candidate digits
+are  tried  for   each  quotient  digit.  With   this  technique,  the
+trial-and-error process is cut short  and only the successful digit is
+tried.
+
+Acceptable break  from reality: This is  not a real method,  this is a
+convenience  method  which gives  shorter  HTML  files than  what  the
+C<"std"> type generates.
+
+=item * C<prepared>
+
+Before starting the division, the module computes the partial products
+of the divisor with any  single-digit number. These when computing the
+intermediate  remainders,   instead  of   doing  a   multiplication  -
+subtraction combination,  the already known partial  product is simply
+copied from  the preparation  list then  subtracted from  the previous
+intermediate  remainder.  The  C<mult-and-sub> parameter  defaults  to
+C<"separate"> for this division type.
+
+=item * C<boat>
+
+The  dividend is  written above  an  horizontal line.  The divisor  is
+written below this  line. As the first partial  remainder is computed,
+the  used digits  of the  dividend and  divisor are  stricken and  the
+digits of  the partial remainder are  written above the digits  of the
+dividend. When computing the next digits, the divisor is rewritten and
+the computation of the next partial remainder again strikes the digits
+of the  first partial remainder  and of  the second occurrence  of the
+divider.
+
+Acceptable  break  from   reality:  I  have  not   found  anywhere  an
+explanation for this technique. The way it is implemented is just some
+guesswork after some reverse engineering  attempt on a few examples. A
+special point  is that it  seems to  require something similar  to the
+C<cheating>  technique  above,  because  I  do  not  see  how  we  can
+"unstrike"  the digits  that  were stricken  with  the previous  digit
+candidate.
+
+=back
+
+=head2 square-root
+
+Simulates the  extraction of the square  root of a number.  There is a
+single     positional     parameter,     an    instance     of     the
+C<Arithmetic::PaperAndPencil::Number> class.
+
+There is  an optional keyword parameter,  C<mult-and-sub>. Its purpose
+is the same as for division.  If set to C<'combined'> (default value),
+the  computing  of the  product  (candidate  digit times  divisor)  is
+combined with  the subtraction  from the partial  dividend. If  set to
+C<'separate'>, the multiplication and  the subtraction are executed in
+separate and successive phases.
+
+=head2 conversion
+
+Simulates the conversion  of a number from its current  radix to a new
+radix.
+
+The parameters are:
+
+=over 4
+
+=item * C<number>
+
+The number to convert, instance of C<Arithmetic::PaperAndPencil::Number>.
+
+=item * C<radix>
+
+The destination  radix for the  conversion. This is a  native integer,
+not an instance of C<Arithmetic::PaperAndPencil::Number>.
+
+=item * C<nb-op>
+
+The  number of  operations  on a  single page.  After  this number  is
+reached, a  new page  is generated. This  allows keeping  the complete
+operation sufficiently short.  This parameter is a  native integer. If
+zero (default value), no new pages are generated.
+
+=item * C<type>
+
+A string  parameter specifying  which algorithm is  used to  convert a
+number. Values  C<'mult'> and C<'Horner'>  are synonymous and  use the
+cascading multiplication algorithm (or  Horner scheme). Value C<'div'>
+uses the cascading division algorithm.
+
+=item * C<div-type>
+
+A string parameter specifying which kind of division is used: C<'std'>
+(default value) uses  a standard division with  a full trial-and-error
+processing  for  candidate  quotient   digits,  C<'cheating'>  uses  a
+standard division  in which the trial-and-error  of candidate quotient
+digits is  artificially reduced  to a single  iteration, C<'prepared'>
+first computes the list of multiples  for the target radix and uses it
+to openly and  accountably reduce the trial-and-error  processing to a
+single iteration.
+
+This parameter is  ignored if the conversion parameter  C<type> is not
+C<'div'>.
+
+See  the  C<type>  parameter  for the  C<division>  method.  Yet,  the
+C<'boat'> value available for the C<type> parameter of the C<division>
+method  is   not  allowed  for   the  C<div-type>  parameter   of  the
+C<conversion> method.
+
+=item * C<mult-and-sub>
+
+This parameter  is similar  to the  C<mult-and-sub> parameter  for the
+C<division> method, except that it is  useful only if the value of the
+C<div-type> parameter is C<'cheating'>.
+
+The  parameter  controls the  computation  of  the successive  partial
+remainders with  a multiplication (quotient digit  times full divisor)
+and a  subtraction (from  the partial  dividend). Possible  values are
+C<'combined'> or  C<'separate'>. If C<'combined'>,  the multiplication
+and the  subtraction are done  at the same  time, digit per  digit. If
+C<'separate'>,  the multiplication  is done  first in  full, then  the
+subtraction is done.
+
+If  the  C<div-type> parameter  is  C<'prepared'>,  this parameter  is
+ignored  and   the  multiplication   and  the  subtraction   are  done
+separately.
+
+If  the   C<div-type>  parameter  is  C<'std'>,   the  C<mult-and-sub>
+parameter is  ignored and the  multiplication and the  subtraction are
+combined. The  reason for  this behaviour  is to  by-pass a  bug which
+would appear in cramped situations where several divisions are crammed
+side by side.
+
+=back
+
+=head2 gcd
+
+Simulates the computation of the  GCD (greatest common divisor) of two
+numbers.
+
+The parameters are:
+
+=over 4
+
+=item * C<first>
+
+The first number used, instance of C<Arithmetic::PaperAndPencil::Number>.
+
+=item * C<second>
+
+The second number used, instance of C<Arithmetic::PaperAndPencil::Number>.
+
+=item * C<div-type>
+
+A string parameter specifying which kind of division is used: C<"std">
+(default value) uses  a standard division with  a full trial-and-error
+processing  for  candidate  quotient   digits,  C<"cheating">  uses  a
+standard division  in which the trial-and-error  of candidate quotient
+digits is artificially reduced to a single iteration.
+
+See  the  C<type>  parameter  for the  C<division>  method.  Yet,  the
+C<"boat"> and C<"prepared"> values available for the C<type> parameter
+of  the  C<division>  method  are  not  allowed  for  the  C<div-type>
+parameter of the C<gcd> method.
+
+=back
+
+=head1 BUGS, ISSUES AND ACCEPTABLE BREAKS FROM REALITY
+
+For the  various arithmetical methods, not  all parameter combinations
+are  used in  real life.  This includes  especially the  C<"cheating">
+variants.
+
+The  values  assigned  to  the   C<level>  attribute  are  not  always
+consistent and  they may lead to  awkward listings, in which  a boring
+part is  printed in whole  detail and  an interesting part  is printed
+without enough detail.
+
+=head1 SECURITY MATTERS
+
+As said above, the numbers are not limited in length. The flip side is
+that  the  user can  ask  for  the  multiplication of  two  1000-digit
+numbers, which  means several millions of  basic actions (single-digit
+multiplications, basic  additions, etc). This  can lead to  a DOS-like
+situation: filled-up memory, clogged CPU for example.
+
+Another issue is the initialisation of a C<Arithmetic::PaperAndPencil>
+object with a  CSV file. The content  of the CSV file  is not checked.
+This  can  result  is  line  and column  coordinates  ranging  in  the
+thousands or  beyond. In this  case, the  C<html> method will  build a
+huge string result.
+
+=head1 SEE ALSO
+
+The background of this module is extensively described in the Github repository
+of the Raku module with the same name. See
+L<https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md>
+(or L<https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-fr.md>
+if you speak French).
+
+Raku module similar to this one:
+L<https://github.com/jforget/raku-Arithmetic-PaperAndPencil>
+
+HP48 / HP49 programme dealing with divisions:
+L<https://www.hpcalc.org/details/5303>
+
+=head1 DEDICATION
+
+This module is dedicated to my  primary school teachers, who taught me
+the basics of arithmetics, and even  some advanced features, and to my
+secondary  school math  teachers, who  taught me  other advanced  math
+concepts and features.
+
 
 =head1 AUTHOR
 
