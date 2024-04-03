@@ -230,6 +230,7 @@ Lorsque j'ai  copié-collé des méthodes  ou des fonctions de  Raku vers
 Perl, j'ai essayé de recopier les signatures telles quelles, comme
 
 ```
+# Raku
 sub filling-spaces(Int $l, Int $c) {
 ```
 
@@ -239,12 +240,14 @@ pas les déclarations de type `Int` ou autres. En revanche, il admet la
 déclaration des paramètres de fonction et j'ai pu ainsi écrire :
 
 ```
+# Perl
 sub filling_spaces($l, $c) {
 ```
 
 au lieu de
 
 ```
+# Perl
 sub filling_spaces {
   my ($l, $c) = @_;
 ```
@@ -289,6 +292,7 @@ de  colonnes à  insérer  `$delta_c` (ou,  en  Raku, `$delta-c`),  puis
 lance :
 
 ```
+      # Raku
       for @sheet <-> $line {
         prepend $line, space-char() xx $delta-c;
       }
@@ -299,6 +303,7 @@ La fonction `space-char`  est la fonction qui fournit  une instance de
 été :
 
 ```
+      # Perl
       for my $line (@sheet) {
         unshift @$line, (Arithmetic::PaperAndPencil::Char->space_char) x $delta_c;
       }
@@ -316,6 +321,7 @@ profonde (_deep copy_). Toujours est-il  que, pour corriger la version
 Perl, j'ai dû écrire :
 
 ```
+      # Perl
       for my $line (@sheet) {
         for (1 .. $delta_c) {
           unshift @$line, Arithmetic::PaperAndPencil::Char->space_char;
@@ -396,12 +402,14 @@ test a réussi.
 en Raku, j'utilise le tableau à 36 éléments
 
 ```
+# Raku
 @digits = ( '0' .. '9', 'A' .. 'Z');
 ```
 
 et je recherche la position du chiffre traité `$.unit.value` dans ce tableau, avec
 
 ```
+  # Raku
   my Int $units = @digits.first: * eq $.unit.value, :k;
 ```
 
@@ -412,6 +420,7 @@ et d'utiliser la fonction
 ou `firstidx`. J'ai donc codé :
 
 ```
+  # Perl
   use List::MoreUtils qw/first_index/;
   ...
   my $units = first_index { * eq $.unit.value } @digits;
@@ -430,6 +439,7 @@ entières  avec `floor`.  J'ai donc  appelé les  modules correspondants
 au début du fichier source avec :
 
 ```
+# Perl
 use Carp;
 use POSIX qw/floor/;
 class Arithmetic::PaperAndPencil::Number 0.01;
@@ -446,6 +456,7 @@ Cela   allait  mieux   avec  les   noms  qualifiés   `Carp::croak`  et
 lignes :
 
 ```
+# Perl
 class Arithmetic::PaperAndPencil::Number 0.01;
 use Carp;
 use POSIX qw/floor/;
@@ -495,13 +506,15 @@ gonflant  de changer  `if condition  {` en  `if (condition)  {` ou  de
 changer
 
 ```
+# Raku
 my Arithmetic::PaperAndPencil::Number $x .= new(radix => $radix, value => '10');
 ```
 
 en
 
 ```
-my $x =  Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '10');
+# Perl
+my $x = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '10');
 ```
 
 J'ai donc adapté le fichier  de configuration d'Emacs pour automatiser
@@ -515,12 +528,14 @@ sont   plus    délicates,   comme   remplacer    `%label<TIT01>`   par
 `$label{TIT01}` ou changer
 
 ```
+  # Raku
   for @numbers.kv -> $i, $n {
 ```
 
 en
 
 ```
+  # Perl
   for my $i (0 .. $#numbers) {
     my $n = $numbers[$i];
 ```
@@ -580,6 +595,7 @@ clé => valeur
 Ainsi, on peut créer une instance de nombre avec, au choix :
 
 ```
+  # Raku
   my Arithmetic::PaperAndPencil::Number $un .= new(radix => $radix, value => '1');
   my Arithmetic::PaperAndPencil::Number $un .= new(:radix($radix), :value('1'));
   my Arithmetic::PaperAndPencil::Number $un .= new(:radix($radix), :value<1>);
@@ -597,6 +613,7 @@ convertir, surtout depuis que la macro Emacs `adapte` contient
 Cela donne automatiquement :
 
 ```
+  # Perl
   my $un = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '1');
 
 ```
@@ -623,6 +640,8 @@ méthode Perl  correspondante simule cette convention  d'appel avec une
 table de hachage `%param`. Exemple :
 
 ```
+# Perl
+#### /!\    code bugué !!!    /!\
 method _mult_and_sub(%param) {
   my $l_dd         = $param{l_dd};
   my $c_dd         = $param{c_dd};
@@ -639,6 +658,7 @@ method _mult_and_sub(%param) {
   my $l_pr         = $param{l_pr};
   my $c_pr         = $param{c_pr};
   my $mult_and_sub = $param{mult_and_sub}  // 'combined';
+#### /!\    code bugué !!!    /!\
 ```
 
 Sauf que dans l'extrait ci-dessus, il y a un bug. L'avez-vous vu ?
@@ -649,6 +669,7 @@ Dans la  version Raku,  la méthode  `square-root` reçoit  un paramètre
 positionnel et un paramètre par mot-clé
 
 ```
+# Raku
 method square-root(Arithmetic::PaperAndPencil::Number $number
                  , Str :$mult-and-sub is copy = 'combined'
                  --> Arithmetic::PaperAndPencil::Number
@@ -663,6 +684,7 @@ positionnels et la simulation des  paramètres par mot-clé dans la même
 fonction ou la même méthode. Il suffit simplement d'écrire :
 
 ```
+# Perl
 method square_root($number, %param) {
   my $mult_and_sub = $param{mult_and_sub} // 'combined';
 [...]
@@ -677,6 +699,7 @@ traités tour à tour avec une  multiplication et une addition. En Raku,
 cela se traduit par :
 
 ```
+    # Raku
     for $number.value.substr(1).comb.kv -> $op1, $old-digit {
 ```
 
@@ -693,10 +716,84 @@ chiffre initial, mais le rang du chiffre dans la chaîne complète. Donc
 `$op1` commence à 1 et la boucle Raku se traduit par :
 
 ```
+    # Perl
     for my $op1 (1 .. $number->chars - 1) {
       my $old_digit = substr($number->value, $op1, 1);
 ```
 
+### Et le dernier problème
+
+...qui est plus un agacement qu'un véritable problème. En Raku, on écrit :
+
+```
+  # Raku
+  my Arithmetic::PaperAndPencil::Action $action;
+  [...]
+    $action .= new(level => 5, label => 'DRA02', w1l => 0, w1c => $len1 + 1
+                                               , w2l => 0, w2c => $len1 + $len2);
+```
+
+Le nom  de méthode  `new` est écrit  dans une colonne  du début  de la
+ligne, dans l'exemple  ci-dessus en colonnes 15 à 17  (en comptant les
+colonnes à partir de 0). On a de la place pour disposer les paramètres
+d'appel de façon correcte tout en conservant une longueur raisonnable,
+80 dans  l'exemple ci-dessus.  À l'inverse, en  Perl, pour  appeler la
+méthode `new`, il faut réécrire le nom  de la classe, ce qui ajoute 34
+caractères en largeur,  sans compter le remplacement  du point « `.` »
+par la flèche  « `->` ». La conséquence est que la  même ligne de code
+s'étend jusqu'à la colonne 115 au lieu de 80.
+
+```
+  # Perl
+  my Arithmetic::PaperAndPencil::Action $action;
+  [...]
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DRA02', w1l => 0, w1c => $len1 + 1
+                                                                                  , w2l => 0, w2c => $len1 + $len2);
+```
+
+Dans d'autres cas, j'ai aligné les  paramètres à partir de la deuxième
+ligne d'appel, en laissant tomber l'alignement avec la première ligne.
+Dans l'exemple ci-dessous,  en Raku les premiers  mots-clés des lignes
+1, 2, 3  et 4 sont alignés, en  Perl le mot-clé `level` de  la ligne 1
+n'est pas aligné  avec les mots-clés `r1l`, `r2l` et  `w1l` des lignes
+2, 3 et 4.
+
+```
+  # Raku
+  my Arithmetic::PaperAndPencil::Action $action;
+  [...]
+      $action .= new(level => 0, label => 'MUL02'
+                   , r1l => 0, r1c => 2, r1val => $multiplier.value   , val1 => $multiplier.value
+                   , r2l => 1, r2c => 2, r2val => $multiplicand.value , val2 => $multiplicand.value
+                   , w1l => 2, w1c => 2, w1val => $pdt.value          , val3 => $pdt.value
+                   );
+  # Perl
+  my Arithmetic::PaperAndPencil::Action $action;
+  [...]
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 0, label => 'MUL02'
+                   , r1l => 0, r1c => 2, r1val => $multiplier->value   , val1 => $multiplier->value
+                   , r2l => 1, r2c => 2, r2val => $multiplicand->value , val2 => $multiplicand->value
+                   , w1l => 2, w1c => 2, w1val => $pdt->value          , val3 => $pdt->value
+                   );
+```
+
+Peut-être aurait-je  pu limiter  en utilisant  la méthode  `new` comme
+s'il s'agissait d'une  méthode d'instance et non pas  d'une méthode de
+classe :
+
+
+```
+  # Perl ?
+  my Arithmetic::PaperAndPencil::Action $action;
+  [...]
+      $action = $action->new(level => 0, label => 'MUL02'
+                           , r1l => 0, r1c => 2, r1val => $multiplier->value   , val1 => $multiplier->value
+                           , r2l => 1, r2c => 2, r2val => $multiplicand->value , val2 => $multiplicand->value
+                           , w1l => 2, w1c => 2, w1val => $pdt->value          , val3 => $pdt->value
+                           );
+```
+
+Mais je doute que cela soit considéré comme étant un style à suivre.
 
 Licence
 =======
