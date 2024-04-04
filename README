@@ -1,16 +1,11 @@
 Arithmetic-PaperAndPencil
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+Arithmetic::PaperAndPencil  is a  module which  allows simulating  the
+paper  and  pencil  techniques  for  basic  arithmetic  operations  on
+integers: addition, subtraction, multiplication and division, but also
+square root extraction and conversion from a radix to another.
 
-A README file is required for CPAN modules since CPAN extracts the README
-file from a module distribution so that people browsing the archive
-can use it to get an idea of the module's uses. It is usually a good idea
-to provide version information here so that people can decide whether
-fixes for the module are worth downloading.
-
+Actually, this module is the porting of a similarly-named Raku module.
 
 INSTALLATION
 
