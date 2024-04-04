@@ -60,7 +60,7 @@ Arithmetic::PaperAndPencil::Char - individual characters when rendering an arith
 
 Version 0.01
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 This class should  not be used directly.  It is meant to  be a utility
 module for C<Arithmetic::PaperAndPencil>.
@@ -72,8 +72,7 @@ strike, etc.
 
 =head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+None. The I<xxx>C<_char> functions must be fully qualified when called.
 
 =head1 SUBROUTINES/METHODS
 

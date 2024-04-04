@@ -20,6 +20,8 @@ use Exporter 'import';
 use POSIX qw/floor ceil/;
 use List::Util qw/min max/;
 
+our $VERSION = 0.01;
+
 field @action;
 
 method from_csv {
@@ -2598,10 +2600,6 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
     use Arithmetic::PaperAndPencil;
 
     my $operation = Arithmetic::PaperAndPencil->new;
@@ -3070,7 +3068,7 @@ candidate.
 
 =back
 
-=head2 square-root
+=head2 square_root
 
 Simulates the  extraction of the square  root of a number.  There is a
 single     positional     parameter,     an    instance     of     the

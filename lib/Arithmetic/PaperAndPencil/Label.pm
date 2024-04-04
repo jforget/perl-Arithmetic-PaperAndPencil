@@ -109,25 +109,25 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
-    use Arithmetic::PaperAndPencil;
-
-    my $foo = Arithmetic::PaperAndPencil->new();
-    ...
+    use Arithmetic::PaperAndPencil::Action;
+    use Arithmetic::PaperAndPencil::Label;
+    my $action = Arithmetic::PaperAndPencil::Label->new(level => $lvl, label => ...);
+    my $line = Arithmetic::PaperAndPencil::Label::full_label($action->label
+                                                           , $action->val1
+                                                           , $action->val2
+                                                           , $action->val3
+                                                           , $lang);
 
 =head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+None.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 full_label
 
-=head2 function2
+Retrieves  the label  from the  hashtable and  replaces variable  tags
+(C<#1#> and similar) with the proper values.
 
 =head1 AUTHOR
 

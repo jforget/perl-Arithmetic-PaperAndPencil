@@ -286,6 +286,8 @@ method square_root {
 }
 '355/113'; # End of Arithmetic::PaperAndPencil
 
+=encoding utf8
+
 =head1 NAME
 
 Arithmetic::PaperAndPencil::Number - integer, with elementary operations
@@ -295,10 +297,6 @@ Arithmetic::PaperAndPencil::Number - integer, with elementary operations
 Version 0.01
 
 =head1 SYNOPSIS
-
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
 
     use Arithmetic::PaperAndPencil::Number;
 
@@ -345,6 +343,14 @@ An  instance  of  C<Arithmetic::PaperAndPencil::Number>  is  built  by
 calling method C<new>  with two parameters, C<value>  and C<radix>. If
 omitted, C<radix> defaults to 10.
 
+=head2 radix
+
+The numerical base, or radix, in which the number is defined.
+
+=head2 value
+
+The digits of the number.
+
 =head2 chars
 
 The number of chars in the C<value> attribute.
@@ -388,21 +394,21 @@ Example
   number = BABE   | → complement = FFFF5652
   length = 8      |
 
-=head2 square-root
+=head2 square_root
 
 Returns the square root of the objet, rounded down to an integer.
 
 The  object must  be  a  single-digit or  a  double-digit instance  of
 C<Arithmetic::PaperAndPencil::Number>.
 
-=head2 is-odd
+=head2 is_odd
 
 Returns an integer used as a boolean,  C<1> if the number is odd, C<0>
 if the number is even.
 
 =head1 FUNCTIONS
 
-=head2 C<max-unit>
+=head2 C<max_unit>
 
 The input  parameter is the  radix (positional). The  function returns
 the  highest   single-digit  number  for  this   radix.  For  example,
@@ -420,7 +426,7 @@ a single-digit number. This function is used to overload C<+>.
 Subtracting two  numbers with the  same radix. Both arguments  must be
 single-digit numbers. This function is used to overload C<->.
 
-=head2 Subtraction C<adjust-sub>
+=head2 Subtraction C<adjust_sub>
 
 Actually, this is not the  plain subtraction. This function receives a
 1-digit high number and  a 1- or 2-digit low number.  It sends back an
@@ -453,7 +459,7 @@ This  function interprets  the arguments  as numbers  and returns  the
 which means that  all other numeric comparisons (C<==>, C<<  < >>,
 C<< <= >>, etc) are overloaded too.
 
-=head2 Alphabetic Comparison C<num_cmp>
+=head2 Alphabetic Comparison C<alpha_cmp>
 
 This  function interprets  the arguments  as strings  and returns  the
 3-way  comparison of  these strings.  This function  overloads C<cmp>,
@@ -479,7 +485,6 @@ automatically be notified of progress on your bug as I make changes.
 You can find documentation for this module with the perldoc command.
 
     perldoc Arithmetic::PaperAndPencil
-
 
 You can also look for information at:
 

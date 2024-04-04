@@ -136,6 +136,10 @@ had  to  write  the  five  accessors for  `A::P&P::Char`  and  the  19
 accessors of `A::P&P::Action`.  Maybe I should install  Perl 5.39 with
 perlbrew?
 
+Later, when I activated  standard test `pod-coverage.t`, this resulted
+in many error messages, because  there is one explicit accessor method
+for each attribute, therefore I would have to document all of them.
+
 Another bad  surprise. When I  run a test file,  I get a  few messages
 telling me  `class is  experimental` and may  messages with  `field is
 experimental`.  Actually, I  got  rid of  these  messages. Instead  of
@@ -714,6 +718,75 @@ with 1 and the Raku loop translates to:
     for my $op1 (1 .. $number->chars - 1) {
       my $old_digit = substr($number->value, $op1, 1);
 ```
+
+### Problems when preparing the Module
+
+During the  development, I  tested the  classes, methods  and routines
+with commands such as:
+
+```
+perl -Ilib xt/99-my-test.t
+prove -l t xt
+```
+
+To prepare  the module for  publication, I  ran the usual  Perl module
+commands, with the addition of an environment variable to trigger some
+tests proposed by `Module::Starter`:
+
+```
+export RELEASE_TESTING=1
+perl Makefile.PL
+make
+make test
+```
+
+Also, I check for code coverage with `Devel::Cover` and:
+
+```
+cover -test html
+```
+
+The first  problem appeared when  running `Makefile.PL`. I  obtained a
+message stating that it could not  find the version from the source of
+`lib/Arithmetic/PaperAndPencil.pm`. Yet I had coded:
+
+```
+class Arithmetic::PaperAndPencil 0.01;
+```
+
+Actually, I had to add
+
+```
+our $VERSION = 0.01;
+```
+
+like before the use of Corinna.
+
+Another  problem, which  I have  already mentionned,  is that  the POD
+coverage test  lists several methods without  documentation. These are
+the accessor methods I had  to explicitly write, instead of generating
+them with the `:reader` attribute. A few methods are documented in the
+POD source,  because I have  something interesting to say  about them.
+But for  most fields,  I have  nothing worthwhile  to say  about their
+accessors. Maybe the message from `Test::Pod::Coverage` will disappear
+in the next Corinna version when I use `:reader`?
+
+Yet another problem. I have used `overload` to link some routines with
+the  standard  operators  `+`,  `-`  and so  on.  When  checking  code
+coverage, these  routines appear in  red in the coverage  report, that
+is, they are never checked.
+
+Also, methods (the Corinna kind) are not processed. Someone else has
+[already declared an issue](https://github.com/pjcj/Devel--Cover/issues/330).
+
+The test file  `manifest.t` wrongly lists all files  within the `.git`
+subdirectory as missing files. After reading
+[MetaCPAN](https://metacpan.org/pod/Test::CheckManifest)
+I found how to avoid these messages.
+
+Lastly,  `Test::Pod`   does  not   recongnise  the   `=encoding  utf8`
+statement. So  it gives  an error message  when encountering  char `→`
+(U+2192).
 
 ### And the Last Problem
 

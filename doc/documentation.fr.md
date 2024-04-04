@@ -134,6 +134,11 @@ obligé d'écrire les cinq accesseurs  des cinq champs de `A::P&P::Char`
 et  les 19  accesseurs des  19 champs  de `A::P&P::Action`.  Peut-être
 devrais-je installer Perl 5.39.xx avec perlbrew ?
 
+Ultérieurement, quand  j'ai activé le test  standard `pod-coverage.t`,
+cela a provoqué de nombreuses  erreurs, car avec une méthode explicite
+pour chaque attribut, le texte POD était incomplet, je devrais ajouter
+de la documentation pour chacune de ces méthodes.
+
 Une autre  mauvaise surprise :  lorsque je lance  un fichier  de test,
 j'obtiens  quelques messages  `class is  experimental` et  de nombreux
 messages `field is experimental` et `method is experimental`. En fait,
@@ -723,6 +728,72 @@ chiffre initial, mais le rang du chiffre dans la chaîne complète. Donc
     for my $op1 (1 .. $number->chars - 1) {
       my $old_digit = substr($number->value, $op1, 1);
 ```
+
+### Problèmes lors de la préparation du module
+
+Pendant le développement, j'ai testé les classes, méthodes et routines
+simplement avec des commandes du genre :
+
+```
+perl -Ilib xt/99-mon-test.t
+prove -l t xt
+```
+
+Pour préparer le  module, j'ai repris la  méthode traditionnelle, avec
+en plus le positionnement  d'une variable d'environnement pour activer
+certains tests proposés par `Module::Starter` :
+
+```
+export RELEASE_TESTING=1
+perl Makefile.PL
+make
+make test
+```
+
+Également, je vérifie la couverture de code avec `Devel::Cover` et :
+
+```
+cover -test html
+```
+
+Le premier problème a été lors  du lancement de `Makefile.PL`, j'ai eu
+un message me  signalant qu'il était impossible de  trouver la version
+du module dans `lib/Arithmetic/PaperAndPencil.pm`. Or j'ai bien codé :
+
+```
+class Arithmetic::PaperAndPencil 0.01;
+```
+
+En fait, il faut ajouter
+
+```
+our $VERSION = 0.01;
+```
+
+comme à l'époque où Corinna n'existait pas.
+
+Un autre problème, déjà mentionné  par anticipation, c'est que le test
+de  couverture du  POD  signale l'absence  de  documentation pour  les
+accesseurs des  classes déclarées (sauf  les quelques fois  où j'avais
+quelque chose  d'intéressant à  expliquer sur  tel ou  tel accesseur).
+Est-ce  que  le  problème  se produira  toujours,  lorsque  la  clause
+`:reader` permettra de ne plus créer explicitement d'accesseur ?
+
+Encore  un  autre  problème.  J'ai utilisé  `overload`  pour  associer
+certaines routines aux opérateurs standards « + », « - », etc. Lors du
+test  de la  couverture de  code, certaines  routines apparaissent  en
+rouge, c'est-à-dire sans test, dans le compte-rendu de couverture.
+
+Également, les  méthodes ne sont  pas traitées. Quelqu'un  d'autre l'a
+[déjà signalé](https://github.com/pjcj/Devel--Cover/issues/330).
+
+Le  test  `manifest.t`  signale  à  tort  l'absence  des  fichiers  du
+sous-répertoire `.git`. Heureusement, en consultant
+[MetaCPAN](https://metacpan.org/pod/Test::CheckManifest)
+j'ai trouvé comment éviter ce message d'erreur.
+
+Finalement, `Test::Pod` ne reconnaît pas la directive `=encoding utf8`
+et déclenche une erreur lorsqu'il rencontre un caractère `→` (U+2192).
 
 ### Et le dernier problème
 
