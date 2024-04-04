@@ -342,6 +342,7 @@ n'ai pas vérifié. J'explique uniquement avec `l2p_lin`, dans un but de
 concision. Voici cette fonction :
 
 ```
+  # Perl
   sub l2p_lin($logl) {
     my $result = $logl - $l_min;
     return $result;
@@ -369,6 +370,7 @@ variable lexicale `$l_min`,  initialisée à 0. En  revanche, en passant
 dans la définition
 
 ```
+  # Perl
   sub l2p_lin($logl) {
     my $result = $logl - $l_min;
     return $result;
@@ -380,6 +382,7 @@ clôture. Donc les appels ultérieurs  à `l2p_lin` utilisent la clôture,
 avec `$l_min` à -4. La solution a été très simple, ajouter un `my`
 
 ```
+  # Perl
   my sub l2p_lin($logl) {
     my $result = $logl - $l_min;
     return $result;
@@ -478,6 +481,7 @@ peut pas utiliser de variables dans un opérateur `tr`. D'où le recours
 à un `eval`
 
 ```
+  # Perl
   my $before = substr($digits, 0, $radix);
   my $after  = reverse($before);
   $_ = '0' x ($len - length($s)) . $s;
@@ -599,7 +603,6 @@ Ainsi, on peut créer une instance de nombre avec, au choix :
   my Arithmetic::PaperAndPencil::Number $un .= new(radix => $radix, value => '1');
   my Arithmetic::PaperAndPencil::Number $un .= new(:radix($radix), :value('1'));
   my Arithmetic::PaperAndPencil::Number $un .= new(:radix($radix), :value<1>);
-
 ```
 
 Jusqu'à présent, lors de la transcription vers Perl, j'ai toujours été
@@ -780,7 +783,6 @@ n'est pas aligné  avec les mots-clés `r1l`, `r2l` et  `w1l` des lignes
 Peut-être aurait-je  pu limiter  en utilisant  la méthode  `new` comme
 s'il s'agissait d'une  méthode d'instance et non pas  d'une méthode de
 classe :
-
 
 ```
   # Perl ?
