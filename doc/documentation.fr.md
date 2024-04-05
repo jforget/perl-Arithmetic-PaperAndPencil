@@ -1,4 +1,4 @@
-# -*- encoding: utf-8; indent-tabs-mode: nil -*-
+-*- encoding: utf-8; indent-tabs-mode: nil -*-
 
 Introduction
 ============
@@ -285,7 +285,7 @@ use open ':encoding(UTF-8)';
 Problèmes recontrés
 -------------------
 
-### Premier problème pour `A:P&P::Char`
+### Premier problème pour `A::P&P::Char`
 
 Le premier  problème s'est manifesté  lors de la génération  du source
 HTML à partir d'une liste d'actions.
@@ -334,7 +334,7 @@ Perl, j'ai dû écrire :
       }
 ```
 
-### Deuxième problème pour `A:P&P::Char`
+### Deuxième problème pour `A::P&P::Char`
 
 Le  programme  de  test  `01-action.t` comporte  deux  générations  de
 sources HTML. J'ai commencé par  tester seulement la première, jusqu'à

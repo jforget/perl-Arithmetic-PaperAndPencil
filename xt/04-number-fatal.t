@@ -9,8 +9,15 @@ use warnings;
 use feature qw/class/;
 use open ':encoding(UTF-8)';
 use Test::More;
-use Test::Exception;
 use Arithmetic::PaperAndPencil::Number qw/max_unit adjust_sub/;
+
+BEGIN {
+  eval "use Test::Exception;";
+  if ($@) {
+    plan skip_all => "Test::Exception needed";
+    exit;
+  }
+}
 
 plan(tests => 44);
 

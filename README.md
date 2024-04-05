@@ -87,6 +87,10 @@ following commands:
   make install
 ```
 
+The only non-core prerequisite is
+[`Test::Exception`](https://metacpan.org/search?q=test%3A%3Aexception),
+which is needed only if you run the extended tests in directory `xt`.
+
 SUPPORT AND DOCUMENTATION
 =========================
 

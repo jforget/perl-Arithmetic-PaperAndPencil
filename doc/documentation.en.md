@@ -1,4 +1,4 @@
-# -*- encoding: utf-8; indent-tabs-mode: nil -*-
+-*- encoding: utf-8; indent-tabs-mode: nil -*-
 
 Introduction
 ============
@@ -128,7 +128,7 @@ the beginning  of many files,  I steel  need to add  `use experimental
 qw/class/` to benefit of Corinna's syntax.
 
 A bad surprise: I knew that version 5.38 contained only a
-[MVP}(https://github.com/Perl-Apollo/Corinna/blob/master/rfc/mvp.md)
+[MVP](https://github.com/Perl-Apollo/Corinna/blob/master/rfc/mvp.md)
 (minimum viable product), but I thought  it would at least provide the
 `:reader` attributes, which would alleviate me from writing accessors.
 Too bad,  the `:reader` attributes are  not available in 5.38.2  and I
@@ -283,7 +283,7 @@ use open ':encoding(UTF-8)';
 Found Problems
 --------------
 
-### First problem with `A:P&P::Char`
+### First problem with `A::P&P::Char`
 
 The first problem appeared when coding the `A::P&P::Char` class and
 the `html` method for `Arithmetic::PaperAndPencil`.
@@ -330,7 +330,7 @@ way, I had to fix the Perl version and write:
       }
 ```
 
-### Second problem with `A:P&P::Char`
+### Second problem with `A::P&P::Char`
 
 The  `01-action.t` test  programme  generates two  HTML strings.  When
 writing class `A::P&P::Char`  and method `html`, I  activated only the

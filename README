@@ -20,6 +20,9 @@ run the following commands:
   make test
   make install
 
+The only non-core prerequisite is Test::Exception which is needed only
+if you run the extended tests in directory xt.
+
 SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
