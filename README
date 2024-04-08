@@ -20,8 +20,12 @@ run the following commands:
   make test
   make install
 
-The only non-core prerequisite is Test::Exception which is needed only
-if you run the extended tests in directory xt.
+The  first non-core  prerequisite is  Test::Exception which  is needed
+only if you run the extended tests in directory xt.
+
+The other non-core prerequisites are Test::CheckManifest,
+Test::Pod::Coverage, Pod::Coverage and Test::Pod which are used only
+if you run the `RELEASE_TESTING` tests.
 
 SUPPORT AND DOCUMENTATION
 

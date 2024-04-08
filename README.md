@@ -87,9 +87,16 @@ following commands:
   make install
 ```
 
-The only non-core prerequisite is
+The first non-core prerequisite is
 [`Test::Exception`](https://metacpan.org/search?q=test%3A%3Aexception),
 which is needed only if you run the extended tests in directory `xt`.
+
+The other non-core prerequisites are
+[Test::CheckManifest](https://metacpan.org/pod/Test::CheckManifest),
+[Test::Pod::Coverage](https://metacpan.org/pod/Test::Pod::Coverage),
+[Pod::Coverage](https://metacpan.org/pod/Pod::Coverage)
+and [Test::Pod](Test::Pod)
+which are used only if you run the `RELEASE_TESTING` tests.
 
 SUPPORT AND DOCUMENTATION
 =========================
