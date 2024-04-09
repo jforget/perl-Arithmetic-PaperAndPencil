@@ -587,9 +587,9 @@ pairs: the  syntax with the fat  arrow and the syntax  with the colon,
 which has an auto-quoting variant.
 
 ```
-clé => valeur
-:clé(valeur)
-:clé<valeur>
+key => value
+:key(value)
+:key<value>
 ```
 
 Creating a number can be done with any of these lines:
@@ -782,11 +782,11 @@ Also, methods (the Corinna kind) are not processed. Someone else has
 The test file  `manifest.t` wrongly lists all files  within the `.git`
 subdirectory as missing files. After reading
 [MetaCPAN](https://metacpan.org/pod/Test::CheckManifest)
-I found how to avoid these messages.
+I found how to avoid these messages, problem solved.
 
-Lastly,  `Test::Pod`   does  not   recongnise  the   `=encoding  utf8`
-statement. So  it gives  an error message  when encountering  char `→`
-(U+2192).
+Lastly, `Test::Pod` does not recognise the `=encoding utf8` statement.
+So  sometimes it  gives an  error message  when encountering  char `→`
+(U+2192 RIGHTWARDS ARROW). And sometimes, I have no error message.
 
 ### And the Last Problem
 

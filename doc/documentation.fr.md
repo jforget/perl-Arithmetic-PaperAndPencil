@@ -790,10 +790,11 @@ rouge, c'est-à-dire sans test, dans le compte-rendu de couverture.
 Le  test  `manifest.t`  signale  à  tort  l'absence  des  fichiers  du
 sous-répertoire `.git`. Heureusement, en consultant
 [MetaCPAN](https://metacpan.org/pod/Test::CheckManifest)
-j'ai trouvé comment éviter ce message d'erreur.
+j'ai trouvé comment éviter ce message d'erreur, problème réglé.
 
 Finalement, `Test::Pod` ne reconnaît pas la directive `=encoding utf8`
-et déclenche une erreur lorsqu'il rencontre un caractère `→` (U+2192).
+et déclenche une  erreur lorsqu'il rencontre un  caractère `→` (U+2192
+RIGHTWARDS ARROW). Et des fois, je n'ai pas d'erreur.
 
 ### Et le dernier problème
 

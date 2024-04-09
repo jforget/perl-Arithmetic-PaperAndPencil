@@ -46,24 +46,24 @@ method csv {
 }
 method set_level($n) { $level = $n } # waiting for :writer
 method level { $level } # waiting for :reader
-method label { $label } # waiting for :reader
-method val1  { $val1  } # waiting for :reader
-method val2  { $val2  } # waiting for :reader
-method val3  { $val3  } # waiting for :reader
-method r1l   { $r1l   } # waiting for :reader
-method r1c   { $r1c   } # waiting for :reader
-method r1val { $r1val } # waiting for :reader
-method r1str { $r1str } # waiting for :reader
-method r2l   { $r2l   } # waiting for :reader
-method r2c   { $r2c   } # waiting for :reader
-method r2val { $r2val } # waiting for :reader
-method r2str { $r2str } # waiting for :reader
-method w1l   { $w1l   } # waiting for :reader
-method w1c   { $w1c   } # waiting for :reader
-method w1val { $w1val } # waiting for :reader
-method w2l   { $w2l   } # waiting for :reader
-method w2c   { $w2c   } # waiting for :reader
-method w2val { $w2val } # waiting for :reader
+method label { $label } # why did :reader not appear in the 5.38 MVP?
+method val1  { $val1  } # :reader would have allowed me to write a much shorter code
+method val2  { $val2  } # I hope that :reader will appear soon
+method val3  { $val3  } # :reader is such a useful feature!
+method r1l   { $r1l   } # after reading the tutorial, I was hoping to use :reader for all 19 fields in this class
+method r1c   { $r1c   } # what is the benefit of Corinna if :reader does not exist?
+method r1val { $r1val } # when will :reader be available?
+method r1str { $r1str } # :writer is a good thing to add, but :reader is a big win, a very big win
+method r2l   { $r2l   } # I am interested in typed fields, but what I really really want is :reader
+method r2c   { $r2c   } # :param for fields was implemented, why not :reader?
+method r2val { $r2val } # I do not care much about field attributes for now, except for :reader
+method r2str { $r2str } # :reader! :reader! :reader! :reader! :reader!
+method w1l   { $w1l   } # if a new version of Perl includes :reader, it will be a sufficient reason to release a new version of the module
+method w1c   { $w1c   } # "all work and no :reader make Jack a dull boy" by S Kubrick, with J Nicholson
+method w1val { $w1val } # :reader of the Lost Ark by S Spielberg with H Ford
+method w2l   { $w2l   } # The Hunt for :reader October by J McTiernan with S Connery
+method w2c   { $w2c   } # Pale :reader, by and with C Eastwood
+method w2val { $w2val } # "I said, :reader, can you put your hands in your head? oh no!" by Supertramp
 
 'CQFD'; # End of Arithmetic::PaperAndPencil::Action
 
