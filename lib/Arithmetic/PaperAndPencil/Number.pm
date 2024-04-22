@@ -9,7 +9,7 @@ use open ':encoding(UTF-8)';
 use feature      qw/class/;
 use experimental qw/class/;
 
-class Arithmetic::PaperAndPencil::Number 0.01;
+class Arithmetic::PaperAndPencil::Number 0.02;
 
 use Carp;
 use Exporter 'import';
@@ -294,7 +294,7 @@ Arithmetic::PaperAndPencil::Number - integer, with elementary operations
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 

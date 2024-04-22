@@ -11,7 +11,7 @@ use Arithmetic::PaperAndPencil::Action;
 use Arithmetic::PaperAndPencil::Char;
 use Arithmetic::PaperAndPencil::Label;
 
-class Arithmetic::PaperAndPencil 0.01;
+class Arithmetic::PaperAndPencil 0.02;
 
 use Arithmetic::PaperAndPencil::Number qw/max_unit adjust_sub/;
 
@@ -20,7 +20,7 @@ use Exporter 'import';
 use POSIX qw/floor ceil/;
 use List::Util qw/min max/;
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 field @action;
 
@@ -2596,7 +2596,7 @@ Arithmetic::PaperAndPencil - simulating paper and pencil techniques for basic ar
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 

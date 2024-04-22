@@ -1,5 +1,8 @@
 Revision history for Arithmetic-PaperAndPencil
 
-0.01    2024-04-xx
-        First version, released on an unsuspecting world.
+0.02    2024-xx-xx
+
+0.01    2024-04-22
+        First version, with the four basic operations, plus square-root, GCD and radix conversion.
+	And HTML rendering
 

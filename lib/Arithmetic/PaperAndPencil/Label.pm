@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use open ':encoding(UTF-8)';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my %label = ('fr' => {
                  'TIT01' => 'Addition (base #1#)'
@@ -105,7 +105,7 @@ Arithmetic::PaperAndPencil::Label -- Used internally by Arithmetic::PaperAndPenc
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 

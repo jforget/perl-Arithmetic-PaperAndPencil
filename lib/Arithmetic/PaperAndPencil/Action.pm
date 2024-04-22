@@ -8,7 +8,7 @@ use open ':encoding(UTF-8)';
 use feature      qw/class/;
 use experimental qw/class/;
 
-class Arithmetic::PaperAndPencil::Action 0.01;
+class Arithmetic::PaperAndPencil::Action 0.02;
 
 field $level :param ;
 field $label :param ;
@@ -73,7 +73,7 @@ Arithmetic::PaperAndPencil::Action -- basic action when computing an arithmetic 
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 

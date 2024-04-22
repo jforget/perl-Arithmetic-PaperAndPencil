@@ -62,23 +62,23 @@ my %WriteMakefileArgs = (
        provides       => {
            'Arithmetic::PaperAndPencil' => {
                 file => 'lib/Arithmetic/PaperAndPencil.pm',
-                version => '0.01',
+                version => '0.02',
            }
          , 'Arithmetic::PaperAndPencil::Action' => {
                 file => 'lib/Arithmetic/PaperAndPencil/Action.pm',
-                version => '0.01',
+                version => '0.02',
            }
          , 'Arithmetic::PaperAndPencil::Char' => {
                 file => 'lib/Arithmetic/PaperAndPencil/Char.pm',
-                version => '0.01',
+                version => '0.02',
            }
          , 'Arithmetic::PaperAndPencil::Label' => {
                 file => 'lib/Arithmetic/PaperAndPencil/Label.pm',
-                version => '0.01',
+                version => '0.02',
            }
          , 'Arithmetic::PaperAndPencil::Number' => {
                 file => 'lib/Arithmetic/PaperAndPencil/Number.pm',
-                version => '0.01',
+                version => '0.02',
            }
        },
        resources => {

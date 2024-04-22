@@ -9,7 +9,7 @@ use open ':encoding(UTF-8)';
 use feature      qw/class/;
 use experimental qw/class/;
 
-class Arithmetic::PaperAndPencil::Char 0.01;
+class Arithmetic::PaperAndPencil::Char 0.02;
 
 field $char :param ;
 field $underline = 0;
@@ -58,7 +58,7 @@ Arithmetic::PaperAndPencil::Char - individual characters when rendering an arith
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 DESCRIPTION
 
