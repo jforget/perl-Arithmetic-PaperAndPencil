@@ -872,5 +872,7 @@ Mais je doute que cela soit considéré comme étant un style à suivre.
 Licence
 =======
 
+Copyright 2024, 2026 Jean Forget
+
 Texte diffusé sous la licence  CC-BY-ND : Creative Commons avec clause
 de paternité, excluant la modification.

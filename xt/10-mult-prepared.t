@@ -2,7 +2,7 @@
 #
 # Checking the generation of HTML on two examples of prepared multiplications
 #
-# Copyright 2023, 2024 Jean Forget
+# Copyright 2023, 2024, 2026 Jean Forget
 #
 # This programme is free software; you can redistribute it and modify it under the Artistic License 2.0.
 

@@ -2,7 +2,7 @@
 #
 # Checking the generation of HTML on division where the partial remainders are computed with separate multiplication and subtraction
 #
-# Copyright 2024 Jean Forget
+# Copyright 2024, 2026 Jean Forget
 #
 # This programme is free software; you can redistribute it and modify it under the Artistic License 2.0.
 

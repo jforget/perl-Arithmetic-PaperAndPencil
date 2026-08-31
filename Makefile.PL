@@ -5,7 +5,7 @@ use ExtUtils::MakeMaker;
 
 my %WriteMakefileArgs = (
     NAME             => 'Arithmetic::PaperAndPencil',
-    AUTHOR           => q{jforget <J2N-FORGET@orange.fr>},
+    AUTHOR           => q{Jean Forget <J2N-FORGET@orange.fr>},
     VERSION_FROM     => 'lib/Arithmetic/PaperAndPencil.pm',
     ABSTRACT_FROM    => 'lib/Arithmetic/PaperAndPencil.pm',
     LICENSE          => 'artistic_2',

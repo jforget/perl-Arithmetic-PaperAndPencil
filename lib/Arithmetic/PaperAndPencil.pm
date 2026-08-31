@@ -3239,7 +3239,7 @@ concepts and features.
 
 =head1 AUTHOR
 
-jforget, C<< <J2N-FORGET at orange.fr> >>
+Jean Forget, C<< <J2N-FORGET at orange.fr> >>
 
 =head1 BUGS
 
@@ -3277,7 +3277,7 @@ L<https://metacpan.org/release/Arithmetic-PaperAndPencil>
 
 =head1 LICENSE AND COPYRIGHT
 
-This software is Copyright (c) 2024 by jforget.
+This software is Copyright (c) 2024, 2026 by Jean Forget.
 
 This is free software, licensed under:
 

@@ -863,5 +863,7 @@ But I think this would be considered bad programming style.
 License
 =======
 
+Copyright 2024, 2026 Jean Forget
+
 Text  published  under the  CC-BY-ND  license:  Creative Commons  with
 attribution and with no modification.

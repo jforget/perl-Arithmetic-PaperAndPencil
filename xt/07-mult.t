@@ -5,7 +5,7 @@
 # In some actions, the level has been tweaked a little to display
 # intermediate results that would not have been displayed normally.
 #
-# Copyright 2023, 2024 Jean Forget
+# Copyright 2023, 2024, 2026 Jean Forget
 #
 # This programme is free software; you can redistribute it and modify it under the Artistic License 2.0.
 
