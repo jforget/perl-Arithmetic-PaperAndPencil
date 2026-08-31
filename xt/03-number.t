@@ -3,7 +3,7 @@
 #
 # Checking the Number class
 #
-use 5.38.0;
+use 5.42.0;
 use utf8;
 use strict;
 use warnings;

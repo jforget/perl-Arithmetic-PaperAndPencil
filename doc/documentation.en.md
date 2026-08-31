@@ -39,6 +39,13 @@ My computer uses Devuan 4, with Perl 5.32.1? So I installed
 with  the  package manager  and  then  I  installed Perl  5.38.2  with
 Perlbrew.
 
+When  developping version  0.0.2,  I use  Perl  5.42.3 with  Perlbrew.
+During the installation, module `HTTP::Tiny`  has some test errors and
+causes  the installation  to  fail.  So I  used  option `--notest`  to
+install Perl 5.42.3 (it seems that option `--force` takes into account
+the  failure  of  `HTTP::Tiny`  and aborts  the  installation  of  the
+interpreter).
+
 Initialisation
 --------------
 
@@ -124,7 +131,7 @@ First Thoughts about Corinna
 ----------------------------
 
 Although the new features of Perl 5.38 are selected with `use 5.38` at
-the beginning  of many files,  I steel  need to add  `use experimental
+the beginning  of many files,  I still  need to add  `use experimental
 qw/class/` to benefit of Corinna's syntax.
 
 A bad surprise: I knew that version 5.38 contained only a
@@ -134,11 +141,14 @@ A bad surprise: I knew that version 5.38 contained only a
 Too bad,  the `:reader` attributes are  not available in 5.38.2  and I
 had  to  write  the  five  accessors for  `A::P&P::Char`  and  the  19
 accessors of `A::P&P::Action`.  Maybe I should install  Perl 5.39 with
-perlbrew?
+perlbrew? Some time later, I worked  on version 0.0.2 with Perl 5.42.3
+and, o frabjous day, the  `:reader` attributes are available. And even
+the `:writer` attributes!
 
 Later, when I activated  standard test `pod-coverage.t`, this resulted
 in many error messages, because  there is one explicit accessor method
-for each attribute, therefore I would have to document all of them.
+for each  attribute, therefore I would  have to document all  of them.
+Using Perl 5.42.3 does not change anything about that.
 
 Another bad  surprise. When I  run a test file,  I get a  few messages
 telling me  `class is  experimental` and may  messages with  `field is
@@ -147,7 +157,6 @@ writing only:
 
 ```
 use feature qw/class/;
-
 ```
 
 I wrote instead:
@@ -155,8 +164,9 @@ I wrote instead:
 ```
 use feature      qw/class/;
 use experimental qw/class/;
-
 ```
+
+This is still necessary with Perl 5.42.3.
 
 At first, I used the style shown in the
 [Corinna documentation](https://github.com/Perl-Apollo/Corinna/blob/master/pod/perlclasstut.pod),

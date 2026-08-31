@@ -39,6 +39,13 @@ Ma machine tourne sous Devuan 4, avec Perl 5.32.1. J'ai donc installé
 avec le gestionnaire  de paquets et et j'ai installé  Perl 5.38.2 avec
 Perlbrew.
 
+Pour le  développement de la  version 0.0.2, j'ai utilisé  Perl 5.42.3
+avec Perlbrew. Le module `HTTP::Tiny`  présente des problèmes lors des
+tests  intégrés.   J'ai  donc  installé  Perl   5.42.3  avec  l'option
+`--notest` de Perlbrew (l'option `--force`  continue à tenir compte de
+l'échec   sur  `HTTP::Tiny`   et  à   interrompre  l'installation   de
+l'interpréteur).
+
 Initialisation
 --------------
 
@@ -132,12 +139,17 @@ qui me dispenserait d'écrire les accesseurs élémentaires. Éh bien non,
 les attributs `:reader` ne sont pas  implémentés en 5.38.2 et j'ai été
 obligé d'écrire les cinq accesseurs  des cinq champs de `A::P&P::Char`
 et  les 19  accesseurs des  19 champs  de `A::P&P::Action`.  Peut-être
-devrais-je installer Perl 5.39.xx avec perlbrew ?
+devrais-je installer  Perl 5.39.xx avec  perlbrew ? Un peu  plus tard,
+j'ai développé la version 0.0.2 avec  Perl 5.42.xx et ô joie, bonheur,
+allégresse,  les attributs  `:reader`  sont disponibles.  Et même  les
+attributs `:writer` !
 
 Ultérieurement, quand  j'ai activé le test  standard `pod-coverage.t`,
 cela a provoqué de nombreuses  erreurs, car avec une méthode explicite
 pour chaque attribut, le texte POD était incomplet, je devrais ajouter
-de la documentation pour chacune de ces méthodes.
+de  la   documentation  pour   chacune  de   ces  méthodes.   Lors  du
+développement de  la version 0.0.2,  l'utilisation de la  version Perl
+5.42.xx n'y change rien.
 
 Une autre  mauvaise surprise :  lorsque je lance  un fichier  de test,
 j'obtiens  quelques messages  `class is  experimental` et  de nombreux
@@ -146,7 +158,6 @@ j'ai réussi à m'en débarasser en complétant
 
 ```
 use feature qw/class/;
-
 ```
 
 en :
@@ -154,8 +165,9 @@ en :
 ```
 use feature      qw/class/;
 use experimental qw/class/;
-
 ```
+
+C'est toujours valable avec Perl 5.42.
 
 Au début, j'ai imité le style de la
 [documentation Corinna](https://github.com/Perl-Apollo/Corinna/blob/master/pod/perlclasstut.pod)

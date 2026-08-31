@@ -1,7 +1,7 @@
 # -*- encoding: utf-8; indent-tabs-mode: nil -*-
 
 
-use 5.38.0;
+use 5.42.0;
 use utf8;
 use strict;
 use warnings;
@@ -11,11 +11,11 @@ use experimental qw/class/;
 
 class Arithmetic::PaperAndPencil::Char 0.02;
 
-field $char :param ;
-field $underline = 0;
-field $strike    = 0;
-field $read      = 0;
-field $write     = 0;
+field $char      :reader :writer :param;
+field $underline :reader :writer = 0;
+field $strike    :reader :writer = 0;
+field $read      :reader :writer = 0;
+field $write     :reader :writer = 0;
 
 method pseudo_html {
   my $result = $char;
@@ -34,16 +34,6 @@ method pseudo_html {
   }
   return $result;
 }
-method set_char     ($c) { $char      = $c; }
-method set_underline($n) { $underline = $n; }
-method set_strike(   $n) { $strike    = $n; }
-method set_read(     $n) { $read      = $n; }
-method set_write(    $n) { $write     = $n; }
-method char      { $char      }
-method underline { $underline }
-method strike    { $strike    }
-method read      { $read      }
-method write     { $write     }
 
 sub space_char     { return Arithmetic::PaperAndPencil::Char->new(char => ' ' ); }
 sub pipe_char      { return Arithmetic::PaperAndPencil::Char->new(char => '|' ); }

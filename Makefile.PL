@@ -1,4 +1,4 @@
-use 5.38.0;
+use 5.42.0;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
@@ -9,7 +9,7 @@ my %WriteMakefileArgs = (
     VERSION_FROM     => 'lib/Arithmetic/PaperAndPencil.pm',
     ABSTRACT_FROM    => 'lib/Arithmetic/PaperAndPencil.pm',
     LICENSE          => 'artistic_2',
-    MIN_PERL_VERSION => '5.38.0',
+    MIN_PERL_VERSION => '5.42.0',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '6.57_02',
     },

@@ -1,7 +1,7 @@
 # -*- encoding: utf-8; indent-tabs-mode: nil -*-
 
 
-use 5.38.0;
+use 5.42.0;
 use utf8;
 use strict;
 use warnings;
@@ -17,11 +17,8 @@ use POSIX qw/floor/;
 
 our @EXPORT_OK = qw/max_unit adjust_sub/;
 
-field $value :param;
-field $radix :param = 10;
-
-method value { $value }
-method radix { $radix }
+field $value :param :reader;
+field $radix :param :reader = 10;
 
 my $digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 my @digits = split('', $digits);
