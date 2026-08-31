@@ -16,14 +16,14 @@ At the same time, from October 2023 until February 2024, I worked on a
 Raku module,
 [`Arithmetic::PaperAndPencil`](https://raku.land/zef:jforget/Arithmetic::PaperAndPencil).
 After this  module was  published, I realised  that I  could perfectly
-rewrite  in Perl  and that  I could  learn and  do some  Corinna while
+port it  to Perl  and that  I could  learn and  do some  Corinna while
 writing this Perl module.
 
 The document you  are reading will give you no  informations about the
 features of the  module. If you want  to know how we  can compute with
 only a pencil and some paper, please visit the
 [Github repository](https://github.com/jforget/raku-Arithmetic-PaperAndPencil)
-and the included
+for the Raku module and the included
 [documentation](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md).
 The present document only deals  with Perl coding and differences with
 Raku.
@@ -34,7 +34,7 @@ Module Development
 Hardware and Software
 ---------------------
 
-My computer uses Devuan 4, with Perl 5.32.1? So I installed
+My computer uses Devuan 4, with Perl 5.32.1. So I installed
 [perlbrew 0.91](https://metacpan.org/dist/App-perlbrew/view/script/perlbrew)
 with  the  package manager  and  then  I  installed Perl  5.38.2  with
 Perlbrew.
@@ -67,12 +67,12 @@ but it is clearly flagged as "discouraged".
 Anyway,   I   think  that,   irrespective   of   its  many   problems,
 `ExtUtils::MakeMaker`  has  a bigger  audience  and  a more  promising
 future when  compared to `Module::Build`,  so I adopted `EUMM`  for my
-module.
+module. When in Rome, do as the Romans do.
 
 When running  `module-starter`, I forgot to  generate the `.gitignore`
 file. I generated a dummy repository with `module-starter`, I took its
 `.gitignore` file  and I deleted  it. On the  other hand, I  did state
-that the mininmum version was Perl 5.38.
+that the minimum version was Perl 5.38.
 
 Rewriting Schedule
 ------------------
@@ -88,9 +88,9 @@ then multiplication (all variants) and so on.
 
 The secondary Raku  modules (number, action, etc)  have been developed
 as the need  occurred during the writing of the  main Raku module. For
-the  Perl module,  each  secondary module  will  be fully  implemented
+the  Perl module,  each  secondary module  has been fully  ported
 before starting  the arithmetic operations  in the main module  and it
-will  be  tested  with  the  test data  from  the  Raku  distribution,
+is  tested  with  the  test data  from  the  Raku  distribution,
 converted to Perl.
 
 Porting the Test Files
@@ -116,15 +116,15 @@ Here is the way the files are linked with each other.
 | 10-add.rakutest             | 05-add.t                   |
 | 11-mult-prepared.rakutest   | 10-mult-prepared.t         |
 | 12-mult-boat.rakutest       | 11-mult-boat.t             |
-| 13-conversion.rakutest      | à faire                    |
+| 13-conversion.rakutest      | 18-conversion.t            |
 | 14-subtraction.rakutest     | 06-subtraction.t           |
-| 15-prep-division.rakutest   | à faire                    |
-| 16-division.rakutest        | à faire                    |
-| 17-square-root.rakutest     | à faire                    |
-| 18-div-boat.rakutest        | à faire                    |
-| 19-division.rakutest        | à faire                    |
-| 20-conversion-div.rakutest  | à faire                    |
-| 21-gcd.rakutest             | à faire                    |
+| 15-prep-division.rakutest   | 13-prep-division.t         |
+| 16-division.rakutest        | 14-division.t              |
+| 17-square-root.rakutest     | 17-square-root.t           |
+| 18-div-boat.rakutest        | 16-boat-div.t              |
+| 19-division.rakutest        | 15-division.t              |
+| 20-conversion-div.rakutest  | 19-conversion-div.t        |
+| 21-gcd.rakutest             | 20-gcd.t                   |
 | 22-russ-mult.rakutest       | 12-russ-mult.t             |
 
 First Thoughts about Corinna
@@ -204,8 +204,8 @@ public method.
 
 Most often, in  methods, at the beginning I create  a `$radix` lexical
 variable. With Raku, there is no ambiguity with the `radix` attribute,
-with    is    typed     `$.radix`    within    `A::P&P::Number`    and
-`$some_instance.radix` elsewhere. But in Perl, the attributes is typed
+with    is    written    `$.radix`   within    `A::P&P::Number`    and
+`$some_instance.radix` elsewhere. But in Perl, the attribute is written
 `$radix` within  `A::P&P::Number`. There is an  ambiguity with lexical
 variable  `$radix`.  For the  moment,  each  time  I have  declared  a
 `$radix` variable, this was within `Arithmetic::PaperAndPencil`, never
@@ -478,12 +478,12 @@ use Carp;
 use POSIX qw/floor/;
 ```
 
-and now,  it was  working, we  could use  `croak` and  `floor` without
+and then,  it was working,  we could  use `croak` and  `floor` without
 adding the package name.
 
 Back to  `List::MoreUtils`. The error message  was different, clearing
 stating that  is was a  syntax error.  Maybe Perl was  displaying this
-message because the highly unusual  syntax of the various functions in
+message because of the highly unusual syntax of the various functions in
 `List::MoreUtils`. If  I had  written `use List::MoreUtils`  after the
 source  line with  `class`, maybe  it would  have worked.  Anyhow, the
 solution with hashtable `%digit_value` works  and it is readable, so I
@@ -501,9 +501,9 @@ variables in operator `tr`. This is why I use `eval`.
 ```
 
 A  good new  is that  `overload` still  works, including  with Corinna
-objects. I will be able to  compute additions with a plain `+` instead
-of  `☈+`  and  substractions  with  plain `-`  instead  of  `☈-`.  For
-multiplication, I  will have to  use this  stupid star instead  of the
+objects. I am be able to  compute additions with a plain `+` instead
+of  `☈+`  and  subtractions  with  plain `-`  instead  of  `☈-`.  For
+multiplication, I  still have to  use this  stupid star instead  of the
 multiplication sign `×`. Too bad.
 
 By the way, several times I used a
@@ -581,18 +581,18 @@ not tried.
 ### Problems with method `multiplication`
 
 A problem  about development and organisation.  The multiplication has
-several variants. I will not do  a single Git commit when all variants
-are  implemented, I  will make  a Git  commit each  time a  variant is
+several variants. I did not run  a single Git commit when all variants
+were  implemented, I  made  a Git  commit each  time a  variant was
 implemented,  or maybe  two  variants.  Yet, the  test  files are  not
-closely linked with such or such variant. Too bad. I will release test
+closely linked with such or such variant. Too bad. I released test
 file `07-mult.t`  (formely `07-mult.rakutest`) with the  first commit,
 for the standard multiplication variant, even if this test file checks
-the jalousie  multiplication. The  test file will  give a  failure. At
-least we are  forewarned. I did not consider  worthwhile to deactivate
+the jalousie  multiplication. The  test file would give a  failure. At
+least we were forewarned. I did not consider  worthwhile to deactivate
 some  tests with  a  `TODO`  tag, because  the  situation producing  a
-failure will not last a long time.
+failure would not last a long time.
 
-A problem about coding. In raku,  there are two syntaxes for key-value
+A problem about coding. In Raku,  there are two syntaxes for key-value
 pairs: the  syntax with the fat  arrow and the syntax  with the colon,
 which has an auto-quoting variant.
 
@@ -623,13 +623,12 @@ This E-lisp statement produces:
 
 ```
   # Perl
-  my $un = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '1');
-
+  my $one = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => '1');
 ```
 
 which is valid for Perl and Corinna. But the second and third syntaxes
-trigger  a compilation  error. Too  bad, I  will do  the changes  with
-manual editing. I do  not want to search how to  write a E-lisp regexp
+trigger  a compilation  error. Too  bad, I  did the changes  with
+manual editing. I did not want to search how to  write a E-lisp regexp
 that  would be  used  by `query-replace-regexp`  and  would convert  a
 colon-key-value pair into a fat-arrow-key-value pair.
 
@@ -639,7 +638,7 @@ now  it  is  obsolete  or  even forbidden,  even  if  we  invoke  `use
 experimental`. So  I replace this  control statement with a  series of
 ugly `if ... elsif`. Maybe I could have used the
 [`Switch` module](https://metacpan.org/pod/Switch),
-but I will stick with `if ... elsif`.
+but I decided to stick with `if ... elsif`.
 
 ### Problems with method `division`
 
@@ -717,7 +716,7 @@ we run the loop with the digit in `$old-digit` and its zero-based rank
 in `$op1`. As a consequence, we must check the last iteration of the
 loop by comparing `$op1` with `$number.chars - 2`. When I translated
 this loop directly into Perl, the result was rather complicated and
-most usages of `$op1` would actually use `$op1 + 1`. To stremline
+most usages of `$op1` would actually use `$op1 + 1`. To streamline
 coding, I have changed the interpretation of `$op1`, which is not
 longer the rank of the digit in the string without the first digit,
 but the rank of the current digit in the full string. So `$op1` begins
@@ -739,7 +738,7 @@ perl -Ilib xt/99-my-test.t
 prove -l t xt
 ```
 
-To prepare  the module for  publication, I  ran the usual  Perl module
+To prepare  the module for  publication, I  run the usual  Perl module
 commands, with the addition of an environment variable to trigger some
 tests proposed by `Module::Starter`:
 
@@ -779,7 +778,9 @@ them with the `:reader` attribute. A few methods are documented in the
 POD source,  because I have  something interesting to say  about them.
 But for  most fields,  I have  nothing worthwhile  to say  about their
 accessors. Maybe the message from `Test::Pod::Coverage` will disappear
-in the next Corinna version when I use `:reader`?
+in the  next Corinna version  when I  use `:reader`? With  the version
+0.0.2  of the  module and  with  Perl 5.42.3,  the answer  is no,  the
+message is still there.
 
 Yet another problem. I have used `overload` to link some routines with
 the  standard  operators  `+`,  `-`  and so  on.  When  checking  code
@@ -832,7 +833,7 @@ an unwieldly 115 chars instead of 80.
 In other  cases, the vertical  alignment applies from the  second line
 on, without  the first line. In  the example below, in  Raku the first
 keywords are aligned in lines 1, 2,  3 and 4. In Perl, keyword `level`
-from line 1 is not aligned and only keywirds `r1l`, `r2l` and `w1l` in
+from line 1 is not aligned and only keywords `r1l`, `r2l` and `w1l` in
 lines 2, 3 and 4 are aligned.
 
 ```

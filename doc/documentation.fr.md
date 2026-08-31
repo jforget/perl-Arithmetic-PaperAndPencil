@@ -15,12 +15,12 @@ l'expérience.
 
 En parallèle,  d'octobre 2023  à février 2024,  j'ai travaillé  sur un
 module Raku `Arithmetic::PaperAndPencil`. Et une fois ce module publié
-sur zef, je me suis rendu compte que je pourrais très bien réécrire ce
+sur zef, je me  suis rendu compte que je pourrais  très bien porter ce
 module en Perl  et que cela me donnerait l'occasion  d'apprendre et de
 pratiquer la programmation avec Corinna.
 
 Ce texte ne donne aucune  information sur les fonctionnalités. Si vous
-souhaitez avoir des informations sur  comment faire des calcul avec un
+souhaitez avoir des informations sur comment faire des calculs avec un
 papier et un crayon, reportez-vous au
 [dépôt Github du module Raku](https://github.com/jforget/raku-Arithmetic-PaperAndPencil)
 et à la
@@ -36,7 +36,7 @@ Environnement technique
 
 Ma machine tourne sous Devuan 4, avec Perl 5.32.1. J'ai donc installé
 [perlbrew 0.91](https://metacpan.org/dist/App-perlbrew/view/script/perlbrew)
-avec le gestionnaire  de paquets et et j'ai installé  Perl 5.38.2 avec
+avec le gestionnaire  de paquets et j'ai installé  Perl 5.38.2 avec
 Perlbrew.
 
 Pour le  développement de la  version 0.0.2, j'ai utilisé  Perl 5.42.3
@@ -66,7 +66,8 @@ _discouraged_ (« déconseillé »).
 
 Toujours  est-il  que  j'ai  l'impression  que  `ExtUtils::MakeMaker`,
 malgré tous ses défauts, a  un avenir plus pérenne que `Module::Build`
-et j'ai donc adopté `EUMM` pour mon module.
+et j'ai donc adopté `EUMM` pour mon module. Vienne l'hiver, hurle avec
+les loups.
 
 Lors de  l'initialisation, j'ai  oublié de  demander la  génération du
 fichier   `.gitignore`.   Je   l'ai  récupéré   ensuite   en   lançant
@@ -82,7 +83,7 @@ par la  multiplication en  jalousie, une  partie de  la multiplication
 standard, l'addition,  la fin de  la multiplication standard,  puis la
 conversion  d'une base  à l'autre  avec le  procédé multiplicatif  (ou
 Horner),  la soustraction,  et ainsi  de suite.  Pour le  module Perl,
-comme  j'ai  un modèle  avec  le  module  Raku, je  progresserai  plus
+comme  j'ai  un  modèle  avec  le module  Raku,  j'ai  progressé  plus
 logiquement,  d'abord  l'addition,  puis   la  soustraction,  puis  la
 multiplication et ses variantes et ainsi de suite.
 
@@ -789,7 +790,9 @@ de  couverture du  POD  signale l'absence  de  documentation pour  les
 accesseurs des  classes déclarées (sauf  les quelques fois  où j'avais
 quelque chose  d'intéressant à  expliquer sur  tel ou  tel accesseur).
 Est-ce  que  le  problème  se produira  toujours,  lorsque  la  clause
-`:reader` permettra de ne plus créer explicitement d'accesseur ?
+`:reader`  permettra  de  ne plus  créer  explicitement  d'accesseur ?
+Réponse lors du  développement de la version 0.0.2 :  oui, le problème
+se produit toujours.
 
 Encore  un  autre  problème.  J'ai utilisé  `overload`  pour  associer
 certaines routines aux opérateurs standards « + », « - », etc. Lors du
