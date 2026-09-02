@@ -1132,7 +1132,7 @@ method division(%param) {
         my $temp  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor_digit);
         $temp *= $act_quo;
         $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'MUL01'    , val3  => $temp->value
-                              , r1l => 1                            , r1c   => $col_q     , r1val => $act_quo->value           , val1 => $act_quo->value
+                              , r1l => 0                            , r1c   => $col_q     , r1val => $act_quo->value           , val1 => $act_quo->value
                               , r2l => $lines_below[$col_r - $i] - 1, r2c   => $col_r - $i, r2val => $divisor_digit, r2str => 1, val2 => $divisor_digit
                               );
         push(@action, $action);
@@ -1160,7 +1160,7 @@ method division(%param) {
         else {
           $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'SUB02'
                                                           , val1  => $rem_digit->value   , val2  => $adjusted_dividend->value
-                               , r1l => $lines_above[$col_r - $i] + 1, r1c => $col_r - $i, r1val => $adjusted_dividend->value, r1str => 1
+                               , r1l => $lines_above[$col_r - $i] + 1, r1c => $col_r - $i, r1val => $dividend_digit->value, r1str => 1
                                );
           push(@action, $action);
           my $label = 'WRI02';
@@ -2342,7 +2342,7 @@ method _mult_and_sub(%param) {
       else {
         $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6      , label => 'SUB02'
                                                         , val1  => $rem_digit->value     , val2  => $adjusted_dividend->value
-                                                        , r1l => $l_dd, r1c => $c_dd - $i, r1val => $adjusted_dividend->value
+                                                        , r1l => $l_dd, r1c => $c_dd - $i, r1val => $dividend_digit->value
                                                         );
         push(@action, $action);
         $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'WRI04'   , val1  => $rem_digit->value
@@ -2355,7 +2355,7 @@ method _mult_and_sub(%param) {
     else {
       $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6      , label => 'SUB02'
                                                       , val1  => $rem_digit->value     , val2  => $adjusted_dividend->value
-                                                      , r1l => $l_dd, r1c => $c_dd - $i, r1val => $adjusted_dividend->value);
+                                                      , r1l => $l_dd, r1c => $c_dd - $i, r1val => $dividend_digit->value);
       push(@action, $action);
       my $label = 'WRI02';
       if ($adjusted_dividend->carry->value eq '0') {
