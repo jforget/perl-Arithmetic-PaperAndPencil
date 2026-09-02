@@ -2450,7 +2450,7 @@ method _embedded_div(%param) {
       if ($theo_quo->value eq '0') {
         $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => 'DIV01'
                      , val1  => $part_dvd->value , r1l => $lin_d, r1c => $c_dd + $col_r   , r1val => $part_dvd->value
-                     , val2  => $divisor ->value , r2l => $l_dr , r2c => $c_dr + $len2 - 1, r2val => $divisor->value
+                     , val2  => $divisor ->value , r2l => $l_dr , r2c => $c_dr - $len2 + 1, r2val => $divisor->value
                      , val3  => '0'             , w1l => $l_qu , w1c => $c_qu            , w1val => '0');
         push(@action, $action);
         $too_much = 0; # no need to loop on candidate values, no need to execute the mult_and_sub routine
@@ -2459,7 +2459,7 @@ method _embedded_div(%param) {
       elsif ($theo_quo->value eq $act_quo->value) {
         $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => 'DIV01'
                      , val1  => $part_dvd1->value, r1l => $lin_d, r1c => $c_dd - $len1 + $col_r - $delta, r1val => $part_dvd1->value
-                     , val2  => $part_dvr1->value, r2l => $l_dr , r2c => $c_dr - $len2 + 1      - $delta, r2val => $part_dvr1->value
+                     , val2  => $part_dvr1->value, r2l => $l_dr , r2c => $c_dr - $len2 + 1              , r2val => $part_dvr1->value
                      , val3  => $theo_quo ->value, w1l => $l_qu , w1c => $c_qu                          , w1val => $act_quo->value);
         push(@action, $action);
       }
