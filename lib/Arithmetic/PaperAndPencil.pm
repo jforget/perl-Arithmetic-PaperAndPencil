@@ -1283,8 +1283,9 @@ method square_root($number, %param) {
     $line_rem = 2;
   }
   for my $i (1 .. $nb_dig - 1) {
-    my $pos = 2 * ($nb_dig - $i);
-    my $two_digits = substr($number->value, - $pos, 2);
+    my $pos          = 2 * ($nb_dig - $i);
+    my $pos_dvd_part = $i - 2 * ($nb_dig - 1); # position of the partial dividend used to compute the first candidate quotient
+    my $two_digits   = substr($number->value, - $pos, 2);
     $action = Arithmetic::PaperAndPencil::Action->new(level => 3        , label => 'DIV04'   , val1  => $two_digits
                                                      , r1l  => 0        , r1c   => 2 - $pos  , r1val => $two_digits
                                                      , w1l  => $line_rem, w1c   => 2 - $pos  , w1val => $two_digits
@@ -1313,8 +1314,8 @@ method square_root($number, %param) {
     my $too_much = 1; # we must loop with the next lower candidate
     if ($theo_quo->value eq '0') {
       $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV01'
-                                         , val1 => $part_dvd1->value, r1l => $line_rem, r1c => - $pos         , r1val => $part_dvd1->value
-                                         , val2 => $part_dvr1->value, r2l => $line_div, r2c => 0              , r2val => $part_dvr1->value
+                                         , val1 => $part_dvd1->value, r1l => $line_rem, r1c => $pos_dvd_part  , r1val => $part_dvd1->value
+                                         , val2 => $part_dvr1->value, r2l => $line_div, r2c => 1              , r2val => $part_dvr1->value
                                          , val3 => '0'              , w1l => $line_div, w1c => $i + $col_first, w1val => '0');
       push(@action, $action);
       $too_much = 0; # no need to loop on candidate values, no need to execute the mult_and_sub routine
@@ -1322,8 +1323,8 @@ method square_root($number, %param) {
     }
     elsif ($theo_quo->value eq $act_quo->value) {
       $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV01'
-                                         , val1 => $part_dvd1->value, r1l => $line_rem     , r1c => - $pos         , r1val => $part_dvd1->value
-                                         , val2 => $part_dvr1->value, r2l => $line_div     , r2c => 0              , r2val => $part_dvr1->value
+                                         , val1 => $part_dvd1->value, r1l => $line_rem     , r1c => $pos_dvd_part  , r1val => $part_dvd1->value
+                                         , val2 => $part_dvr1->value, r2l => $line_div     , r2c => 1              , r2val => $part_dvr1->value
                                          , val3 => $theo_quo->value , w1l => $line_div     , w1c => $i + $col_first, w1val => $act_quo  ->value
                                                                     , w2l  => $line_div + 1, w2c => $i + $col_first, w2val => $act_quo  ->value);
       push(@action, $action);
@@ -1331,8 +1332,8 @@ method square_root($number, %param) {
     else {
       $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV01'
                                          , val1 => $part_dvd1->value, val2 => $part_dvr1->value, val3  => $theo_quo ->value
-                                         , r1l  => $line_rem        , r1c  => - $pos           , r1val => $part_dvd1->value
-                                         , r2l  => $line_div        , r2c  => 0                , r2val => $part_dvr1->value);
+                                         , r1l  => $line_rem        , r1c  => $pos_dvd_part    , r1val => $part_dvd1->value
+                                         , r2l  => $line_div        , r2c  => 1                , r2val => $part_dvr1->value);
       push(@action, $action);
       $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => $label
                                , val1 => $act_quo->value, w1l => $line_div, w1c  => $i + $col_first, w1val => $act_quo->value
@@ -3200,6 +3201,12 @@ The  values  assigned  to  the   C<level>  attribute  are  not  always
 consistent and  they may lead to  awkward listings, in which  a boring
 part is  printed in whole  detail and  an interesting part  is printed
 without enough detail.
+
+The values  decribing which chars  are read  during an action  are not
+always right.  When the char is  crossed out (which is  visible in the
+generated HTML source),  the values are correct. But when  the char is
+not crossed  out (which does  not appear when rendering  the generated
+HTML source), the values may be wrong.
 
 =head1 SECURITY MATTERS
 
