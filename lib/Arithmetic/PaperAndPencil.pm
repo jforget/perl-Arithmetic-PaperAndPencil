@@ -2450,9 +2450,9 @@ method _embedded_div(%param) {
       my $too_much = 1; # we must loop with the next lower candidate
       if ($theo_quo->value eq '0') {
         $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => 'DIV01'
-                     , val1  => $part_dvd->value , r1l => $lin_d, r1c => $c_dd + $col_r   , r1val => $part_dvd->value
-                     , val2  => $divisor ->value , r2l => $l_dr , r2c => $c_dr - $len2 + 1, r2val => $divisor->value
-                     , val3  => '0'             , w1l => $l_qu , w1c => $c_qu            , w1val => '0');
+                     , val1  => $part_dvd->value , r1l => $lin_d, r1c => $c_dd - $len1 + $col_r    , r1val => $part_dvd->value
+                     , val2  => $divisor ->value , r2l => $l_dr , r2c => $c_dr - $len2 + 1 + $delta, r2val => $divisor->value
+                     , val3  => '0'              , w1l => $l_qu , w1c => $c_qu                     , w1val => '0');
         push(@action, $action);
         $too_much = 0; # no need to loop on candidate values, no need to execute the mult_and_sub routine
         $rem = $part_dvd->value;
@@ -2543,9 +2543,9 @@ method _embedded_div(%param) {
     while ($col_r <= $len1) {
       my $part_quo = max( grep { $mult_cache->{$_} <= $part_div } keys(%{$mult_cache}));
       $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 5, label => 'DIV01'
-                   , val1 => $part_div->value, r1l => $lin_d, r1c => $col_r       , r1val => $part_div->value
-                   , val2 => $divisor->value , r2l => $l_dr , r2c => $c_dr        , r2val => $divisor->value
-                   , val3 => $part_quo      , w1l => $l_qu , w1c => $c_qu + $n   , w1val => $part_quo);
+                   , val1 => $part_div->value, r1l => $lin_d, r1c => $c_dd + $col_r - $len1, r1val => $part_div->value
+                   , val2 => $divisor->value , r2l => $l_dr , r2c => $c_dr                 , r2val => $divisor->value
+                   , val3 => $part_quo       , w1l => $l_qu , w1c => $c_qu + $n            , w1val => $part_quo);
       push(@action, $action);
       $quotient .= $part_quo;
       if ($part_quo eq '0') {
