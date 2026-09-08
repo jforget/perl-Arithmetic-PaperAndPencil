@@ -2,7 +2,8 @@ Revision history for Arithmetic-PaperAndPencil
 
 0.02    2026-xx-xx
         Object definitions: add ":reader" and ":writer" attributes to fields
-        Various fixes
+        Various bug fixes
+        Direct output to file without needing an in-memory variable
 
 0.01    2024-04-22
         First version, with the four basic operations, plus square-root, GCD and radix conversion.

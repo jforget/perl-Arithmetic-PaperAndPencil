@@ -34,12 +34,56 @@ method from_csv {
   }
 }
 
-method csv {
-  my $result = join "\n", map { $_->csv } @action;
-  if (substr($result, -1, 1) ne "\n") {
-    $result .= "\n";
+sub chek_and_open(%param) {
+  if (exists $param{filehandle} and exists $param{pathname}) {
+    die "You cannot use parameters 'filehandle' and 'pathname' simultaneously";
   }
-  return $result;
+  if (exists $param{filemode} and not exists $param{pathname}) {
+    die "Parameter 'filemode' can be given only if parameter 'pathname' is used";
+  }
+  if (exists $param{filehandle}) {
+    return $param{filehandle};
+  }
+  if (not exists $param{pathname}) {
+    return '';
+  }
+  if (exists $param{filemode} and $param{filemode} ne 'a'
+                              and $param{filemode} ne 'w'
+                              and $param{filemode} ne '>'
+                              and $param{filemode} ne '>>') {
+    die "Parameter 'filemode': wrong value $param{filemode}";
+  }
+  my $fh;
+  if ( not exists $param{filemode} or $param{filemode} eq 'w' or $param{filemode} eq '>') {
+    open $fh, '>', $param{pathname}
+      or die "Unable to open $param{pathname}";
+  }
+  else {
+    open $fh, '>>', $param{pathname}
+      or die "Unable to open $param{pathname}";
+  }
+  return $fh;
+}
+
+method csv(%param) {
+  my $fh = chek_and_open(%param);
+  if ($fh eq '') {
+    my $result = join "\n", map { $_->csv } @action;
+    if (substr($result, -1, 1) ne "\n") {
+      $result .= "\n";
+    }
+    return $result;
+  }
+  else {
+    for my $action (@action) {
+      print $fh $action->csv, "\n";
+    }
+    if (exists $param{pathname}) {
+      close $fh
+        or die "Unable to close $param{pathname}";
+    }
+    return '';
+  }
 }
 
 method html(%param) {
@@ -2705,6 +2749,69 @@ parameter CSV string.
 Generates a string with a CSV format and listing all operations stored
 in the sheet  object. The opposite of C<from_csv>. This  string can be
 printed into a CSV file for later retrieval.
+
+Note: the documentation below applies nearly as is to methods C<html> and C<latex>.
+
+The parameters are the following:
+
+=over 4
+
+=item * C<filehandle>
+
+Filehandle into which the CSV lines are written.
+
+=item * C<pathname>
+
+Pahtname of the file into which the CSV lines are written.
+
+=item * C<filemode>
+
+How the file given in C<pathname>  is opened. Possible values are C<a>
+C<<< >> >>> (synonymous with C<a>), C<w> and C<< > >> (synonymous with
+C<w>). Default value is C<w>.
+
+=back
+
+If you hope  the operation sheet contains only a  few operations, call
+this method  with none of  these three  parameters. In this  case, the
+method feeds its return value with the CSV lines. Example:
+
+  my $operations = Arithmetic::PaperAndPencil->new;
+  my $myriad     = Arithmetic::PaperAndPencil::Number->new(value => '10000');
+  $myriad = $operations->conversion(number => $myriad, radix => 16);
+  open my $fh, '>', 'myriad.csv'
+      or die "opening 'myriad.csv': $!";
+  print $fh $operations->csv;
+  close $fh
+      or die "closing 'myriad.csv': $!";
+
+If you  fear that the  operation sheet contains many  operations, call
+the method with  parameter C<filehandle>. In this case,  the CSV lines
+are  written into  this filehandle  and  the method  returns an  empty
+string. Example:
+
+  my $operations = Arithmetic::PaperAndPencil->new;
+  my $googol     = Arithmetic::PaperAndPencil::Number->new(value => '1' . '0' x 100);
+  $googol = $operations->conversion(number => $googol, radix => 16);
+  open my $fh, '>', 'googol.csv'
+      or die "opening 'googol.csv': $!";
+  $operations->csv(filehandle => $fh);
+  close $fh
+      or die "closing 'googol.csv': $!";
+
+Alternately, you can  call the method with  parameter C<pathname> (and
+optionnally C<filemode>).  In this  case the file  is opened,  the CSV
+lines are written to it, the file  is closed and the method returns an
+empty string. Example:
+
+  my $operations = Arithmetic::PaperAndPencil->new;
+  my $googol     = Arithmetic::PaperAndPencil::Number->new(value => '1' . '0' x 100);
+  $googol = $operations->conversion(number => $googol, radix => 16);
+  $operations->csv(pathname => 'googol.csv');
+
+Calling the method with  both C<filehandle> and C<pathname> parameters
+triggers an error.  Calling the method with  parameter C<filemode> and
+without parameter C<pathname> also triggers an error.
 
 =head2 html
 
