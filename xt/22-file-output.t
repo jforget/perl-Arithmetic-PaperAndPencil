@@ -1,6 +1,6 @@
 # -*- encoding: utf-8; indent-tabs-mode: nil -*-
 #
-# Checking the use of output files in the 'csv' method
+# Checking the use of output files in the 'csv' and 'html' methods
 #
 # Copyright 2026 Jean Forget
 #
@@ -23,7 +23,7 @@ BEGIN {
   }
 }
 
-plan(tests => 12);
+plan(tests => 24);
 
 my Arithmetic::PaperAndPencil $operation = Arithmetic::PaperAndPencil->new;
 my Arithmetic::PaperAndPencil::Number $result;
@@ -31,24 +31,41 @@ my $x   = Arithmetic::PaperAndPencil::Number->new(radix => 10, value => '9212');
 my $one = Arithmetic::PaperAndPencil::Number->new(radix => 10, value => '1');
 $result = $operation->division(dividend => $x, divisor => $one);
 
-open my $fh, '>', 'xt/data/22-step1.csv'
+open my $fhc, '>', 'xt/data/22-step1.csv'
   or die "opening 22-step1.csv failed $!";
+open my $fhh, '>', 'xt/data/22-step1.html'
+  or die "opening 22-step1.html failed $!";
 
-dies_ok  { $operation->csv(filehandle => $fh, pathname => 'xt/data/22-step2.csv') } "use of both 'filehandle' and 'pathname' parameters";
-dies_ok  { $operation->csv(filehandle => $fh, pathname => 'xt/data/22-step2.csv', filemode => 'a') } "use of both 'filehandle' and 'pathname' parameters";
-dies_ok  { $operation->csv(filehandle => $fh, filemode => 'a') } "use of parameter 'filemode' without parameter 'pathname'";
+dies_ok  { $operation->csv(filehandle => $fhc, pathname => 'xt/data/22-step2.csv') } "use of both 'filehandle' and 'pathname' parameters";
+dies_ok  { $operation->csv(filehandle => $fhc, pathname => 'xt/data/22-step2.csv', filemode => 'a') } "use of both 'filehandle' and 'pathname' parameters";
+dies_ok  { $operation->csv(filehandle => $fhc, filemode => 'a') } "use of parameter 'filemode' without parameter 'pathname'";
 dies_ok  { $operation->csv(filemode => 'a') } "use of parameter 'filemode' without parameter 'pathname'";
-lives_ok { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => 'a' ) } "use of parameter 'filemode' with parameter 'pathname' = 'a'";
-lives_ok { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => 'w' ) } "use of parameter 'filemode' with parameter 'pathname' = 'w'";
-lives_ok { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => '>' ) } "use of parameter 'filemode' with parameter 'pathname' = '>'";
-lives_ok { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => '>>') } "use of parameter 'filemode' with parameter 'pathname' = '>>'";
+lives_ok { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => 'a' ) } "use of parameter 'pathname' with parameter 'filemode' = 'a'";
+lives_ok { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => 'w' ) } "use of parameter 'pathname' with parameter 'filemode' = 'w'";
+lives_ok { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => '>' ) } "use of parameter 'pathname' with parameter 'filemode' = '>'";
+lives_ok { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => '>>') } "use of parameter 'pathname' with parameter 'filemode' = '>>'";
 dies_ok  { $operation->csv(pathname => 'xt/data/22-step2.csv', filemode => 'b' ) } "wrong parameter 'filemode'";
 lives_ok { $operation->csv() } "no parameters at all";
-lives_ok { $operation->csv(filehandle => $fh) } "single parameter 'filehandle'";
+lives_ok { $operation->csv(filehandle => $fhc) } "single parameter 'filehandle'";
 lives_ok { $operation->csv(pathname   => 'xt/data/22-step2.csv') } "single parameter 'pathname'";
 
-close $fh
+dies_ok  { $operation->html(filehandle => $fhh, pathname => 'xt/data/22-step2.html') } "use of both 'filehandle' and 'pathname' parameters in 'html' method";
+dies_ok  { $operation->html(filehandle => $fhh, pathname => 'xt/data/22-step2.html', filemode => 'a') } "use of both 'filehandle' and 'pathname' parameters in 'html' method";
+dies_ok  { $operation->html(filehandle => $fhh, filemode => 'a') } "use of parameter 'filemode' without parameter 'pathname' in 'html' method";
+dies_ok  { $operation->html(filemode => 'a') } "use of parameter 'filemode' without parameter 'pathname' in 'html' method";
+lives_ok { $operation->html(pathname => 'xt/data/22-step2.html', filemode => 'a' ) } "use of parameter 'pathname' with parameter 'filemode' = 'a' in 'html' method";
+lives_ok { $operation->html(pathname => 'xt/data/22-step2.html', filemode => 'w' ) } "use of parameter 'pathname' with parameter 'filemode' = 'w' in 'html' method";
+lives_ok { $operation->html(pathname => 'xt/data/22-step2.html', filemode => '>' ) } "use of parameter 'pathname' with parameter 'filemode' = '>' in 'html' method";
+lives_ok { $operation->html(pathname => 'xt/data/22-step2.html', filemode => '>>') } "use of parameter 'pathname' with parameter 'filemode' = '>>' in 'html' method";
+dies_ok  { $operation->html(pathname => 'xt/data/22-step2.html', filemode => 'b' ) } "wrong parameter 'filemode' in 'html' method";
+lives_ok { $operation->html() } "no parameters at all in 'html' method";
+lives_ok { $operation->html(filehandle => $fhh) } "single parameter 'filehandle' in 'html' method";
+lives_ok { $operation->html(pathname   => 'xt/data/22-step2.html') } "single parameter 'pathname' in 'html' method";
+
+close $fhc
   or die "closing 22-step1.csv failed $!";
+close $fhh
+  or die "closing 22-step1.html failed $!";
 
 sub slurp($fname) {
   open my $f, '<', $fname

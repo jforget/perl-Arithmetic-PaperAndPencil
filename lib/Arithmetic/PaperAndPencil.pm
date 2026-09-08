@@ -87,6 +87,7 @@ method csv(%param) {
 }
 
 method html(%param) {
+  my $fh     = chek_and_open(%param);
   my $lang   = $param{lang}   // 'fr';
   my $silent = $param{silent} // 0;
   my $level  = $param{level}  // 3;
@@ -152,6 +153,20 @@ method html(%param) {
     for my $c1 (0 .. l2p_col($c)) {
       $sheet[l2p_lin($l)][$c1] //= Arithmetic::PaperAndPencil::Char->space_char;
     }
+  }
+
+  my sub push_to_result($string) {
+    $result .= $string;
+  }
+  my sub push_to_fh($string) {
+    print $fh $string;
+  }
+  my $output_sub;
+  if ($fh eq '') {
+    $output_sub = \&push_to_result;
+  }
+  else {
+    $output_sub = \&push_to_fh;
   }
 
   for my $action (@action) {
@@ -422,7 +437,7 @@ method html(%param) {
         else {
           $line =~ s/talk>/p>/g;
         }
-        $result .= $line;
+        $output_sub->($line);
       }
     }
 
@@ -470,7 +485,7 @@ method html(%param) {
       }
       $op =~ s/\h+$//gm;
       if ($op ne '') {
-        $result .= "<pre>\n$op</pre>\n";
+        $output_sub->("<pre>\n$op</pre>\n");
       }
       # untagging written and read chars
       for my $line (@sheet) {
@@ -2825,6 +2840,10 @@ tags.
 The parameters are the following:
 
 =over 4
+
+=item * C<filehandle>, C<pathname>, C<filemode>
+
+See C<csv> method.
 
 =item * C<lang>
 
