@@ -437,6 +437,7 @@ method html(%param) {
         else {
           $line =~ s/talk>/p>/g;
         }
+        $line =~ s/\h+$//gm;
         $output_sub->($line);
       }
     }
@@ -497,6 +498,10 @@ method html(%param) {
     }
   }
 
+  if ($param{pathname}) {
+    close $fh
+      or die "Unable to close $param{pathname}";
+  }
   return $result;
 }
 
