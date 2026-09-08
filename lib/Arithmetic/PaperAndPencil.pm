@@ -413,6 +413,15 @@ method html(%param) {
         else {
           $line = "<talk>$line</talk>\n";
         }
+        # changing pseudo-HTML into proper HTML
+        $line =~ s/operation>/h1>/g;
+        if ($css->{talk}) {
+          $line =~ s!</talk>!</p>!g;
+          $line =~ s!<talk>!<p class='$css->{talk}'>!g;
+        }
+        else {
+          $line =~ s/talk>/p>/g;
+        }
         $result .= $line;
       }
     }
@@ -425,6 +434,41 @@ method html(%param) {
         my $line1 = join('', map { $_->pseudo_html } @$line);
         $op .= $line1 . "\n";
       }
+      # simplyfing pseudo-HTML
+      $op =~ s{</underline><underline>}{}g;
+      $op =~ s{</strike><strike>}{}g;
+      $op =~ s{</write>(\h*)<write>}{$1}g;
+      $op =~ s{</read>(\h*)<read>}{$1}g;
+
+      # changing pseudo-HTML into proper HTML
+      if ($css->{underline}) {
+        $op =~ s!</underline>!</span>!g;
+        $op =~ s!<underline>!<span class='$css->{underline}'>!g;
+      }
+      else {
+        $op =~ s/underline>/u>/g;
+      }
+      # maybe I should replace all "strike" tags by "del"? or by "s"?
+      # see https://www.w3schools.com/tags/tag_strike.asp : <strike> is not supported in HTML5
+      if ($css->{strike}) {
+        $op =~ s!</strike>!</span>!g;
+        $op =~ s!<strike>!<span class='$css->{strike}'>!g;
+      }
+      if ($css->{read}) {
+        $op =~ s!</read>!</span>!g;
+        $op =~ s!<read>!<span class='$css->{read}'>!g;
+      }
+      else {
+        $op =~ s/read>/em>/g;
+      }
+      if ($css->{write}) {
+        $op =~ s!</write>!</span>!g;
+        $op =~ s!<write>!<span class='$css->{write}'>!g;
+      }
+      else {
+        $op =~ s/write>/strong>/g;
+      }
+      $op =~ s/\h+$//gm;
       if ($op ne '') {
         $result .= "<pre>\n$op</pre>\n";
       }
@@ -437,50 +481,6 @@ method html(%param) {
       }
     }
   }
-
-  # simplyfing pseudo-HTML
-  $result =~ s{</underline><underline>}{}g;
-  $result =~ s{</strike><strike>}{}g;
-  $result =~ s{</write>(\h*)<write>}{$1}g;
-  $result =~ s{</read>(\h*)<read>}{$1}g;
-
-  # changing pseudo-HTML into proper HTML
-  $result =~ s/operation>/h1>/g;
-  if ($css->{talk}) {
-    $result =~ s!</talk>!</p>!g;
-    $result =~ s!<talk>!<p class='$css->{talk}'>!g;
-  }
-  else {
-    $result =~ s/talk>/p>/g;
-  }
-  if ($css->{underline}) {
-    $result =~ s!</underline>!</span>!g;
-    $result =~ s!<underline>!<span class='$css->{underline}'>!g;
-  }
-  else {
-    $result =~ s/underline>/u>/g;
-  }
-  # maybe I should replace all "strike" tags by "del"? or by "s"?
-  # see https://www.w3schools.com/tags/tag_strike.asp : <strike> is not supported in HTML5
-  if ($css->{strike}) {
-    $result =~ s!</strike>!</span>!g;
-    $result =~ s!<strike>!<span class='$css->{strike}'>!g;
-  }
-  if ($css->{read}) {
-    $result =~ s!</read>!</span>!g;
-    $result =~ s!<read>!<span class='$css->{read}'>!g;
-  }
-  else {
-    $result =~ s/read>/em>/g;
-  }
-  if ($css->{write}) {
-    $result =~ s!</write>!</span>!g;
-    $result =~ s!<write>!<span class='$css->{write}'>!g;
-  }
-  else {
-    $result =~ s/write>/strong>/g;
-  }
-  $result =~ s/\h+$//gm;
 
   return $result;
 }
