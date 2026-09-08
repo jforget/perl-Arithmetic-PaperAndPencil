@@ -1,8 +1,8 @@
 # -*- encoding: utf-8; indent-tabs-mode: nil -*-
 #
-# Checking the generation of HTML on division
+# Checking use of output files in the 'csv' method
 #
-# Copyright 2023, 2024, 2026 Jean Forget
+# Copyright 2026 Jean Forget
 #
 # This programme is free software; you can redistribute it and modify it under the Artistic License 2.0.
 
