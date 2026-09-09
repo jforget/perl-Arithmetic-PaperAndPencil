@@ -28,6 +28,13 @@ open my $fhc, '>', 'xt/data/21-step1.csv'
 open my $fhh, '>', 'xt/data/21-step1.html'
   or die "opening 21-step1.html failed $!";
 
+# A bit of pedagogy within the tests
+print $fhh <<'EOF';
+<html>
+<head><title>Examples of computations</title></head>
+<body>
+EOF
+
 $result = $operation->division(dividend => $x, divisor => $one);
 $operation->csv( pathname   => 'xt/data/21-step2.csv');
 $operation->html(pathname   => 'xt/data/21-step2.html');
@@ -53,6 +60,8 @@ $operation->csv( filehandle => $fhc);
 $operation->html(filehandle => $fhh);
 is(slurp('xt/data/21-step2.csv' ), slurp('xt/data/21-ref3.csv' ));
 is(slurp('xt/data/21-step2.html'), slurp('xt/data/21-ref3.html'));
+
+print $fhh "</body>\n</html>\n";
 
 close $fhc
   or die "closing 21-step1.csv failed $!";
