@@ -505,6 +505,35 @@ method html(%param) {
   return $result;
 }
 
+method latex(%param) {
+  my $fh     = chek_and_open(%param);
+  my $lang   = $param{lang}   // 'fr';
+  my $silent = $param{silent} // 0;
+  my $level  = $param{level}  // 3;
+  my $talkative = 1 - $silent; # "silent" better for API, "talkative" better for programming
+  my $result    = '';
+
+  my sub push_to_result($string) {
+    $result .= $string;
+  }
+  my sub push_to_fh($string) {
+    print $fh $string;
+  }
+  my $output_sub;
+  if ($fh eq '') {
+    $output_sub = \&push_to_result;
+  }
+  else {
+    $output_sub = \&push_to_fh;
+  }
+
+  if ($param{pathname}) {
+    close $fh
+      or die "Unable to close $param{pathname}";
+  }
+  return $result;
+}
+
 method addition(@numbers) {
   if (@numbers == 0) {
     croak "The addition needs at least one number to add";
@@ -2877,6 +2906,31 @@ entries among C<underline>, C<strike>,  C<write>, C<read> and C<talk>.
 If  an entry  exists,  the default  format is  replaced  by C<<  <span
 style='xxx'> >>. Exception: if the  C<talk> entry exists, the "spoken"
 messages are formatted with C<< <p style='xxx'> >>.
+
+=back
+
+=head2 latex
+
+Generates a string or a file using the LATEX and METAPOST languages.
+
+The resulting  file can be  compiled with  a program including  both a
+LATEX and a METAPOST interpreters, such as C<lualuatex>.
+
+The parameters are the following:
+
+=over 4
+
+=item * C<filehandle>, C<pathname>, C<filemode>
+
+See C<csv> method.
+
+=item * C<lang>, C<silent>, C<level>
+
+See C<html> method.
+
+=item * C<xxx>
+
+xxx
 
 =back
 

@@ -23,7 +23,7 @@ BEGIN {
   }
 }
 
-plan(tests => 24);
+plan(tests => 36);
 
 my Arithmetic::PaperAndPencil $operation = Arithmetic::PaperAndPencil->new;
 my Arithmetic::PaperAndPencil::Number $result;
@@ -35,6 +35,8 @@ open my $fhc, '>', 'xt/data/22-step1.csv'
   or die "opening 22-step1.csv failed $!";
 open my $fhh, '>', 'xt/data/22-step1.html'
   or die "opening 22-step1.html failed $!";
+open my $fhl, '>', 'xt/data/22-step1.tex'
+  or die "opening 22-step1.tex failed $!";
 
 dies_ok  { $operation->csv(filehandle => $fhc, pathname => 'xt/data/22-step2.csv') } "use of both 'filehandle' and 'pathname' parameters";
 dies_ok  { $operation->csv(filehandle => $fhc, pathname => 'xt/data/22-step2.csv', filemode => 'a') } "use of both 'filehandle' and 'pathname' parameters";
@@ -62,10 +64,25 @@ lives_ok { $operation->html() } "no parameters at all in 'html' method";
 lives_ok { $operation->html(filehandle => $fhh) } "single parameter 'filehandle' in 'html' method";
 lives_ok { $operation->html(pathname   => 'xt/data/22-step2.html') } "single parameter 'pathname' in 'html' method";
 
+dies_ok  { $operation->latex(filehandle => $fhl, pathname => 'xt/data/22-step2.tex') } "use of both 'filehandle' and 'pathname' parameters in 'latex' method";
+dies_ok  { $operation->latex(filehandle => $fhl, pathname => 'xt/data/22-step2.tex', filemode => 'a') } "use of both 'filehandle' and 'pathname' parameters in 'latex' method";
+dies_ok  { $operation->latex(filehandle => $fhl, filemode => 'a') } "use of parameter 'filemode' without parameter 'pathname' in 'latex' method";
+dies_ok  { $operation->latex(filemode => 'a') } "use of parameter 'filemode' without parameter 'pathname' in 'latex' method";
+lives_ok { $operation->latex(pathname => 'xt/data/22-step2.tex', filemode => 'a' ) } "use of parameter 'pathname' with parameter 'filemode' = 'a' in 'latex' method";
+lives_ok { $operation->latex(pathname => 'xt/data/22-step2.tex', filemode => 'w' ) } "use of parameter 'pathname' with parameter 'filemode' = 'w' in 'latex' method";
+lives_ok { $operation->latex(pathname => 'xt/data/22-step2.tex', filemode => '>' ) } "use of parameter 'pathname' with parameter 'filemode' = '>' in 'latex' method";
+lives_ok { $operation->latex(pathname => 'xt/data/22-step2.tex', filemode => '>>') } "use of parameter 'pathname' with parameter 'filemode' = '>>' in 'latex' method";
+dies_ok  { $operation->latex(pathname => 'xt/data/22-step2.tex', filemode => 'b' ) } "wrong parameter 'filemode' in 'latex' method";
+lives_ok { $operation->latex() } "no parameters at all in 'latex' method";
+lives_ok { $operation->latex(filehandle => $fhl) } "single parameter 'filehandle' in 'latex' method";
+lives_ok { $operation->latex(pathname   => 'xt/data/22-step2.tex') } "single parameter 'pathname' in 'latex' method";
+
 close $fhc
   or die "closing 22-step1.csv failed $!";
 close $fhh
   or die "closing 22-step1.html failed $!";
+close $fhl
+  or die "closing 22-step1.tex failed $!";
 
 sub slurp($fname) {
   open my $f, '<', $fname
