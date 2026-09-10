@@ -540,6 +540,25 @@ method latex(%param) {
 EOF
   }
 
+  for my $action (@action) {
+
+    # Talking
+    if ($talkative or substr($action->label, 0, 3) eq 'TIT') {
+      my $line = Arithmetic::PaperAndPencil::Label::full_label($action->label
+                                                             , $action->val1
+                                                             , $action->val2
+                                                             , $action->val3
+                                                             , $lang);
+      if ($line) {
+        $line =~ s/ "/ ``/;
+        if (substr($action->label, 0, 3) eq 'TIT') {
+          $line = "\\section\{$line\}";
+        }
+        $output_sub->("$line\n\n");
+      }
+    }
+  }
+
   unless ($suppress_header) {
     $output_sub->("\\end{document}\n");
   }

@@ -67,5 +67,5 @@ $ref = '';
 }
 close $fh
     or die "closing $tex_name $!";
-$result = $sheet->latex(lang => 'fr', silent => 1, level => 0);
+$result = $sheet->latex(lang => 'fr', silent => 0, level => 0);
 is($result, $ref, "LATEX generation");
