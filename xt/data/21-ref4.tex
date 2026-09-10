@@ -1,0 +1,101 @@
+% -*- encoding: utf-8 -*-
+\documentclass[a4paper]{article}
+\usepackage{luamplib}
+\parindent=0mm
+\begin{document}
+\section{Division de 9212 par 1, procédé standard, base 10}
+
+Fastoche, 9212 divisé par 1 donne 9212, reste 0
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 9 etex, (-3 * dx, -1 * dy));
+label(btex \bf 2 etex, (-2 * dx, -1 * dy));
+label(btex \bf 1 etex, (-1 * dx, -1 * dy));
+label(btex \bf 2 etex, (0 * dx, -1 * dy));
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\section{Addition (base 10)}
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 1 etex, (0 * dx, -1 * dy));
+label(btex \bf 1 etex, (-2 * dx, 0 * dy));
+label(btex \bf 3 etex, (-1 * dx, 0 * dy));
+label(btex \bf 9 etex, (0 * dx, 0 * dy));
+draw (-2.5 * dx, -1.5 * dy) -- (0.5 * dx, -1.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+9 et 1, 10
+
+Je pose 0 et je retiens 1
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 0 etex, (0 * dx, -2 * dy));
+label(btex \it 1 etex, (0 * dx, -1 * dy));
+label(btex  1 etex, (-2 * dx, 0 * dy));
+label(btex  3 etex, (-1 * dx, 0 * dy));
+label(btex \it 9 etex, (0 * dx, 0 * dy));
+draw (-2.5 * dx, -1.5 * dy) -- (0.5 * dx, -1.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+3 et 1, 4
+
+Je pose 4 et je ne retiens rien
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 4 etex, (-1 * dx, -2 * dy));
+label(btex  0 etex, (0 * dx, -2 * dy));
+label(btex  1 etex, (0 * dx, -1 * dy));
+label(btex  1 etex, (-2 * dx, 0 * dy));
+label(btex \it 3 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+draw (-2.5 * dx, -1.5 * dy) -- (0.5 * dx, -1.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+Je pose 1
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 1 etex, (-2 * dx, -2 * dy));
+label(btex  4 etex, (-1 * dx, -2 * dy));
+label(btex  0 etex, (0 * dx, -2 * dy));
+label(btex  1 etex, (0 * dx, -1 * dy));
+label(btex \it 1 etex, (-2 * dx, 0 * dy));
+label(btex  3 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+draw (-2.5 * dx, -1.5 * dy) -- (0.5 * dx, -1.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\section{Division de 139 par 1, procédé standard, base 10}
+
+Fastoche, 139 divisé par 1 donne 139, reste 0
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 1 etex, (-2 * dx, -1 * dy));
+label(btex \bf 3 etex, (-1 * dx, -1 * dy));
+label(btex \bf 9 etex, (0 * dx, -1 * dy));
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\end{document}

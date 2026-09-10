@@ -1,0 +1,362 @@
+% -*- encoding: utf-8 -*-
+\documentclass[a4paper]{article}
+\usepackage{luamplib}
+\parindent=0mm
+\begin{document}
+\section{Multiplication de 729 et 3, procédé standard, base 10}
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+J'écris 729
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 7 etex, (-2 * dx, 0 * dy));
+label(btex \bf 2 etex, (-1 * dx, 0 * dy));
+label(btex \bf 9 etex, (0 * dx, 0 * dy));
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+J'écris 123
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 1 etex, (-8 * dx, -1 * dy));
+label(btex \bf 2 etex, (-7 * dx, -1 * dy));
+label(btex \bf 3 etex, (-6 * dx, -1 * dy));
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+J'écris 234
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \it 1 etex, (-8 * dx, -1 * dy));draw ((-8 - .4) * dx, -1 * dy) -- ((-8 + .4) * dx, -1 * dy);
+label(btex \it 2 etex, (-7 * dx, -1 * dy));draw ((-7 - .4) * dx, -1 * dy) -- ((-7 + .4) * dx, -1 * dy);
+label(btex \it 3 etex, (-6 * dx, -1 * dy));draw ((-6 - .4) * dx, -1 * dy) -- ((-6 + .4) * dx, -1 * dy);
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+label(btex \bf 2 etex, (-8 * dx, 1 * dy));
+label(btex \bf 3 etex, (-7 * dx, 1 * dy));
+label(btex \bf 4 etex, (-6 * dx, 1 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+J'écris 12345678901
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  1 etex, (-8 * dx, -1 * dy));draw ((-8 - .4) * dx, -1 * dy) -- ((-8 + .4) * dx, -1 * dy);
+label(btex  2 etex, (-7 * dx, -1 * dy));draw ((-7 - .4) * dx, -1 * dy) -- ((-7 + .4) * dx, -1 * dy);
+label(btex  3 etex, (-6 * dx, -1 * dy));draw ((-6 - .4) * dx, -1 * dy) -- ((-6 + .4) * dx, -1 * dy);
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+label(btex  2 etex, (-8 * dx, 1 * dy));
+label(btex  3 etex, (-7 * dx, 1 * dy));
+label(btex  4 etex, (-6 * dx, 1 * dy));
+label(btex \bf 1 etex, (-10 * dx, 3 * dy));
+label(btex \bf 2 etex, (-9 * dx, 3 * dy));
+label(btex \bf 3 etex, (-8 * dx, 3 * dy));
+label(btex \bf 4 etex, (-7 * dx, 3 * dy));
+label(btex \bf 5 etex, (-6 * dx, 3 * dy));
+label(btex \bf 6 etex, (-5 * dx, 3 * dy));
+label(btex \bf 7 etex, (-4 * dx, 3 * dy));
+label(btex \bf 8 etex, (-3 * dx, 3 * dy));
+label(btex \bf 9 etex, (-2 * dx, 3 * dy));
+label(btex \bf 0 etex, (-1 * dx, 3 * dy));
+label(btex \bf 1 etex, (0 * dx, 3 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  1 etex, (-8 * dx, -1 * dy));draw ((-8 - .4) * dx, -1 * dy) -- ((-8 + .4) * dx, -1 * dy);
+label(btex  2 etex, (-7 * dx, -1 * dy));draw ((-7 - .4) * dx, -1 * dy) -- ((-7 + .4) * dx, -1 * dy);
+label(btex  3 etex, (-6 * dx, -1 * dy));draw ((-6 - .4) * dx, -1 * dy) -- ((-6 + .4) * dx, -1 * dy);
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+label(btex  2 etex, (-8 * dx, 1 * dy));
+label(btex  3 etex, (-7 * dx, 1 * dy));
+label(btex  4 etex, (-6 * dx, 1 * dy));
+label(btex  1 etex, (-10 * dx, 3 * dy));
+label(btex  2 etex, (-9 * dx, 3 * dy));
+label(btex  3 etex, (-8 * dx, 3 * dy));
+label(btex  4 etex, (-7 * dx, 3 * dy));
+label(btex  5 etex, (-6 * dx, 3 * dy));
+label(btex  6 etex, (-5 * dx, 3 * dy));
+label(btex  7 etex, (-4 * dx, 3 * dy));
+label(btex  8 etex, (-3 * dx, 3 * dy));
+label(btex  9 etex, (-2 * dx, 3 * dy));
+label(btex  0 etex, (-1 * dx, 3 * dy));
+label(btex  1 etex, (0 * dx, 3 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+draw (-8.5 * dx, 0.5 * dy) -- (-7.5 * dx, -0.5 * dy);
+draw (0.5 * dx, -0.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-8.5 * dx, -1.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  1 etex, (-8 * dx, -1 * dy));draw ((-8 - .4) * dx, -1 * dy) -- ((-8 + .4) * dx, -1 * dy);
+label(btex  2 etex, (-7 * dx, -1 * dy));draw ((-7 - .4) * dx, -1 * dy) -- ((-7 + .4) * dx, -1 * dy);
+label(btex  3 etex, (-6 * dx, -1 * dy));draw ((-6 - .4) * dx, -1 * dy) -- ((-6 + .4) * dx, -1 * dy);
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+label(btex  2 etex, (-8 * dx, 1 * dy));
+label(btex  3 etex, (-7 * dx, 1 * dy));
+label(btex  4 etex, (-6 * dx, 1 * dy));
+label(btex  1 etex, (-10 * dx, 3 * dy));
+label(btex  2 etex, (-9 * dx, 3 * dy));
+label(btex  3 etex, (-8 * dx, 3 * dy));
+label(btex  4 etex, (-7 * dx, 3 * dy));
+label(btex  5 etex, (-6 * dx, 3 * dy));
+label(btex  6 etex, (-5 * dx, 3 * dy));
+label(btex  7 etex, (-4 * dx, 3 * dy));
+label(btex  8 etex, (-3 * dx, 3 * dy));
+label(btex  9 etex, (-2 * dx, 3 * dy));
+label(btex  0 etex, (-1 * dx, 3 * dy));
+label(btex  1 etex, (0 * dx, 3 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+draw (-8.5 * dx, 0.5 * dy) -- (-7.5 * dx, -0.5 * dy);
+draw (0.5 * dx, -0.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-8.5 * dx, -1.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (0.5 * dx, -2.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-9.5 * dx, -8.5 * dy) -- (-7.5 * dx, -6.5 * dy);
+draw (-7.5 * dx, -6.5 * dy) -- (-5.5 * dx, -8.5 * dy);
+draw (-8.5 * dx, -5.5 * dy) -- (-4.5 * dx, -1.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  1 etex, (-8 * dx, -1 * dy));draw ((-8 - .4) * dx, -1 * dy) -- ((-8 + .4) * dx, -1 * dy);
+label(btex  2 etex, (-7 * dx, -1 * dy));draw ((-7 - .4) * dx, -1 * dy) -- ((-7 + .4) * dx, -1 * dy);
+label(btex  3 etex, (-6 * dx, -1 * dy));draw ((-6 - .4) * dx, -1 * dy) -- ((-6 + .4) * dx, -1 * dy);
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+label(btex  2 etex, (-8 * dx, 1 * dy));
+label(btex  3 etex, (-7 * dx, 1 * dy));
+label(btex  4 etex, (-6 * dx, 1 * dy));
+label(btex  1 etex, (-10 * dx, 3 * dy));
+label(btex  2 etex, (-9 * dx, 3 * dy));
+label(btex  3 etex, (-8 * dx, 3 * dy));
+label(btex  4 etex, (-7 * dx, 3 * dy));
+label(btex  5 etex, (-6 * dx, 3 * dy));
+label(btex  6 etex, (-5 * dx, 3 * dy));
+label(btex  7 etex, (-4 * dx, 3 * dy));
+label(btex  8 etex, (-3 * dx, 3 * dy));
+label(btex  9 etex, (-2 * dx, 3 * dy));
+label(btex  0 etex, (-1 * dx, 3 * dy));
+label(btex  1 etex, (0 * dx, 3 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+draw (-8.5 * dx, 0.5 * dy) -- (-7.5 * dx, -0.5 * dy);
+draw (0.5 * dx, -0.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-8.5 * dx, -1.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (0.5 * dx, -2.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-9.5 * dx, -8.5 * dy) -- (-7.5 * dx, -6.5 * dy);
+draw (-7.5 * dx, -6.5 * dy) -- (-5.5 * dx, -8.5 * dy);
+draw (-8.5 * dx, -5.5 * dy) -- (-4.5 * dx, -1.5 * dy);
+draw (-12.5 * dx, -2.5 * dy) -- (8.5 * dx, -2.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+J'écris 456
+
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex \bf 4 etex, (6 * dx, -2 * dy));
+label(btex \bf 5 etex, (7 * dx, -2 * dy));
+label(btex \bf 6 etex, (8 * dx, -2 * dy));
+label(btex  1 etex, (-8 * dx, -1 * dy));draw ((-8 - .4) * dx, -1 * dy) -- ((-8 + .4) * dx, -1 * dy);
+label(btex  2 etex, (-7 * dx, -1 * dy));draw ((-7 - .4) * dx, -1 * dy) -- ((-7 + .4) * dx, -1 * dy);
+label(btex  3 etex, (-6 * dx, -1 * dy));draw ((-6 - .4) * dx, -1 * dy) -- ((-6 + .4) * dx, -1 * dy);
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+label(btex  2 etex, (-8 * dx, 1 * dy));
+label(btex  3 etex, (-7 * dx, 1 * dy));
+label(btex  4 etex, (-6 * dx, 1 * dy));
+label(btex  1 etex, (-10 * dx, 3 * dy));
+label(btex  2 etex, (-9 * dx, 3 * dy));
+label(btex  3 etex, (-8 * dx, 3 * dy));
+label(btex  4 etex, (-7 * dx, 3 * dy));
+label(btex  5 etex, (-6 * dx, 3 * dy));
+label(btex  6 etex, (-5 * dx, 3 * dy));
+label(btex  7 etex, (-4 * dx, 3 * dy));
+label(btex  8 etex, (-3 * dx, 3 * dy));
+label(btex  9 etex, (-2 * dx, 3 * dy));
+label(btex  0 etex, (-1 * dx, 3 * dy));
+label(btex  1 etex, (0 * dx, 3 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+draw (-8.5 * dx, 0.5 * dy) -- (-7.5 * dx, -0.5 * dy);
+draw (0.5 * dx, -0.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-8.5 * dx, -1.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (0.5 * dx, -2.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-9.5 * dx, -8.5 * dy) -- (-7.5 * dx, -6.5 * dy);
+draw (-7.5 * dx, -6.5 * dy) -- (-5.5 * dx, -8.5 * dy);
+draw (-8.5 * dx, -5.5 * dy) -- (-4.5 * dx, -1.5 * dy);
+draw (-12.5 * dx, -2.5 * dy) -- (8.5 * dx, -2.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  4 etex, (6 * dx, -2 * dy));
+label(btex  5 etex, (7 * dx, -2 * dy));
+label(btex  6 etex, (8 * dx, -2 * dy));
+label(btex  1 etex, (-8 * dx, -1 * dy));draw ((-8 - .4) * dx, -1 * dy) -- ((-8 + .4) * dx, -1 * dy);
+label(btex  2 etex, (-7 * dx, -1 * dy));draw ((-7 - .4) * dx, -1 * dy) -- ((-7 + .4) * dx, -1 * dy);
+label(btex  3 etex, (-6 * dx, -1 * dy));draw ((-6 - .4) * dx, -1 * dy) -- ((-6 + .4) * dx, -1 * dy);
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+label(btex  2 etex, (-8 * dx, 1 * dy));
+label(btex  3 etex, (-7 * dx, 1 * dy));
+label(btex  4 etex, (-6 * dx, 1 * dy));
+label(btex  1 etex, (-10 * dx, 3 * dy));
+label(btex  2 etex, (-9 * dx, 3 * dy));
+label(btex  3 etex, (-8 * dx, 3 * dy));
+label(btex  4 etex, (-7 * dx, 3 * dy));
+label(btex  5 etex, (-6 * dx, 3 * dy));
+label(btex  6 etex, (-5 * dx, 3 * dy));
+label(btex  7 etex, (-4 * dx, 3 * dy));
+label(btex  1 etex, (0 * dx, 3 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+draw (-8.5 * dx, 0.5 * dy) -- (-7.5 * dx, -0.5 * dy);
+draw (0.5 * dx, -0.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-8.5 * dx, -1.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (0.5 * dx, -2.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-9.5 * dx, -8.5 * dy) -- (-7.5 * dx, -6.5 * dy);
+draw (-7.5 * dx, -6.5 * dy) -- (-5.5 * dx, -8.5 * dy);
+draw (-8.5 * dx, -5.5 * dy) -- (-4.5 * dx, -1.5 * dy);
+draw (-12.5 * dx, -2.5 * dy) -- (8.5 * dx, -2.5 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\begin{mplibcode}
+beginfig(1);
+dx = 6;
+dy = 10;
+label(btex  4 etex, (6 * dx, -2 * dy));
+label(btex  5 etex, (7 * dx, -2 * dy));
+label(btex  6 etex, (8 * dx, -2 * dy));
+label(btex  1 etex, (-8 * dx, -1 * dy));draw ((-8 - .4) * dx, -1 * dy) -- ((-8 + .4) * dx, -1 * dy);
+label(btex  2 etex, (-7 * dx, -1 * dy));draw ((-7 - .4) * dx, -1 * dy) -- ((-7 + .4) * dx, -1 * dy);
+label(btex  3 etex, (-6 * dx, -1 * dy));draw ((-6 - .4) * dx, -1 * dy) -- ((-6 + .4) * dx, -1 * dy);
+label(btex  7 etex, (-2 * dx, 0 * dy));
+label(btex  2 etex, (-1 * dx, 0 * dy));
+label(btex  9 etex, (0 * dx, 0 * dy));
+label(btex  2 etex, (-8 * dx, 1 * dy));
+label(btex  3 etex, (-7 * dx, 1 * dy));
+label(btex  4 etex, (-6 * dx, 1 * dy));
+label(btex  1 etex, (-10 * dx, 3 * dy));
+label(btex  2 etex, (-9 * dx, 3 * dy));
+label(btex  3 etex, (-8 * dx, 3 * dy));
+label(btex  4 etex, (-7 * dx, 3 * dy));
+label(btex  5 etex, (-6 * dx, 3 * dy));
+label(btex  6 etex, (-5 * dx, 3 * dy));
+label(btex  7 etex, (-4 * dx, 3 * dy));
+label(btex  1 etex, (0 * dx, 3 * dy));
+draw (-4.5 * dx, -2.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (-6.5 * dx, -0.5 * dy) -- (-6.5 * dx, -3.5 * dy);
+draw (-4.5 * dx, -6.5 * dy) -- (-4.5 * dx, -9.5 * dy);
+draw (-8.5 * dx, 0.5 * dy) -- (-7.5 * dx, -0.5 * dy);
+draw (0.5 * dx, -0.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-8.5 * dx, -1.5 * dy) -- (-4.5 * dx, -5.5 * dy);
+draw (0.5 * dx, -2.5 * dy) -- (1.5 * dx, -1.5 * dy);
+draw (-9.5 * dx, -8.5 * dy) -- (-7.5 * dx, -6.5 * dy);
+draw (-7.5 * dx, -6.5 * dy) -- (-5.5 * dx, -8.5 * dy);
+draw (-8.5 * dx, -5.5 * dy) -- (-4.5 * dx, -1.5 * dy);
+draw (-12.5 * dx, -2.5 * dy) -- (8.5 * dx, -2.5 * dy);
+draw (-10.5 * dx, 3.5 * dy) -- (-7.5 * dx, 3.5 * dy) -- (-7.5 * dx, 3.3 * dy);
+endfig;
+\end{mplibcode}
+\vspace{2mm}
+\end{document}

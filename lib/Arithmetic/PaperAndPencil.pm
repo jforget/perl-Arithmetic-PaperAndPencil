@@ -510,6 +510,9 @@ method latex(%param) {
   my $lang   = $param{lang}   // 'fr';
   my $silent = $param{silent} // 0;
   my $level  = $param{level}  // 3;
+  my $dx     = $param{dx}     // '6';
+  my $dy     = $param{dy}     // '10';
+  my $suppress_header = $param{suppress_header} // 0;
   my $talkative = 1 - $silent; # "silent" better for API, "talkative" better for programming
   my $result    = '';
 
@@ -527,6 +530,19 @@ method latex(%param) {
     $output_sub = \&push_to_fh;
   }
 
+  unless ($suppress_header) {
+    $output_sub->(<<'EOF');
+% -*- encoding: utf-8 -*-
+\documentclass[a4paper]{article}
+\usepackage{luamplib}
+\parindent=0mm
+\begin{document}
+EOF
+  }
+
+  unless ($suppress_header) {
+    $output_sub->("\\end{document}\n");
+  }
   if ($param{pathname}) {
     close $fh
       or die "Unable to close $param{pathname}";
@@ -2928,9 +2944,22 @@ See C<csv> method.
 
 See C<html> method.
 
-=item * C<xxx>
+=item * C<suppress_header>
 
-xxx
+When C<0> (default value),  the method outputs the C<\begin{document}>
+header and  the C<\end{document}>  footer. When  C<1>, the  header and
+footer are  not sent to the  output, which allows the  program to call
+method C<latex> several times for the same output file.
+
+=item * C<dx>, C<dy>
+
+Respectively horizontal size and vertical size  for a char cell in the
+METAPOST pictures.
+
+The syntax is checked by METAPOST.  So you can provide an integer such
+as C<6>,  a number  with a fractional  part such as  C<6.5> or  even a
+number with a length unit such as C<6mm>.
+
 
 =back
 
