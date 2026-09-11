@@ -14,8 +14,8 @@ class Arithmetic::PaperAndPencil::Char 0.02;
 field $char      :reader :writer :param;
 field $underline :reader :writer = 0;
 field $strike    :reader :writer = 0;
-field $read      :reader :writer = 0;
-field $write     :reader :writer = 0;
+field $read      :reader :writer :param = 0;
+field $write     :reader :writer :param = 0;
 
 method pseudo_html {
   my $result = $char;
@@ -31,6 +31,21 @@ method pseudo_html {
   }
   if ($underline) {
     $result = "<underline>$result</underline>";
+  }
+  return $result;
+}
+
+method tex {
+  my $result = $char;
+  if ($result eq '{') {
+    $result = '\\{';
+  }
+  if ($write) {
+    $result = "\\bf $result";
+  }
+  elsif ($read) {
+    # "elsif", because only one of (read|write) will be rendered, and write is more important than read
+    $result = "\\it $result";
   }
   return $result;
 }
@@ -69,6 +84,12 @@ None. The I<xxx>C<_char> functions must be fully qualified when called.
 =head2 pseudo_html
 
 Renders the char with its attributes (underline, etc).
+
+=head2 tex
+
+Renders the char  with its attributes (bold for  written chars, italic
+for read chars) using the TEX syntax (used when displaying char within
+a METAPOST picture).
 
 =head1 AUTHOR
 

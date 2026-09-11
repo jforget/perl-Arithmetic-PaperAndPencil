@@ -540,7 +540,33 @@ method latex(%param) {
 EOF
   }
 
+  my %chars = ();
   for my $action (@action) {
+
+    # Changing page
+    if ($action->label eq 'NXP01' or substr($action->label, 0, 3) eq 'TIT') {
+      %chars = ();
+    }
+
+    # Writing some digits
+    if ($action->w1val gt ' ') {
+      for my $i (0 .. length($action->w1val) - 1) {
+        my $x  = $action->w1c - length($action->w1val) + $i + 1;
+        my $ch = Arithmetic::PaperAndPencil::Char->new(char  => substr($action->w1val, $i, 1)
+                                                     , write => 1
+            );
+        $chars{- $action->w1l }{$x} = $ch;
+      }
+    }
+    if ($action->w2val gt ' ') {
+      for my $i (0 .. length($action->w2val) - 1) {
+        my $x = $action->w2c - length($action->w2val) + $i + 1;
+        my $ch = Arithmetic::PaperAndPencil::Char->new(char  => substr($action->w2val, $i, 1)
+                                                     , write => 1
+            );
+        $chars{- $action->w2l }{$x} = $ch;
+      }
+    }
 
     # Talking
     if ($talkative or substr($action->label, 0, 3) eq 'TIT') {
@@ -556,6 +582,30 @@ EOF
         }
         $output_sub->("$line\n\n");
       }
+    }
+
+    # Showing the operation
+    if ($action->level <= $level) {
+      $output_sub->(<<"EOF");
+\\begin{mplibcode}
+beginfig(1);
+dx = $dx;
+dy = $dy;
+EOF
+      for my $y (sort { 0+ $a <=> 0+ $b } keys %chars) {
+        my $line = $chars{$y};
+        for my $x (sort { 0+ $a <=> 0+ $b } keys %$line) {
+          my $char  = $line->{$x};
+          my $tex = sprintf("label(btex %s etex, (%d * dx, %d * dy));", $char->tex, $x, $y);
+          $tex =~ s/\s+$//;
+          $output_sub->("$tex\n");
+        }
+      }
+      $output_sub->(<<"EOF");
+endfig;
+\\end{mplibcode}
+\\vspace{2mm}
+EOF
     }
   }
 
