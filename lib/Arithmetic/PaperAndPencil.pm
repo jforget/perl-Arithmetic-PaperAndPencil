@@ -541,11 +541,93 @@ EOF
   }
 
   my %chars = ();
+  my @lines = ();
+  my @hooks = ();
   for my $action (@action) {
 
     # Changing page
     if ($action->label eq 'NXP01' or substr($action->label, 0, 3) eq 'TIT') {
       %chars = ();
+    }
+
+    # Drawing a vertical line
+    if ($action->label eq 'DRA01') {
+      if ($action->w1c != $action->w2c) {
+        die "The line is not vertical, starting at column ", $action->w1c, " and ending at column ", $action->w2c;
+      }
+      my $from = $action->w1l;
+      my $to   = $action->w1l;
+      if ($action->w2l < $from) {
+        $from =  $action->w2l;
+      }
+      if ($action->w2l > $to) {
+        $to =  $action->w2l;
+      }
+      push @lines, [ $action->w1c + .5, - $from + .5, $action->w1c + .5, - $to - .5 ];
+    }
+
+    # Drawing an horizontal line
+    if ($action->label eq 'DRA02') {
+      if ($action->w1l != $action->w2l) {
+        die "The line is not horizontal, starting at line ", $action->w1l, " and ending at line ", $action->w2l;
+      }
+      my $from = $action->w1c;
+      my $to   = $action->w1c;
+      if ($action->w2c < $from) {
+        $from =  $action->w2c;
+      }
+      if ($action->w2c > $to) {
+        $to =  $action->w2c;
+      }
+      push @lines, [ $from - .5, - $action->w1l - .5, $to + .5, - $action->w1l - .5 ];
+    }
+
+    # Drawing a hook
+    if ($action->label eq 'HOO01') {
+      if ($action->w1l != $action->w2l) {
+        die "The hook is not horizontal, starting at line ", $action->w1l, " and ending at line ", $action->w2l;
+      }
+      my $from = $action->w1c;
+      my $to   = $action->w1c;
+      if ($action->w2c < $from) {
+        $from =  $action->w2c;
+      }
+      if ($action->w2c > $to) {
+        $to =  $action->w2c;
+      }
+      push @hooks, [ $from - .5, - $action->w1l + .5, $to + .5, - $action->w1l + .5, $to + .5, -$action->w1l + .3 ];
+    }
+
+    # Drawing an oblique line top-left to bottom right
+    if ($action->label eq 'DRA03') {
+      if( $action->w2c - $action->w1c != $action->w2l - $action->w1l) {
+        die "The line is not 45-degree oblique";
+      }
+      my $x_from = $action->w1c;
+      my $x_to   = $action->w1c;
+      my $y_from = $action->w1l;
+      my $y_to   = $action->w1l;
+      if ($action->w2c < $x_from) { $x_from =  $action->w2c; }
+      if ($action->w2c > $x_to  ) { $x_to   =  $action->w2c; }
+      if ($action->w2l < $y_from) { $y_from =  $action->w2l; }
+      if ($action->w2l > $y_to  ) { $y_to   =  $action->w2l; }
+      push @lines, [ $x_from - .5, - $y_from + .5, $x_to + .5, - $y_to - .5 ];
+    }
+
+    # Drawing an oblique line bottom-left to top-right
+    if ($action->label eq 'DRA04') {
+      if ($action->w2c - $action->w1c != $action->w1l - $action->w2l) {
+        die "The line is not 45-degree oblique";
+      }
+      my $x_from = $action->w1c;
+      my $x_to   = $action->w1c;
+      my $y_from = $action->w1l;
+      my $y_to   = $action->w1l;
+      if ($action->w2c < $x_from) { $x_from =  $action->w2c; }
+      if ($action->w2c > $x_to  ) { $x_to   =  $action->w2c; }
+      if ($action->w2l > $y_from) { $y_from =  $action->w2l; }
+      if ($action->w2l < $y_to  ) { $y_to   =  $action->w2l; }
+      push @lines, [ $x_from - .5, - $y_from - .5, $x_to + .5, - $y_to + .5 ];
     }
 
     # Reading some digits
@@ -591,7 +673,7 @@ EOF
     # Erasing some digits
     if ($action->label eq 'ERA01') {
       if  ($action->w1l != $action->w2l) {
-        die "The chars are not horizontally aligned, starting at line {$action.w1l} and ending at line {$action.w2l}";
+        die "The chars are not horizontally aligned, starting at line ", $action->w1l, " and ending at line ", $action->w2l;
       }
       my $begin = $action->w1c;
       my $end   = $action->w1c;
@@ -644,6 +726,14 @@ EOF
           $chars{$y}{$x}->set_write(0);
           $chars{$y}{$x}->set_read( 0);
         }
+      }
+      for my $line (@lines) {
+        my ($x_from, $y_from, $x_to, $y_to) = @$line;
+        $output_sub->("draw ($x_from * dx, $y_from * dy) -- ($x_to * dx, $y_to * dy);\n");
+      }
+      for my $hook (@hooks) {
+        my ($x_from, $y_from, $x_thru, $y_thru, $x_to, $y_to) = @$hook;
+        $output_sub->("draw ($x_from * dx, $y_from * dy) -- ($x_thru * dx, $y_thru * dy) -- ($x_to * dx, $y_to * dy);\n");
       }
       $output_sub->(<<"EOF");
 endfig;
