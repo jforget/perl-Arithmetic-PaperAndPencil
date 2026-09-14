@@ -548,6 +548,26 @@ EOF
       %chars = ();
     }
 
+    # Reading some digits
+    if ($action->r1val gt ' ') {
+      for my $i (0 .. length($action->r1val) - 1) {
+        my $x  = $action->r1c - length($action->r1val) + $i + 1;
+        $chars{- $action->r1l }{$x}->set_read(1);
+        if ($action->r1str) {
+          $chars{- $action->r1l }{$x}->set_strike(1);
+        }
+      }
+    }
+    if ($action->r2val gt ' ') {
+      for my $i (0 .. length($action->r2val) - 1) {
+        my $x  = $action->r2c - length($action->r2val) + $i + 1;
+        $chars{- $action->r2l }{$x}->set_read(1);
+        if ($action->r2str) {
+          $chars{- $action->r2l }{$x}->set_strike(1);
+        }
+      }
+    }
+
     # Writing some digits
     if ($action->w1val gt ' ') {
       for my $i (0 .. length($action->w1val) - 1) {
@@ -565,6 +585,24 @@ EOF
                                                      , write => 1
             );
         $chars{- $action->w2l }{$x} = $ch;
+      }
+    }
+
+    # Erasing some digits
+    if ($action->label eq 'ERA01') {
+      if  ($action->w1l != $action->w2l) {
+        die "The chars are not horizontally aligned, starting at line {$action.w1l} and ending at line {$action.w2l}";
+      }
+      my $begin = $action->w1c;
+      my $end   = $action->w1c;
+      if ($action->w2c < $begin) {
+        $begin = $action->w2c;
+      }
+      if ($action->w2c >$end) {
+        $end = $action->w2c;
+      }
+      for my $x ($begin .. $end) {
+        delete $chars{-$action->w1l}{$x};
       }
     }
 
@@ -595,10 +633,16 @@ EOF
       for my $y (sort { 0+ $a <=> 0+ $b } keys %chars) {
         my $line = $chars{$y};
         for my $x (sort { 0+ $a <=> 0+ $b } keys %$line) {
-          my $char  = $line->{$x};
-          my $tex = sprintf("label(btex %s etex, (%d * dx, %d * dy));", $char->tex, $x, $y);
+          my $char   = $line->{$x};
+          my $strike = '';
+          if ($char->strike) {
+            $strike = "draw (($x - .4) * dx, $y * dy) -- (($x + .4) * dx, $y * dy);";
+          }
+          my $tex = sprintf("label(btex %s etex, (%d * dx, %d * dy));%s", $char->tex, $x, $y, $strike);
           $tex =~ s/\s+$//;
           $output_sub->("$tex\n");
+          $chars{$y}{$x}->set_write(0);
+          $chars{$y}{$x}->set_read( 0);
         }
       }
       $output_sub->(<<"EOF");
