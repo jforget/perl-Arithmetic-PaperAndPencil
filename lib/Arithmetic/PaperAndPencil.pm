@@ -1584,6 +1584,10 @@ method square_root($number, %param) {
                   , w1l  => 1, w1c   => $col_first, w1val => $divisor->value
                 );
   push(@action, $action);
+  my $adjust_part_dvd = 0;
+  if ($divisor->chars == 2) {
+    $adjust_part_dvd = 1;
+  }
 
   my $zero = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => 0);
   my $one  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => 1);
@@ -1598,8 +1602,8 @@ method square_root($number, %param) {
   }
   for my $i (1 .. $nb_dig - 1) {
     my $pos          = 2 * ($nb_dig - $i);
-    my $pos_dvd_part = $i - 2 * ($nb_dig - 1); # position of the partial dividend used to compute the first candidate quotient
     my $two_digits   = substr($number->value, - $pos, 2);
+    my $pos_dvd_part = $i - 2 * ($nb_dig - 1) - $adjust_part_dvd; # position of the partial dividend used to compute the first candidate quotient
     $action = Arithmetic::PaperAndPencil::Action->new(level => 3        , label => 'DIV04'   , val1  => $two_digits
                                                      , r1l  => 0        , r1c   => 2 - $pos  , r1val => $two_digits
                                                      , w1l  => $line_rem, w1c   => 2 - $pos  , w1val => $two_digits
