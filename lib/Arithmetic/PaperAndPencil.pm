@@ -548,6 +548,8 @@ EOF
     # Changing page
     if ($action->label eq 'NXP01' or substr($action->label, 0, 3) eq 'TIT') {
       %chars = ();
+      @lines = ();
+      @hooks = ();
     }
 
     # Drawing a vertical line
@@ -691,9 +693,9 @@ EOF
     # Talking
     if ($talkative or substr($action->label, 0, 3) eq 'TIT') {
       my $line = Arithmetic::PaperAndPencil::Label::full_label($action->label
-                                                             , $action->val1
-                                                             , $action->val2
-                                                             , $action->val3
+                                                             , "\\textbf{@{[$action->val1]}}"
+                                                             , "\\textbf{@{[$action->val2]}}"
+                                                             , "\\textbf{@{[$action->val3]}}"
                                                              , $lang);
       if ($line) {
         $line =~ s/ "/ ``/;
