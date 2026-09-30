@@ -22,8 +22,9 @@ New Features
 
 Of course, you can suggest new features. Yet, before submitting your proposal,
 you should check the
-[extended documentation](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md),
+[extended documentation](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md)
 of the homonymous Raku module, especially the
-[paragraph about discarded ideas](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md#what-the-module-does-not)
+[first](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md#what-the-module-does-not)
 and the
-[paragraph about discarded features](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md#discarded-implementations).
+[second](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/blob/master/doc/Description-en.md#ideas-i-gave-up)
+chapters about discarded ideas.

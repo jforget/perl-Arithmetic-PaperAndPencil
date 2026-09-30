@@ -74,7 +74,7 @@ or these two commands:
 
 with bookmarks `b` and `e` for the  first and last lines of the `"de"`
 entry. If  you prefer, you  can initialise all `"TITnn"`  entries with
-the English values instead of the French values.
+the English values (plus the TODO markers) instead of the French values.
 
 Iterative Step
 --------------
@@ -110,6 +110,10 @@ my $operation = Arithmetic::PaperAndPencil->new;
 $operation->from_csv($csv);
 $operation->html(lang => $lang, silent => 0, level => $level, pathname => "$out/$file.html");
 ```
+
+You  should  work on  CSV  files  in  numerical order,  starting  with
+`t/data/05-add.csv`  until `xt/data/20-gcd.csv`.  Do  not bother  with
+`t/data/01-action.csv` and `xt/data/02-html.csv`.
 
 Final Step
 ----------
@@ -149,7 +153,7 @@ while in other schools, the pupils would say either:
 
 or:
 
-> 6 oté de 9, 3
+> 6 ôté de 9, 3
 >
 > 6 subtracted from 9 equals 3
 
