@@ -922,6 +922,28 @@ method multiplication(%param) {
                );
   push(@action, $action);
 
+  # Multiplications with obvious results
+  if ($multiplier->value eq '1') {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 0
+                 , label => 'MUL02'
+                 , val1  => $multiplicand->value
+                 , val2  => '1'
+                 , val3  => $multiplicand->value
+                 );
+    push(@action, $action);
+    return $multiplicand;
+  }
+  if ($multiplicand->value eq '1') {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 0
+                 , label => 'MUL02'
+                 , val1  => $multiplier->value
+                 , val2  => '1'
+                 , val3  => $multiplier->value
+                 );
+    push(@action, $action);
+    return $multiplier;
+  }
+
   # caching the partial products for prepared and shortcut multiplications
   my %mult_cache = (1 => $multiplicand);
   if ($type eq 'prepared') {
@@ -2988,8 +3010,8 @@ but it will be correct.
 
 Humans can  detect situations where  the computation procedure  can be
 amended,  such as  a  multiplication where  the  multiplicand and  the
-multiplier contain many  "0" digits. The module does  not detect these
-cases and still uses the unaltered computation procedure.
+multiplier contain  many "0"  digits. The module  does not  detect all
+these cases and still uses the unaltered computation procedure.
 
 Human beings write their calculations on A4 paper (21 cm × 29,7 cm) or
 letter paper (21,6  cm × 27,9 cm). The module  writes its calculations

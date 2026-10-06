@@ -16,20 +16,25 @@ use Arithmetic::PaperAndPencil;
 use feature qw/class/;
 use open ':encoding(UTF-8)';
 
-plan(tests => 4);
+plan(tests => 6);
 
 my $refcsv  = slurp('xt/data/08-mult.csv');
 my $refhtml = slurp('xt/data/08-mult.html');
 my $operation = Arithmetic::PaperAndPencil->new;
-my $x = Arithmetic::PaperAndPencil::Number->new(value => '10200300040000', radix => 10);
-my $y = Arithmetic::PaperAndPencil::Number->new(value => '2'  , radix => 10);
-my $z = Arithmetic::PaperAndPencil::Number->new(value => '101', radix => 10);
+my $x   = Arithmetic::PaperAndPencil::Number->new(value => '10200300040000', radix => 10);
+my $y   = Arithmetic::PaperAndPencil::Number->new(value => '2'  , radix => 10);
+my $z   = Arithmetic::PaperAndPencil::Number->new(value => '101', radix => 10);
+my $one = Arithmetic::PaperAndPencil::Number->new(value => '1'  , radix => 10);
 my Arithmetic::PaperAndPencil::Number $pdt;
 
 $pdt = $operation->multiplication(multiplicand => $x, multiplier => $x, type => 'std');
 is($pdt->value, '104046120906024001600000000', "product is 104046120906024001600000000");
 $pdt = $operation->multiplication(multiplicand => $y, multiplier => $z, type => 'std');
 is($pdt->value, '202', "product is 202");
+$pdt = $operation->multiplication(multiplicand => $one, multiplier => $z, type => 'std');
+is($pdt->value, '101', "product is 101");
+$pdt = $operation->multiplication(multiplicand => $z, multiplier => $one, type => 'std');
+is($pdt->value, '101', "product is 101");
 
 is($operation->csv, $refcsv, "checking the CSV file");
 my $html = $operation->html(lang => 'fr', silent => 0, level => 3);
