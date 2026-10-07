@@ -923,6 +923,26 @@ method multiplication(%param) {
   push(@action, $action);
 
   # Multiplications with obvious results
+  if ($multiplier->value eq '0') {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 0
+                 , label => 'MUL02'
+                 , val1  => $multiplicand->value
+                 , val2  => '0'
+                 , val3  => '0'
+                 );
+    push(@action, $action);
+    return $multiplier;
+  }
+  if ($multiplicand->value eq '0') {
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 0
+                 , label => 'MUL02'
+                 , val1  => $multiplier->value
+                 , val2  => '0'
+                 , val3  => '0'
+                 );
+    push(@action, $action);
+    return $multiplicand;
+  }
   if ($multiplier->value eq '1') {
     $action = Arithmetic::PaperAndPencil::Action->new(level => 0
                  , label => 'MUL02'

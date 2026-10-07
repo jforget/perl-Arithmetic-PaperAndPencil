@@ -16,7 +16,7 @@ use Arithmetic::PaperAndPencil;
 use feature qw/class/;
 use open ':encoding(UTF-8)';
 
-plan(tests => 6);
+plan(tests => 8);
 
 my $refcsv  = slurp('xt/data/08-mult.csv');
 my $refhtml = slurp('xt/data/08-mult.html');
@@ -25,6 +25,7 @@ my $x   = Arithmetic::PaperAndPencil::Number->new(value => '10200300040000', rad
 my $y   = Arithmetic::PaperAndPencil::Number->new(value => '2'  , radix => 10);
 my $z   = Arithmetic::PaperAndPencil::Number->new(value => '101', radix => 10);
 my $one = Arithmetic::PaperAndPencil::Number->new(value => '1'  , radix => 10);
+my $zero = Arithmetic::PaperAndPencil::Number->new(value => '0'  , radix => 10);
 my Arithmetic::PaperAndPencil::Number $pdt;
 
 $pdt = $operation->multiplication(multiplicand => $x, multiplier => $x, type => 'std');
@@ -35,6 +36,10 @@ $pdt = $operation->multiplication(multiplicand => $one, multiplier => $z, type =
 is($pdt->value, '101', "product is 101");
 $pdt = $operation->multiplication(multiplicand => $z, multiplier => $one, type => 'std');
 is($pdt->value, '101', "product is 101");
+$pdt = $operation->multiplication(multiplicand => $zero, multiplier => $z, type => 'std');
+is($pdt->value, '0', "product is 0");
+$pdt = $operation->multiplication(multiplicand => $z, multiplier => $zero, type => 'std');
+is($pdt->value, '0', "product is 0");
 
 is($operation->csv, $refcsv, "checking the CSV file");
 my $html = $operation->html(lang => 'fr', silent => 0, level => 3);
