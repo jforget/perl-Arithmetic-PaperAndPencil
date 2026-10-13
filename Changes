@@ -5,6 +5,8 @@ Revision history for Arithmetic-PaperAndPencil
         Various bug fixes
         Direct output to file without needing an in-memory variable
         Output format: LATEX + METAPOST
+        Option "skip-zero" for additions
+        "Iron" division
 
 0.01    2024-04-22
         First version, with the four basic operations, plus square-root, GCD and radix conversion.

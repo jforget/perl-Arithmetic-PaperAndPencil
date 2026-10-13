@@ -756,6 +756,13 @@ EOF
 }
 
 method addition(@numbers) {
+  return $self->addition1( numbers => [ @numbers ], skip_zero => 0 );
+}
+
+method addition1(%param) {
+  my @numbers   = @{ $param{numbers} };
+  my $skip_zero = $param{skip_zero} // 0;
+
   if (@numbers == 0) {
     croak "The addition needs at least one number to add";
   }
@@ -796,7 +803,7 @@ method addition(@numbers) {
   for my $j (0 .. $max_length -1) {
     $total[$j] = { lin => $nb, col => -$j };
   }
-  my $result = $self->_adding(\@digits, \@total, 0, $radix);
+  my $result = $self->_adding(\@digits, \@total, 0, $radix, 0, $skip_zero);
   return Arithmetic::PaperAndPencil::Number->new(value => $result, radix => $radix);
 }
 
@@ -2056,7 +2063,7 @@ method gcd(%param) {
   return $first;
 }
 
-method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
+method _adding($digits, $pos, $basic_level, $radix, $striking = 0, $skip_zero = 0) {
   my @digits = @$digits;
   my @pos    = @$pos;
   my $action;
@@ -2067,12 +2074,17 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0) {
   for my $i (0 .. $#digits) {
     my $l = $digits[$i];
     my @l = grep { $_ } @$l; # removing empty entries
+    if ($skip_zero) {
+      @l = grep { $_->{val} ne '0' } @l;
+    }
     if (0+ @l == 0) {
-      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI04' , val1  => $carry
-                                                       , w1l  => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $carry
+      my $digit = substr($carry, -1, 1);
+      $carry = substr($carry, 0, -1) || '0';
+      $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3, label => 'WRI04' , val1  => $digit
+                                                       , w1l  => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $digit
                                                        );
       push(@action, $action);
-      $result = $carry . $result;
+      $result = $digit . $result;
     }
     elsif (0+ @l == 1 && $carry eq '0') {
       $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3
@@ -3227,6 +3239,25 @@ Simulates the addition  of two or more numbers. The  numbers are given
 as a  list variable  C<@list> or  a list  of scalar  variables C<$nb1,
 $nb2,  $nb3>.  This is  a  positional  parameter.  Each number  is  an
 instance of the C<Arithmetic::PaperAndPencil::Number> class.
+
+=head2 addition1
+
+The addition  method with  a different signature.  This method  uses a
+hashtable to simulate keyword parameters.
+
+The  first  keyword is  C<numbers>.  Its  value  is a  list  reference
+containing  the  C<Arithmetic::PaperAndPencil::Number> instances  that
+will be added.
+
+The  second keyword  is C<skip_zero>.  Its value  is a  boolean value,
+usually C<0>  or C<1>, controlling the  use of digits zero  within the
+numbers being  added. If  true, the elementary  additions such  as C<3
+plus 0, 3>  are skipped. If false, all elementary  additions are kept,
+even if they involve a zero digit.
+
+Syntax Example:
+
+  $sum = $operation->addition1(numbers => [ $nb1, $nb2, $nb3], skip_zero => 1);
 
 =head2 subtraction
 
