@@ -166,4 +166,10 @@ the French adjective "Facile" (easy).
 The  following  are mere  explanations  for  advanced algorithms,  not
 ritual phrases for basic computation methods.
 
-* NXP01, WRI01, WRI05, MUL03, CNV01, CNV02, CNV03, SUB03, SUB04, DIV03, SQR01, SHF01.
+* NXP01, WRI01, WRI05, MUL03, CNV01, CNV02, CNV03, SUB03, SUB04, DIV03, DIV08, DIV09, SQR01, SHF01.
+
+* all titles TIT01 to TIT20
+
+The following are silent actions, with no associated label
+
+* DRA01, DRA02, DRA03, DRA04, ERA01, HOO01, WRI00
