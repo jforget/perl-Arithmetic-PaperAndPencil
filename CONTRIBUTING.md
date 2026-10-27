@@ -3,7 +3,8 @@
 Internationalization
 ====================
 
-This subject is an important one, see the dedicated file.
+This subject is an important one, see the
+[dedicated file](https://github.com/jforget/perl-Arithmetic-PaperAndPencil/blob/master/CONTRIBUTING-I18N.md).
 
 Bugs
 ====
@@ -14,8 +15,9 @@ https://github.com/jforget/perl-Arithmetic-PaperAndPencil/issues
 As usual,  please give the version  of the module, the  version of the
 Perl interpreter and a short script reproducing the bug.
 
-If you have a development environment  with Raku, can you please check
-the homonymous Raku module? Is the bug present in this Raku module?
+If you have a development environment  with Raku, can you please check the
+[homonymous Raku module](https://github.com/jforget/raku-Arithmetic-PaperAndPencil/tree/master)?
+Is the bug present in this Raku module?
 
 New Features
 ============
