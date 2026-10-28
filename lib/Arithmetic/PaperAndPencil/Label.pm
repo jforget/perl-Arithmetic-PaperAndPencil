@@ -30,6 +30,7 @@ my %label = ('fr' => {
                , 'TIT17' => 'PGCD de #1# et #2#, base #3#'
                , 'TIT18' => 'PGCD de #1# et #2#, base #3#, avec triche'
                , 'TIT19' => 'Multiplication de #1# et #2#, procédé "du paysan russe", base #3#'
+               , 'TIT20' => 'Division de #1# par #2#, procédé "division de fer", base #3#'
                , 'NXP01' => 'Changement de page'
                , 'ADD01' => '#1# et #2#, #3#'
                , 'ADD02' => 'et #1#, #2#'
@@ -55,6 +56,8 @@ my %label = ('fr' => {
                , 'DIV05' => 'Fastoche, #1# divisé par 1 donne #1#, reste 0'
                , 'DIV06' => 'Fastoche, #1# divisé par #2# donne 0, reste #1#'
                , 'DIV07' => 'En #1# combien de fois 2, il y va #2# fois, reste #3#'
+               , 'DIV08' => 'Le diviseur arrondi par excès est #1#'
+               , 'DIV09' => "Soit #1# après mise à l'échelle"
                , 'SQR01' => 'Racine carrée de #1# égale #2#'
                , 'SHF01' => 'Je décale #1#, ce qui donne #2#'
                }
@@ -78,6 +81,7 @@ my %label = ('fr' => {
                , 'TIT17' => 'GCD of #1# and #2#, radix #3#'
                , 'TIT18' => 'GCD of #1# and #2#, radix #3#, cheating'
                , 'TIT19' => 'Multiplication of #1# and #2#, "Russian peasant" processus, radix #3#'
+               , 'TIT20' => 'Division of #1# by #2#, "iron division" processus, radix #3#'
                , 'MUL01' => '#1# times #2#, #3#'    # guesswork
                }
                )

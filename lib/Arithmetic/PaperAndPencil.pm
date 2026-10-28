@@ -1313,6 +1313,7 @@ method division(%param) {
   my $type         = $param{type}           // 'std';
   my $result       = $param{result}         // 'quotient';
   my $mult_and_sub = $param{mult_and_sub}   // 'combined';
+  my $compact      = 0+ ($param{compact}    // '0');
 
   my Arithmetic::PaperAndPencil::Action $action;
   my $radix = $dividend->radix;
@@ -1334,6 +1335,7 @@ method division(%param) {
   elsif ($type eq 'cheating') { $title = 'TIT10' ; }
   elsif ($type eq 'prepared') { $title = 'TIT11' ; $mult_and_sub = 'separate' }
   elsif ($type eq 'boat'    ) { $title = 'TIT12' ; }
+  elsif ($type eq 'iron'    ) { $title = 'TIT20' ; }
   if ($title eq '') {
     die "Division type '$type' unknown";
   }
@@ -1553,6 +1555,230 @@ method division(%param) {
     elsif ($result eq 'remainder') { return   Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $rem); }
     elsif ($result eq 'both'     ) { return ( Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $quotient)
                                             , Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $rem)); }
+  }
+  if ($type eq 'iron') {
+    my Arithmetic::PaperAndPencil::Number $dvr_up;     # called "rank" by K. Menninger's translator, but I prefer "divisor rounded up"
+    my Arithmetic::PaperAndPencil::Number $supplement; # called "supplement" by K. Menninger's translator, I adopt this instead of "complement"
+    my Arithmetic::PaperAndPencil::Number $quotient;
+    my Arithmetic::PaperAndPencil::Number $remainder = $dividend;
+
+    # computing the rounded-up divisor and its supplement
+    if ($divisor->chars == 1) {
+      $dvr_up     = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor->value);
+      $supplement = $zero;
+    }
+    else {
+      $dvr_up     = $one + $divisor->carry($divisor->chars - 1);
+      $dvr_up     = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $dvr_up->value . '0' x ($divisor->chars - 1));
+      $supplement = $divisor->unit($divisor->chars - 1)->complement($divisor->chars - 1);
+    }
+    my $dvr_up_scaling = '0' x ($dvr_up->chars - 1);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV08', val1 => $dvr_up->value);
+    push(@action, $action);
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'SUB03', val1 => $dvr_up->value, val2 => $divisor->value, val3 => $supplement->value);
+    push(@action, $action);
+
+    # Splitting the supplement into single-digit numbers (scaled by a few zeroes)
+    my @supplement;
+    for my $pos (0 .. $supplement->chars - 1) {
+      my Arithmetic::PaperAndPencil::Number $digit = $supplement->carry($pos)->unit;
+      if ($digit->value ne '0') {
+        unshift @supplement, { digit => $digit, scaling => '0' x $pos, scaled_value => $digit->value . '0' x $pos };
+      }
+    }
+
+    # display columns
+    my $c_factors = $dvr_up->chars;
+    my $c_times   = $c_factors + 2;
+    my $c_quo1    = $c_times   + $remainder->chars - $dvr_up->chars + 2;
+    my $c_plus    = $c_quo1    + 3;
+    my $c_dvd     = $c_plus    + $remainder->chars;
+    my $c_op      = $c_dvd     + 2;
+    my $c_dvr     = $c_op      + $dvr_up->chars + 1;
+    my $c_eq      = $c_dvr     + 2;
+    my $c_cand    = $c_eq      + $remainder->chars - $divisor->chars + 2;
+    my $c_quo     = $c_cand    + $remainder->chars - $divisor->chars + 3;
+    my $l         = 0;
+    my $last_l    = 0;
+    $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'WRI00', w1l => $l, w1c => $c_dvd, w1val => $remainder->value);
+    push(@action, $action);
+
+    while ($dvr_up <= $remainder) {
+      if ($compact && ($remainder ge $divisor)
+                   && ($remainder lt $dvr_up || substr($dvr_up->value, 0, 1) eq '1')) {
+        my $dvd_scale   = $remainder->chars - $divisor->chars;
+        my $dvd_scaling = '0' x $dvd_scale;
+
+        # incrementing the quotient
+        my Arithmetic::PaperAndPencil::Number $q = $quotient->carry($dvd_scale);
+        my $old_value = $q->value;
+        $q += $one;
+        $action   = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'ADD01', val1 => $old_value, val2 => '1', val3 => $q->value, r1l => $last_l, r1c => $c_quo, r1val => $old_value);
+        push(@action, $action);
+        $quotient = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $q->value . $dvd_scaling);
+        $action   = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV09', val1 => $quotient->value, w1l => $l + 1, w1c => $c_quo, w1val => $quotient->value);
+        push(@action, $action);
+
+        # subtracting the scaled divisor from the remainder
+        my Arithmetic::PaperAndPencil::Number $dvr_scaled = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor->value . $dvd_scaling);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'WRI00', w1l => $l + 1, w1c => $c_dvd, w1val => $dvr_scaled->value );
+        push(@action, $action);
+        my $res = '';
+        $res = $self->_embedded_sub(basic_level => 4, l_hi => $l    , c_hi => $c_dvd, high => $remainder
+                                                    , l_lo => $l + 1, c_lo => $c_dvd, low  => $dvr_scaled
+                                                    , l_re => $l + 2, c_re => $c_dvd);
+        $remainder = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $res);
+
+        # make room for the next steps
+        $last_l = $l;
+        $l     += 2;
+      }
+      else {
+
+        my $dvd_scale;
+        my $dvd_scaling;
+        if ($dvr_up lt $remainder) {
+          $dvd_scale = $remainder->chars - $dvr_up->chars;
+        }
+        else {
+          $dvd_scale = $remainder->chars - $dvr_up->chars - 1;
+        }
+        $dvd_scaling = '0' x $dvd_scale;
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'WRI00', w1l => $l, w1c => $c_op, w1val => '÷'
+                                                                                      , w2l => $l, w2c => $c_eq, w2val => '=');
+        push(@action, $action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'WRI00', w1l => $l, w1c => $c_dvr, w1val => $dvr_up->value);
+        push(@action, $action);
+
+        my Arithmetic::PaperAndPencil::Number $op1       = $remainder->carry($dvd_scale + $dvr_up->chars - 1);
+        my Arithmetic::PaperAndPencil::Number $op2       = $dvr_up   ->carry(             $dvr_up->chars - 1);
+        my Arithmetic::PaperAndPencil::Number $cand1     = $op1 / $op2;
+        my Arithmetic::PaperAndPencil::Number $candidate = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $cand1->value . $dvd_scaling);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV01'
+                      , val1 => $op1->value, r1l => $l, r1c => $c_dvd - $dvd_scale - $dvr_up->chars + 1, r1val => $op1->value
+                      , val2 => $op2->value, r2l => $l, r2c => $c_dvr              - $dvr_up->chars + 1, r2val => $op2->value
+                      , val3 => $cand1->value);
+        push(@action, $action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 4, label => 'DIV09', val1 => $candidate->value, w1l => $l, w1c => $c_cand, w1val => $candidate->value);
+        push(@action, $action);
+        if ($l == 0) {
+          # initialise $quotient with $candidate
+          $quotient = $candidate;
+          $action   = Arithmetic::PaperAndPencil::Action->new(level => 4, label => 'WRI04', val1 => $quotient->value, w1l => $l, w1c => $c_quo, w1val => $quotient->value);
+          push(@action, $action);
+        }
+        else {
+          # add $candidate to $quotient
+          my @added;
+          my @total;
+          my @digit_list = reverse(split('', $quotient->value));
+          for my $i (0 .. $#digit_list) {
+            my $digit = $digit_list[$i];
+            $added[$i][0] = { lin => $last_l, col => $c_quo - $i, val => $digit};
+            $total[$i]    = { lin => $l     , col => $c_quo - $i};
+          }
+          @digit_list = reverse(split('', $candidate->value));
+          for my $i (0 .. $#digit_list) {
+            my $digit = $digit_list[$i];
+            $added[$i][1] = { lin => $l     , col => $c_dvd - $i, val => $digit};
+          }
+          $quotient = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $self->_adding(\@added, \@total, 3, $radix, 0, 1));
+          $action[-1]->set_level(4);
+        }
+        $last_l = $l;
+        $l++;
+        $op1 = $op2 * $cand1;
+        my Arithmetic::PaperAndPencil::Number $prdt = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $op1->value . $dvd_scaling . $dvr_up_scaling);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'MUL01', val1 => $op2->value, val2 => $cand1->value, val3 => $op1->value
+                                 , w1l => $l, w1c => $c_factors, w1val => $dvr_up->value
+                                 , w2l => $l, w2c => $c_quo1   , w2val => $candidate->value
+                                 );
+        push(@action, $action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'WRI00'
+                                 , w1l => $l, w1c => $c_times, w1val => '×'
+                                 , w2l => $l, w2c => $c_plus , w2val => '-'
+                                 );
+        push(@action, $action);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV09', val1  => $prdt->value
+                                                        , w1l   => $l,  w1c => $c_dvd , w1val => $prdt->value
+                                 );
+        push(@action, $action);
+        my $rem = $self->_embedded_sub(basic_level => 3
+                                      , l_hi => $l - 1, c_hi => $c_dvd, high => $remainder
+                                      , l_lo => $l    , c_lo => $c_dvd, low  => $prdt
+                                      , l_re => $l + 1, c_re => $c_dvd
+                                      );
+        $action[-1]->set_level(4);
+        $l++;
+        $remainder = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $rem);
+        if (@supplement) {
+          my @added;
+          my @total;
+          my @digit_list = reverse(split('', $rem));
+          for my $i (0 .. $#digit_list) {
+            my $digit = $digit_list[$i];
+            $added[$i][0] = { lin => $l                  , col => $c_dvd - $i, val => $digit};
+            $total[$i]    = { lin => $l + @supplement + 1, col => $c_dvd - $i};
+          }
+          my $j = 0;
+          for my $supplement (@supplement) {
+            $l++;
+            $j++;
+            $op1    = $supplement->{digit} * $cand1;
+            $prdt   = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $op1->value . $dvd_scaling . $supplement->{scaling});
+            $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'MUL01', val1 => $supplement->{digit}->value, val2 => $cand1->value, val3 => $op1->value
+                                     , w1l => $l, w1c => $c_factors, w1val => $supplement->{scaled_value}
+                                     , w2l => $l, w2c => $c_quo1   , w2val => $candidate->value
+                                     );
+            push(@action, $action);
+            $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'WRI00'
+                                     , w1l => $l, w1c => $c_times, w1val => '×'
+                                     , w2l => $l, w2c => $c_plus , w2val => '+'
+                                     );
+            push(@action, $action);
+            $action = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV09', val1  => $prdt->value
+                                     , w1l => $l, w1c => $c_dvd, w1val => $prdt->value
+                                     );
+            push(@action, $action);
+            @digit_list = reverse(split('', $prdt->value));
+            for my $i (0 .. $#digit_list) {
+              my $digit = $digit_list[$i];
+              $added[$i][$j] = { lin => $l, col => $c_dvd - $i, val => $digit};
+            }
+          }
+          $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DRA02', w1l => $l, w1c => $c_plus + 1, w2l => $l, w2c => $c_dvd);
+          push(@action, $action);
+          $remainder = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $self->_adding(\@added, \@total, 3, $radix, 0, 1));
+          $l++;
+        }
+      }
+      $action[-1]->set_level(3);
+
+    }
+
+    # final subtraction, if necessary
+    if ($divisor <= $remainder) {
+      $action[-1]->set_level(2);
+      my $old_value = $quotient->value;
+      $quotient += $one;
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 4, label => 'ADD01'  , val1  => $old_value, val2 => '1', val3 => $quotient->value
+                   , r1l  => $last_l, r1c => $c_quo, r1val => $old_value
+                   , w1l  => $l + 1 , w1c => $c_quo, w1val => $quotient->value
+                );
+      push(@action, $action);
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'WRI00', w1l => $l + 1, w1c => $c_dvd, w1val => $divisor->value );
+      push(@action, $action);
+      my $res = '';
+      $res = $self->_embedded_sub(basic_level => 4, l_hi => $l    , c_hi => $c_dvd, high => $remainder
+                                                  , l_lo => $l + 1, c_lo => $c_dvd, low  => $divisor
+                                                  , l_re => $l + 2, c_re => $c_dvd);
+      $remainder = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $res);
+    }
+
+    $action[-1]->set_level(0);
+    if    ($result eq 'quotient' ) { return   $quotient; }
+    elsif ($result eq 'remainder') { return   $remainder; }
+    elsif ($result eq 'both'     ) { return ( $quotient, $remainder); }
   }
 
 }
@@ -3562,6 +3788,22 @@ special point  is that it  seems to  require something similar  to the
 C<cheating>  technique  above,  because  I  do  not  see  how  we  can
 "unstrike"  the digits  that  were stricken  with  the previous  digit
 candidate.
+
+=item * C<iron>
+
+The paper-and-pencil equivalent of the counting board "iron division"
+(or "ferrea divisio"), as shown by K. Menninger.
+
+Acceptable break from reality: this division algorithm is meant for an
+abacus  or a  counting board.  The set-up  used by  the module  is the
+pedagogical set-up  adopted by K.  Menninger to present  the algorithm
+within his book (with minor changes).
+
+The  "iron"   division  accepts   an  additional   boolean  parameter,
+C<compact>. Default value  is C<0> (false) and gives  an iron division
+as shown in Menninger's book. When true (C<1> for example), the module
+inserts a standard  subtraction when necessary in order  to obtain the
+result with fewer steps.
 
 =back
 
