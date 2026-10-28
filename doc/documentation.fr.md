@@ -125,6 +125,10 @@ donc la correspondance.
 | 20-conversion-div.rakutest  | 19-conversion-div.t        |
 | 21-gcd.rakutest             | 20-gcd.t                   |
 | 22-russ-mult.rakutest       | 12-russ-mult.t             |
+| 23-file-output.rakutest     | 21-file-output.t           |
+| 24-file-output.rakutest     | 22-file-output.t           |
+| 25-skip-zero.rakutest       | 23-skip-zero.t             |
+| 26-iron-div.rakutest        | 24-iron-div.t              |
 
 Premières impressions sur Corinna
 ---------------------------------
@@ -520,6 +524,9 @@ l'[opérateur Vénus](https://metacpan.org/dist/perlsecret/view/lib/perlsecret.p
 pour tester les résultats booléens sous la forme `0` ou `1`
 et l'[opérateur landau](https://metacpan.org/dist/perlsecret/view/lib/perlsecret.pod#Baby-cart)
 pour insérer des appels de méthode dans des chaînes de caractères.
+Cela dit,
+l'[opérateur bang-bang](https://metacpan.org/dist/perlsecret/view/lib/perlsecret.pod#Bang-bang)
+aurait été mieux approprié pour la conversion en booléens.
 
 ### Problèmes pour la méthode `addition`
 

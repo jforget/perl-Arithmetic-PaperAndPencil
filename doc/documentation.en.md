@@ -126,6 +126,10 @@ Here is the way the files are linked with each other.
 | 20-conversion-div.rakutest  | 19-conversion-div.t        |
 | 21-gcd.rakutest             | 20-gcd.t                   |
 | 22-russ-mult.rakutest       | 12-russ-mult.t             |
+| 23-file-output.rakutest     | 21-file-output.t           |
+| 24-file-output.rakutest     | 22-file-output.t           |
+| 25-skip-zero.rakutest       | 23-skip-zero.t             |
+| 26-iron-div.rakutest        | 24-iron-div.t              |
 
 First Thoughts about Corinna
 ----------------------------
@@ -323,7 +327,7 @@ Function  `space-char`   is  the   function  giving  an   instance  of
 
 It   did  not   work.  Test   programme  `01-action.t`   (Raku-to-Perl
 translation  of  `06-html.rakutest`) would  write  `133`  where I  was
-expecting  `123`. After  some debugging,  I understood  that one  each
+expecting  `123`. After  some debugging,  I understood  that on   each
 line,  the `unshift`  statement would  insert the  same `A::P&P::Char`
 instance twice.  On the other hand,  the problem was not  appearing in
 Raku. Either  formula `space-char() xx $delta-c`  calls twice function
@@ -368,7 +372,7 @@ string generation, variable `$l_min`  would have the successive values
 0, -1,  -3 and -4  (skipping -2 because we  insert two columns  in one
 go). Yet,  during the  second HTML  string generation,  `$l_min` would
 have  a strange  behaviour. When  printed from  outside the  `l2p_lin`
-function, I would have values 0, -1,  -3 and -4, but when printed from
+function, it would give values 0, -1, -3 and -4, but when printed from
 within the `l2p_lin` function it would always give -4.
 
 Here  is the  hypothetical explanation.  During the  first generation,
@@ -513,6 +517,9 @@ mainly the
 to test boolean results as `0` or `1` and the
 [baby-cart operator](https://metacpan.org/dist/perlsecret/view/lib/perlsecret.pod#Baby-cart)
 to include method calls within char strings delimited with double quotes.
+Actually, the
+[bang-bang operator](https://metacpan.org/dist/perlsecret/view/lib/perlsecret.pod#Bang-bang)
+would have been better for boolean conversion.
 
 ### Problems with method `addition`
 
