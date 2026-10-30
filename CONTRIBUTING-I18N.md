@@ -116,8 +116,7 @@ You  should  work on  CSV  files  in  numerical order,  starting  with
 `t/data/01-action.csv` and `xt/data/02-html.csv`.
 
 If you have an  issue with singular vs plural forms,  please send me a
-message.  My CPAN  user  code  is `jforget`,  you  can  guess my  mail
-address.
+message.
 
 Final Step
 ----------
