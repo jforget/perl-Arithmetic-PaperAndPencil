@@ -211,6 +211,16 @@ sub divide($x, $y, $invert) {
   }
 }
 
+sub left_shift($x, $y, $invert) {
+  if ($invert) {
+    die "The instance of Arithmetic::PaperAndPencil::Number must be on the left, the native integer must be on the right";
+  }
+  if ($y < 0) {
+    return $x->carry(- $y);
+  }
+  return Arithmetic::PaperAndPencil::Number->new(radix => $x->radix, value => $x->value . '0' x $y);
+}
+
 sub num_cmp($x, $y, $invert) {
   my $radix = $x->radix;
   if ($radix != $y->radix) {
@@ -233,6 +243,7 @@ use overload '+' => \&add
            , '-' => \&minus
            , '*' => \&times
            , '/' => \&divide
+           , '<<'  => \&left_shift
            , '<=>' => \&num_cmp
            , 'cmp' => \&alpha_cmp
     ;
@@ -448,6 +459,18 @@ single-digit numbers. This function is used to overload C<*>.
 Dividing two numbers with the same radix. The first argument must be a
 single-digit or double-digit number and  the second argument must be a
 single-digit number (and greater than zero, of course).
+
+=head2 Numeric shift left C<left_shift>
+
+The left parameter must be a number (instance of C<A::PP::Number>) and
+the  right parameter  must be  a Perl  native integer.  The number  is
+multiplied by a power of the  radix (not necessarily radix 2). Another
+way  to described  it  is  that the  C<value>  attribute  of the  left
+parameter  is concatenated  with  as  many zero  digits  as the  right
+parameter.
+
+If the right parameter is less than zero, this function gives the same
+result as the C<carry> method (with a positive argument).
 
 =head2 Numeric Comparison C<num_cmp>
 

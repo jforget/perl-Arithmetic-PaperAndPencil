@@ -63,14 +63,16 @@ my @test_odd = (
        );
 
 #plan 50 + @test_add + @test_mult + 2 × @test_sub + @test_cmp + @test_div + @test_odd;
-plan(tests => 49 + @test_add + @test_mult + 2 * @test_sub + @test_cmp + @test_div + @test_odd);
+plan(tests => 52 + @test_add + @test_mult + 2 * @test_sub + @test_cmp + @test_div + @test_odd);
 
+# 1 test, 1 to 1
 # Check with the default radix
 my $x = Arithmetic::PaperAndPencil::Number->new(value => '6');
 my $y = Arithmetic::PaperAndPencil::Number->new(value => '9');
 my $z = max_unit(10);
 is( $z->value, "9", "highest single-digit is 9");
 
+# 4 tests, 2 to 5
 $z  = $x + $y;
 is( $z->value, "15", "6 plus 9 is 15");
 $z = $y - $x;
@@ -81,6 +83,7 @@ $z = $x * $y;
 is( $z->value, "54", "6 times 9 is 54");
 #is( $z.gist , "54", "6 times 9 is 54 (using gist)");
 
+# 8 tests, 6 to 13
 is( $x->carry->value, "0", "carry of single-digit '6' is '0'");
 is( $x->unit ->value, "6", "unit of single-digit '6' is unaltered '6'");
 is( $z->carry->value, "5", "carry of '54' is '5'");
@@ -90,10 +93,12 @@ is( $z->unit( 2)->value, "54", "2-digit extended unit of '54' is '54'");
 is( $z->carry(3)->value,  "0", "3-digit extended carry of '54' is '0'");
 is( $z->unit( 3)->value, "54", "3-digit extended unit of '54' is '54'");
 
+# 3 tests, 14 to 16
 is( $x->square_root->value, "2", "square root of 6 is 2");
 is( $y->square_root->value, "3", "square root of 9 is 3");
 is( $z->square_root->value, "7", "square root of 54 is 7");
 
+# 6 tests, 17 to 22
 is($x <=> $y, -1,  "6 numerically less than 9");
 is($x <=> $x,  0,  "6 numerically same as 6");
 is($z <=> $x,  1, "54 numerically greater than 6");
@@ -101,6 +106,7 @@ is($x cmp $y, -1,  "6 alphabetically less than 9");
 is($z cmp $x, -1, "54 alphabetically less than 6");
 is($z cmp $z,  0, "54 alphabetically same as 54");
 
+# 24 tests, 23 to 46
 is( 0+($x <  $x), 0,  "6 numerically less than 6? No");
 is( 0+($x <  $y), 1,  "6 numerically less than 9? Yes");
 is( 0+($x <  $z), 1,  "6 numerically less than 54? Yes");
@@ -126,10 +132,19 @@ is( 0+($z <= $x), 0, "54 numerically less than or equal to 6? No");
 is( 0+($z <= $y), 0, "54 numerically less than or equal to 9? No");
 is( 0+($z <= $z), 1, "54 numerically less than or equal to 54? Yes");
 
+# 3 tests, 47 to 49
 $z = Arithmetic::PaperAndPencil::Number->new(value => '000');
 is($z       ->value, '0', "'000' is the same as '0'");
 is($z->carry->value, "0", "carry of '000' is '0'");
 is($z->unit ->value, "0", "unit of '000' is '0'");
+
+# 3 tests, 50 to 52
+$z = Arithmetic::PaperAndPencil::Number->new(value => '6') << 3;
+is($z->value, '6000', "'6' shifted 3 times is '600'");
+$z <<= 2;
+is($z->value, "600000", "'6000' shifted twice is '600000'");
+$z <<= -3;
+is($z->value, "600", "'600000' shited right three times is '600'");
 
 # Check with explicit radix
 for (@test_add) {
