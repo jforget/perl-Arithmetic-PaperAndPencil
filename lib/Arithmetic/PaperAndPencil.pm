@@ -804,6 +804,7 @@ method addition1(%param) {
     $total[$j] = { lin => $nb, col => -$j };
   }
   my $result = $self->_adding(\@digits, \@total, 0, $radix, 0, $skip_zero);
+  $action[-1]->set_level(0);
   return Arithmetic::PaperAndPencil::Number->new(value => $result, radix => $radix);
 }
 
