@@ -2665,6 +2665,7 @@ method _simple_mult(%param) {
   my $c_pd         = $param{c_pd};
   my $multiplicand = $param{multiplicand};
   my $multiplier   = $param{multiplier};
+  my $hide_mr      = $param{hide_mr} // 0;
   my $result = '';
   my $radix  = $multiplier->radix;
   my $carry  = '0';
@@ -2674,9 +2675,13 @@ method _simple_mult(%param) {
   for my $i (0 .. $len1 - 1) {
     my $mul = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => substr($multiplicand->value, $len1 - $i - 1, 1));
     $pdt = $multiplier * $mul;
-    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'MUL01'           , val3 => $pdt->value
-                                              , r1l => $l_mr, r1c => $c_mr     , r1val => $multiplier->value, val1 => $multiplier->value
-                                              , r2l => $l_md, r2c => $c_md - $i, r2val => $mul->value       , val2 => $mul->value
+    my $mr_val = $multiplier->value;
+    if ($hide_mr) {
+      $mr_val = '';
+    }
+    $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'MUL01'    , val3 => $pdt->value
+                                              , r1l => $l_mr, r1c => $c_mr     , r1val => $mr_val    , val1 => $multiplier->value
+                                              , r2l => $l_md, r2c => $c_md - $i, r2val => $mul->value, val2 => $mul->value
                                               );
     push(@action, $action);
     if ($carry ne '0') {
@@ -2895,6 +2900,7 @@ method _mult_and_sub(%param) {
   my $l_pr         = $param{l_pr};
   my $c_pr         = $param{c_pr};
   my $mult_and_sub = $param{mult_and_sub}  // 'combined';
+  my $hide_quo     = $param{hide_quo} // 0;
 
   my Arithmetic::PaperAndPencil::Action $action;
   my $radix    = $dividend->radix;
@@ -2906,7 +2912,7 @@ method _mult_and_sub(%param) {
     my Arithmetic::PaperAndPencil::Number $pdt;
     $pdt = $self->_simple_mult(basic_level => $basic_level + 1
                          , l_md => $l_dr, c_md => $c_dr, multiplicand => $divisor
-                         , l_mr => $l_qu, c_mr => $c_qu, multiplier   => $quotient
+                         , l_mr => $l_qu, c_mr => $c_qu, multiplier   => $quotient, hide_mr => $hide_quo
                          , l_pd => $l_pr, c_pd => $c_pr);
     if ($dividend < $pdt) {
       return (1, '');
@@ -2921,9 +2927,13 @@ method _mult_and_sub(%param) {
     my $divisor_digit = substr($divisor->value, -$i - 1, 1);
     my $temp  = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor_digit);
     $temp *= $quotient;
+    my $quo_val = $quotient->value;
+    if ($hide_quo) {
+      $quo_val = '';
+    }
     $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'MUL01', val3 => $temp->value
-                   , r1l => $l_qu, r1c => $c_qu     , r1val => $quotient->value, val1  => $quotient->value
-                   , r2l => $l_dr, r2c => $c_dr - $i, r2val => $divisor_digit  , val2  => $divisor_digit
+                   , r1l => $l_qu, r1c => $c_qu     , r1val => $quo_val      , val1  => $quotient->value
+                   , r2l => $l_dr, r2c => $c_dr - $i, r2val => $divisor_digit, val2  => $divisor_digit
                    );
     push(@action, $action);
     if ($carry ne '0') {
