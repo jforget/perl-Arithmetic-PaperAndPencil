@@ -3543,7 +3543,7 @@ multiplicand are processed left-to-right.
 This   parameter   has   no  use   with   C<'std'>,   C<'jalousie-A'>,
 C<'jalousie-B'> and C<'russian'> types.
 
-=item * C<mult-and-add>
+=item * C<mult_and_add>
 
 This parameter  is used with  the C<'boat'> type.  Value C<'separate'>
 (default value) means that in a first phase, the digits resulting from
@@ -3704,7 +3704,7 @@ stricken and the final product is written above the partial products.
 
 Acceptable  break from  reality: I  am not  sure the  explanation from
 I<Number Words and  Number Symbols> is authoritative. So  I have added
-two parameters, C<direction> and  C<mult-and-add>, to allow the module
+two parameters, C<direction> and  C<mult_and_add>, to allow the module
 user to choose which subvariant he prefers.
 
 =item * C<russian>
@@ -3739,7 +3739,7 @@ This string parameter  can be either C<"quotient">  (default value) or
 C<"remainder">,  or  C<"both">.  It  controls  which  value  is  (are)
 returned by the method to the main programme.
 
-=item * C<mult-and-sub>
+=item * C<mult_and_sub>
 
 This string parameter  can be either C<"combined">  (default value) or
 C<"separate">. It  controls the computation of  the successive partial
@@ -3778,7 +3778,7 @@ of the divisor with any  single-digit number. These when computing the
 intermediate  remainders,   instead  of   doing  a   multiplication  -
 subtraction combination,  the already known partial  product is simply
 copied from  the preparation  list then  subtracted from  the previous
-intermediate  remainder.  The  C<mult-and-sub> parameter  defaults  to
+intermediate  remainder.  The  C<mult_and_sub> parameter  defaults  to
 C<"separate"> for this division type.
 
 =item * C<boat>
@@ -3824,7 +3824,7 @@ Simulates the  extraction of the square  root of a number.  There is a
 single     positional     parameter,     an    instance     of     the
 C<Arithmetic::PaperAndPencil::Number> class.
 
-There is  an optional keyword parameter,  C<mult-and-sub>. Its purpose
+There is  an optional keyword parameter,  C<mult_and_sub>. Its purpose
 is the same as for division.  If set to C<'combined'> (default value),
 the  computing  of the  product  (candidate  digit times  divisor)  is
 combined with  the subtraction  from the partial  dividend. If  set to
@@ -3861,9 +3861,13 @@ zero (default value), no new pages are generated.
 A string  parameter specifying  which algorithm is  used to  convert a
 number. Values  C<'mult'> and C<'Horner'>  are synonymous and  use the
 cascading multiplication algorithm (or  Horner scheme). Value C<'div'>
-uses the cascading division algorithm.
+uses  the  cascading division  algorithm.  Value  C<'light'> uses  the
+cascading multiplication  algorithm with a  more compact setup.  It is
+available  only  if  the  origin   radix  is  less  than  the  doubled
+destination radix. For example, it is available for 2 → 10 conversions
+and for 19 → 10 conversions, but not for 20 → 10 conversions.
 
-=item * C<div-type>
+=item * C<div_type>
 
 A string parameter specifying which kind of division is used: C<'std'>
 (default value) uses  a standard division with  a full trial-and-error
@@ -3879,14 +3883,14 @@ C<'div'>.
 
 See  the  C<type>  parameter  for the  C<division>  method.  Yet,  the
 C<'boat'> value available for the C<type> parameter of the C<division>
-method  is   not  allowed  for   the  C<div-type>  parameter   of  the
+method  is   not  allowed  for   the  C<div_type>  parameter   of  the
 C<conversion> method.
 
-=item * C<mult-and-sub>
+=item * C<mult_and_sub>
 
-This parameter  is similar  to the  C<mult-and-sub> parameter  for the
+This parameter  is similar  to the  C<mult_and_sub> parameter  for the
 C<division> method, except that it is  useful only if the value of the
-C<div-type> parameter is C<'cheating'>.
+C<div_type> parameter is C<'cheating'>.
 
 The  parameter  controls the  computation  of  the successive  partial
 remainders with  a multiplication (quotient digit  times full divisor)
@@ -3896,15 +3900,20 @@ and the  subtraction are done  at the same  time, digit per  digit. If
 C<'separate'>,  the multiplication  is done  first in  full, then  the
 subtraction is done.
 
-If  the  C<div-type> parameter  is  C<'prepared'>,  this parameter  is
+If  the  C<div_type> parameter  is  C<'prepared'>,  this parameter  is
 ignored  and   the  multiplication   and  the  subtraction   are  done
 separately.
 
-If  the   C<div-type>  parameter  is  C<'std'>,   the  C<mult-and-sub>
+If  the   C<div_type>  parameter  is  C<'std'>,   the  C<mult_and_sub>
 parameter is  ignored and the  multiplication and the  subtraction are
 combined. The  reason for  this behaviour  is to  by-pass a  bug which
 would appear in cramped situations where several divisions are crammed
 side by side.
+
+The  C<mult_and_sub>  parameter  is   also  available  for  C<'light'>
+conversions, when the origin radix is less than the destination radix.
+For example,  it is available for  2 → 10  conversions and for 9  → 10
+conversions, but not for 11 → 10 conversions.
 
 =back
 
@@ -3925,7 +3934,7 @@ The first number used, instance of C<Arithmetic::PaperAndPencil::Number>.
 
 The second number used, instance of C<Arithmetic::PaperAndPencil::Number>.
 
-=item * C<div-type>
+=item * C<div_type>
 
 A string parameter specifying which kind of division is used: C<"std">
 (default value) uses  a standard division with  a full trial-and-error
@@ -3935,7 +3944,7 @@ digits is artificially reduced to a single iteration.
 
 See  the  C<type>  parameter  for the  C<division>  method.  Yet,  the
 C<"boat"> and C<"prepared"> values available for the C<type> parameter
-of  the  C<division>  method  are  not  allowed  for  the  C<div-type>
+of  the  C<division>  method  are  not  allowed  for  the  C<div_type>
 parameter of the C<gcd> method.
 
 =back
