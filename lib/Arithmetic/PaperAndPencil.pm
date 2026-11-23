@@ -2020,14 +2020,15 @@ method conversion(%param) {
   if    ($type eq 'mult'  ) { $title = 'TIT14' ; }
   elsif ($type eq 'Horner') { $title = 'TIT14' ; }
   elsif ($type eq 'div'   ) { $title = 'TIT16' ; }
-  else                      { die "Conversion type '$type' unknown, should be 'mult', 'Horner' or 'div'"; }
+  elsif ($type eq 'light' ) { $title = 'TIT21' ; }
+  else                      { die "Conversion type '$type' unknown, should be 'mult', 'Horner', 'light' or 'div'"; }
   if ($type eq 'div' and $div_type ne 'std'
                      and $div_type ne 'cheating'
                      and $div_type ne 'prepared') {
     die "Division type '$div_type' unknown, should be 'std', 'cheating' or 'prepared'";
   }
-  if ($type eq 'div' and $mult_and_sub ne 'combined'
-                     and $mult_and_sub ne 'separate') {
+  if (($type eq 'div' or $type eq 'light') and $mult_and_sub ne 'combined'
+                                           and $mult_and_sub ne 'separate') {
     die "Mult and sub type '$mult_and_sub' unknown, should be 'combined' or 'separate'";
   }
   if ($type eq 'div' and $div_type eq 'std') {
@@ -2038,6 +2039,13 @@ method conversion(%param) {
   }
   my Arithmetic::PaperAndPencil::Action $action;
   my $old_radix = $number->radix;
+  if ($type eq 'light' and $old_radix >= 2 * $radix) {
+    die "Light conversion only available if old radix ($old_radix) is less that two times the new radix ($radix)";
+  }
+  if ($type eq 'light' and $old_radix >= $radix and $mult_and_sub eq 'combined') {
+    # Light conversion can combine multiplication and subtraction only if old radix is less that the new radix
+    $mult_and_sub = 'separate';
+  }
 
   $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => $title, val1 => $number->value, val2 => $old_radix, val3 => $radix);
   push(@action, $action);
@@ -2167,6 +2175,10 @@ method conversion(%param) {
         $width = $result->chars;
       }
     }
+  }
+  elsif ($type eq 'light') {
+    # temporary
+    return $number;
   }
   else {
     my $op   = 0;

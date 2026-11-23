@@ -31,6 +31,7 @@ my %label = ('fr' => {
                , 'TIT18' => 'PGCD de #1# et #2#, base #3#, avec triche'
                , 'TIT19' => 'Multiplication de #1# et #2#, procédé "du paysan russe", base #3#'
                , 'TIT20' => 'Division de #1# par #2#, procédé "division de fer", base #3#'
+               , 'TIT21' => 'Conversion de #1#, base #2# vers base #3#, multiplications en cascade (présentation allégée)'
                , 'NXP01' => 'Changement de page'
                , 'ADD01' => '#1# et #2#, #3#'
                , 'ADD02' => 'et #1#, #2#'
