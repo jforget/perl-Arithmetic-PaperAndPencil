@@ -2059,7 +2059,7 @@ method conversion(%param) {
   my Arithmetic::PaperAndPencil::Number $new_radix;
   my $zero  = Arithmetic::PaperAndPencil::Number->new(radix => $old_radix, value => '0');
   my %mult_cache;
-  if ($type eq 'mult' || $type eq 'Horner') {
+  if ($type eq 'mult' || $type eq 'Horner' || $type eq 'light') {
     $self->_prep_conv($old_radix, $radix, \%conv_cache, basic_level => 2);
   }
   else {
@@ -2166,7 +2166,7 @@ method conversion(%param) {
         push(@action, $action);
         $action = Arithmetic::PaperAndPencil::Action->new(level => 9, label => 'CNV03'
                                                         , val1  => $result->value, val2  => substr($number->value, $op1 + 1)
-                                                        , w1l   => 1, w1c => 0   , w1val => $result->value);
+                                    , w1l => 1, w1c => 0, w1val => $result->value);
         push(@action, $action);
         $op = 0;
         $line = 1;
@@ -2177,8 +2177,42 @@ method conversion(%param) {
     }
   }
   elsif ($type eq 'light') {
-    # temporary
-    return $number;
+    my $l_nb  = 0;
+    my $c_nb  = 0;
+    my $c_min = 0; # 0 or -1 when drawing horizontal lines in additions or subtractions
+    my $res   = '';
+    my $adj   = abs($radix - $old_radix);
+    $action   = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'WRI00', w1l => $l_nb, w1c => $c_nb + $number->chars - 1, w1val => $number->value);
+    push(@action, $action);
+    my $too_much   = 1; # useless here, but required for the syntax
+    my $must_lower = 0;
+    my $old = substr($number->value, 0, 1);
+    my $adjust = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $adj);
+    my Arithmetic::PaperAndPencil::Number $nb_new = $conv_cache{$old};
+    if ($nb_new->value ne $old) {
+      $l_nb = 1;
+      $must_lower = 1;
+      $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'CNV02'
+                  , r1l => 0    , w1c => $c_nb, r1val => $old          , val1 => $old
+                  , w1l => $l_nb, w1c => $c_nb, w1val => $nb_new->value, val2 => $nb_new->value
+                  );
+      push(@action, $action);
+      $c_min = -1; # because we have converted a single_digit number into a 2-digit number
+    }
+
+    for my $c (1..1) {
+      if ($must_lower) {
+        my $lowered = substr($number->value, $c, 1);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 4, label => 'DIV04'
+                                                        , val1  => $lowered
+                               , r1l => 0    , w1c => $c, r1val => $lowered
+                               , w1l => $l_nb, w1c => $c, w1val => $lowered
+                         );
+        push(@action, $action);
+      }
+    }
+    $action[-1]->set_level(0);
+    return $nb_new;
   }
   else {
     my $op   = 0;
