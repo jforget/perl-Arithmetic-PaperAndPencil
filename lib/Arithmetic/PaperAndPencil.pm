@@ -2201,14 +2201,48 @@ method conversion(%param) {
     }
 
     for my $c (1..1) {
+      my Arithmetic::PaperAndPencil::Number $nb_old = $nb_new;
+      my $lowered = substr($number->value, $c, 1);
       if ($must_lower) {
-        my $lowered = substr($number->value, $c, 1);
         $action = Arithmetic::PaperAndPencil::Action->new(level => 4, label => 'DIV04'
                                                         , val1  => $lowered
                                , r1l => 0    , w1c => $c, r1val => $lowered
                                , w1l => $l_nb, w1c => $c, w1val => $lowered
                          );
         push(@action, $action);
+      }
+      if ($old_radix > $radix) {
+        my Arithmetic::PaperAndPencil::Number $product;
+        $product = $self->_simple_mult(basic_level => 1
+                    , l_mr => 0        , c_mr => 0     , multiplier   => $adjust, hide_mr => 1
+                    , l_md => $l_nb    , c_md => $c - 1, multiplicand => $nb_old
+                    , l_pd => $l_nb + 1, c_pd => $c);
+        $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DRA02', w1l => $l_nb + 1, w1c => $c_min, w2l => $l_nb + 1, w2c => $c);
+        push(@action, $action);
+        my @added;
+        my @total;
+        my $low_and_conv = $conv_cache{$lowered}->value;
+        my $hide         = 0;
+        if ($lowered ne $low_and_conv) {
+          $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'CNV02', val1 => $lowered, val2 => $low_and_conv);
+          push(@action, $action);
+          $hide = 1;
+        }
+        # Note: $low_and_conv may be a 2-digit string, but it does not matter, "_adding" will still work
+        # we just need to ensure that the value before conversion is not altered, so we hide the new value
+        $added[0][0] = { lin => $l_nb    , col => $c, val => $low_and_conv, hide => $hide };
+        $total[0]    = { lin => $l_nb + 2, col => $c };
+        for my $i (0 .. $nb_old->chars - 1) {
+          my $digit = substr($nb_old->value, $nb_old->chars - $i - 1, 1);
+          $added[$i + 1][0] = { lin => $l_nb    , col => $c - $i - 1, val => $digit };
+          $total[$i + 1]    = { lin => $l_nb + 2, col => $c - $i - 1 };
+        }
+        for my $i (0 .. $product->chars - 1) {
+          my $digit = substr($product->value, $product->chars - $i - 1, 1);
+          $added[$i][1] = { lin => $l_nb + 1, col => $c - $i, val => $digit };
+        }
+        $nb_new = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $self->_adding(\@added, \@total, 2, $radix));
+        $l_nb += 2;
       }
     }
     $action[-1]->set_level(0);
@@ -2360,9 +2394,10 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0, $skip_zero = 
       $result = $digit . $result;
     }
     elsif (0+ @l == 1 && $carry eq '0') {
+      my $r1val = ''; unless (@l == 0 or $l[0]{hide}) { $r1val = $l[0]{val}; }
       $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 3
                           , label => 'WRI04'                          , val1  => $l[0]{val}
-                          , r1l => $l[ 0  ]{lin}, r1c => $l[ 0  ]{col}, r1val => $l[0]{val}, r1str => $striking
+                          , r1l => $l[ 0  ]{lin}, r1c => $l[ 0  ]{col}, r1val => $r1val, r1str => $striking
                           , w1l => $pos[$i]{lin}, w1c => $pos[$i]{col}, w1val => $l[0]{val}
                           );
       push(@action, $action);
@@ -2371,12 +2406,14 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0, $skip_zero = 
     else {
       my $first;
       $sum = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $l[0]{val});
+      my $r1val = ''; unless (@l == 0 or $l[0]{hide}) { $r1val = $l[0]{val}; }
+      my $r2val = ''; unless (@l <= 1 or $l[1]{hide}) { $r2val = $l[1]{val}; }
       if ($carry eq '0') {
         $sum   += Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $l[1]{val});
         $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6
                             , label => 'ADD01' , val1  => $l[0]{val}, val2  => $l[1]{val}, val3  => $sum->value
-                            , r1l => $l[0]{lin}, r1c   => $l[0]{col}, r1val => $l[0]{val}, r1str => $striking
-                            , r2l => $l[1]{lin}, r2c   => $l[1]{col}, r2val => $l[1]{val}, r2str => $striking
+                            , r1l => $l[0]{lin}, r1c   => $l[0]{col}, r1val => $r1val, r1str => $striking
+                            , r2l => $l[1]{lin}, r2c   => $l[1]{col}, r2val => $r2val, r2str => $striking
                             );
         $first = 2;
       }
@@ -2390,10 +2427,11 @@ method _adding($digits, $pos, $basic_level, $radix, $striking = 0, $skip_zero = 
       }
       push(@action, $action);
       for my $j ($first .. $#l) {
+        my $r1val = ''; unless (@l <= $j or $l[$j]{hide}) { $r1val = $l[$j]{val}; }
         $sum   += Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $l[$j]{val});
         $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6
                           , label => 'ADD02'    , val1 => $l[$j]{val}, val2  => $sum->value
-                          , r1l   => $l[$j]{lin}, r1c  => $l[$j]{col}, r1val => $l[$j]{val}, r1str => $striking
+                          , r1l   => $l[$j]{lin}, r1c  => $l[$j]{col}, r1val => $r1val, r1str => $striking
                           );
         push(@action, $action);
       }

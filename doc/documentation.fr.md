@@ -128,7 +128,8 @@ donc la correspondance.
 | 23-file-output.rakutest     | 21-file-output.t           |
 | 24-file-output.rakutest     | 22-file-output.t           |
 | 25-skip-zero.rakutest       | 23-skip-zero.t             |
-| 26-iron-div.rakutest        | 24-iron-div.t              |
+| 26-iron-div.rakutest         | 24-iron-div.t             |
+| 27-conversion-light.rakutest | 25-conversion-light.t     |
 
 Premières impressions sur Corinna
 ---------------------------------
@@ -817,6 +818,22 @@ j'ai trouvé comment éviter ce message d'erreur, problème réglé.
 Finalement, `Test::Pod` ne reconnaît pas la directive `=encoding utf8`
 et déclenche une  erreur lorsqu'il rencontre un  caractère `→` (U+2192
 RIGHTWARDS ARROW). Et des fois, je n'ai pas d'erreur.
+
+Lors du  portage en Perl  de l'option `light`  de la conversion,  il a
+fallu que je  tienne compte de l'attribut `hide`  (cacher) de certains
+chiffres. Le portage simple des lignes Raku telles que :
+
+```
+      my $r2val = @l[1]<val>; if @l[1]<hide> { $r2val = ''; } # Raku
+      my $r2val = $l[1]{val}; if $l[1]{hide} { $r2val = ''; } # Perl
+```
+
+provoquait parfois  l'autovivication d'un poste dans  le tableau `@l`.
+J'ai donc dû adapter cette définition en renversant la logique :
+
+```
+      my $r2val = ''; unless (@l <= 1 or $l[1]{hide}) { $r2val = $l[1]{val}; }
+```
 
 ### Et le dernier problème
 

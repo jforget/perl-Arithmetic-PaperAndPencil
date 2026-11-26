@@ -129,7 +129,8 @@ Here is the way the files are linked with each other.
 | 23-file-output.rakutest     | 21-file-output.t           |
 | 24-file-output.rakutest     | 22-file-output.t           |
 | 25-skip-zero.rakutest       | 23-skip-zero.t             |
-| 26-iron-div.rakutest        | 24-iron-div.t              |
+| 26-iron-div.rakutest         | 24-iron-div.t             |
+| 27-conversion-light.rakutest | 25-conversion-light.t     |
 
 First Thoughts about Corinna
 ----------------------------
@@ -805,6 +806,21 @@ I found how to avoid these messages, problem solved.
 Lastly, `Test::Pod` does not recognise the `=encoding utf8` statement.
 So  sometimes it  gives an  error message  when encountering  char `→`
 (U+2192 RIGHTWARDS ARROW). And sometimes, I have no error message.
+
+When porting option  `light` of method `conversion` to Perl,  I had to
+pay attention to attribute `hide` of some digits. The simple port
+
+```
+      my $r2val = @l[1]<val>; if @l[1]<hide> { $r2val = ''; } # Raku
+      my $r2val = $l[1]{val}; if $l[1]{hide} { $r2val = ''; } # Perl
+```
+
+would sometimes  autovivify a new  entry within  array `@l`. I  had to
+rework this statement, by inverting the logic in this way:
+
+```
+      my $r2val = ''; unless (@l <= 1 or $l[1]{hide}) { $r2val = $l[1]{val}; }
+```
 
 ### And the Last Problem
 
