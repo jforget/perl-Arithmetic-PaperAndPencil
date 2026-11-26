@@ -736,6 +736,21 @@ with 1 and the Raku loop translates to:
       my $old_digit = substr($number->value, $op1, 1);
 ```
 
+When porting option  `light` of method `conversion` to Perl,  I had to
+pay attention to attribute `hide` of some digits. The simple port
+
+```
+      my $r2val = @l[1]<val>; if @l[1]<hide> { $r2val = ''; } # Raku
+      my $r2val = $l[1]{val}; if $l[1]{hide} { $r2val = ''; } # Perl
+```
+
+would sometimes  autovivify a new  entry within  array `@l`. I  had to
+rework this statement, by inverting the logic in this way:
+
+```
+      my $r2val = ''; unless (@l <= 1 or $l[1]{hide}) { $r2val = $l[1]{val}; }
+```
+
 ### Problems when preparing the Module
 
 During the  development, I  tested the  classes, methods  and routines
@@ -806,21 +821,6 @@ I found how to avoid these messages, problem solved.
 Lastly, `Test::Pod` does not recognise the `=encoding utf8` statement.
 So  sometimes it  gives an  error message  when encountering  char `→`
 (U+2192 RIGHTWARDS ARROW). And sometimes, I have no error message.
-
-When porting option  `light` of method `conversion` to Perl,  I had to
-pay attention to attribute `hide` of some digits. The simple port
-
-```
-      my $r2val = @l[1]<val>; if @l[1]<hide> { $r2val = ''; } # Raku
-      my $r2val = $l[1]{val}; if $l[1]{hide} { $r2val = ''; } # Perl
-```
-
-would sometimes  autovivify a new  entry within  array `@l`. I  had to
-rework this statement, by inverting the logic in this way:
-
-```
-      my $r2val = ''; unless (@l <= 1 or $l[1]{hide}) { $r2val = $l[1]{val}; }
-```
 
 ### And the Last Problem
 
