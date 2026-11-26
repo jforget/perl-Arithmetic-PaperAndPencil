@@ -38,6 +38,9 @@
    ;; replacing Raku method invocation with Perl method invocation
    (save-excursion (query-replace-regexp "\\([a-z]\\)\\.\\([a-z]\\)" "\\1->\\2" nil nil nil) )
 
+   ;; replacing Raku private method invocation with Perl method invocation
+   (save-excursion (query-replace "self!" "$self->_" nil nil nil) )
+
    ;; put again parentheses around "if" conditions
    (save-excursion (query-replace-regexp "if \\(.*\\) {$" "if (\\1) {" nil nil nil) )
 

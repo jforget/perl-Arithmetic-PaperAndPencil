@@ -2200,7 +2200,7 @@ method conversion(%param) {
       $c_min = -1; # because we have converted a single_digit number into a 2-digit number
     }
 
-    for my $c (1..1) {
+    for my $c (1 .. $number->chars - 1) {
       my Arithmetic::PaperAndPencil::Number $nb_old = $nb_new;
       my $lowered = substr($number->value, $c, 1);
       if ($must_lower) {
@@ -2244,6 +2244,28 @@ method conversion(%param) {
         $nb_new = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $self->_adding(\@added, \@total, 2, $radix));
         $l_nb += 2;
       }
+      elsif ($mult_and_sub eq 'separate') {
+        my $nb1 = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $nb_old->value . $lowered);
+        ($too_much, $res) = $self->_mult_and_sub(l_dd => $l_nb     , c_dd => $c - 1, dividend     => $nb1
+                                               , l_dr => $l_nb     , c_dr => $c    , divisor      => $nb_old
+                                               , l_qu => 0         , c_qu => 0     , quotient     => $adjust, hide_quo => 1
+                                               , l_re => $l_nb + 2 , c_re => $c    , basic_level  => 0
+                                               , l_pr => $l_nb + 1 , c_pr => $c    , mult_and_sub => $mult_and_sub);
+        $nb_new =  Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $res);
+        $l_nb += 2;
+      }
+      else {
+        my $nb1 = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $nb_old->value . $lowered);
+        ($too_much, $res) = $self->_mult_and_sub(l_dd => $l_nb     , c_dd => $c - 1, dividend     => $nb1
+                                               , l_dr => $l_nb     , c_dr => $c    , divisor      => $nb_old
+                                               , l_qu => 0         , c_qu => 0     , quotient     => $adjust, hide_quo => 1
+                                               , l_re => $l_nb + 1 , c_re => $c    , basic_level  => 0
+                                               , l_pr => 0         , c_pr => 0     , mult_and_sub => $mult_and_sub);
+        $nb_new =  Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $res);
+        $l_nb += 1;
+      }
+      $action[-1]->set_level(3);
+      $must_lower = 1;
     }
     $action[-1]->set_level(0);
     return $nb_new;
@@ -3039,11 +3061,40 @@ method _mult_and_sub(%param) {
                                                         , r1l => $l_dd, r1c => $c_dd - $i, r1val => $dividend_digit->value
                                                         );
         push(@action, $action);
-        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'WRI04'   , val1  => $rem_digit->value
+        $carry = $adjusted_dividend->carry->value;
+        my Arithmetic::PaperAndPencil::Number $left_number = $dividend->carry($i + 1);
+        my $left_digits = $left_number->value;
+        my $label = 'WRI02';
+        my $val2  = $carry;
+        if ($carry eq '0' or $carry eq $left_digits) {
+          $label = 'WRI04';
+          $val2  = '';
+        }
+        $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => $label    , val1  => $rem_digit->value, val2 => $val2
                                                         , w1l   => $l_re           , w1c   => $c_re - $i, w1val => $rem_digit->value
                      );
         push(@action, $action);
         $rem   = $rem_digit->value . $rem;
+        if ($left_digits ne $carry) {
+          if ($carry eq '0') {
+            $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'WRI06'
+                                                            , val1  => $left_digits
+                       , w1l => $l_re, w1c => $c_re - $i - 1, w1val => $left_digits
+                       );
+            push(@action, $action);
+            $rem = $left_digits . $rem;
+          }
+          else {
+            my Arithmetic::PaperAndPencil::Number $left_number1 = $left_number - Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $carry);
+            my $left_digits1 = $left_number1->value;
+            $action = Arithmetic::PaperAndPencil::Action->new(level => $basic_level + 6, label => 'SUB01'
+                    , val1 => $carry, val2 => $left_digits1 , val3  => $left_digits
+                    , w1l  => $l_re , w1c  => $c_re - $i - 1, w1val => $left_digits1
+                    );
+            push(@action, $action);
+            $rem = $left_digits1 . $rem;
+          }
+        }
       }
     }
     else {

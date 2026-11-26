@@ -40,6 +40,7 @@ my %label = ('fr' => {
                , 'WRI03' => "Je pose #1# et je ne retiens rien"
                , 'WRI04' => "Je pose #1#"
                , 'WRI05' => "Je recopie la ligne #1#"
+               , 'WRI06' => "Je recopie #1#"
                , 'MUL01' => '#1# fois #2#, #3#'
                , 'MUL02' => 'Fastoche, #1# fois #2#, #3#'
                , 'MUL03' => '#1# est pair, je barre #2#'

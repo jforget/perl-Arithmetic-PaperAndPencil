@@ -33,7 +33,7 @@ for my $data (@tests) {
   check_cnv($old_radix,  $nb1, $new_radix, $expected);
 }
 is($operation->csv, $refcsv, "Checking CSV file");
-my $html = $operation->html(lang => 'fr', silent => 0, level => 5);
+my $html = $operation->html(lang => 'fr', silent => 0, level => 3);
 is($html, $refhtml, "Checking HTML file");
 done_testing;
 
