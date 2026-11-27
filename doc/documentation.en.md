@@ -740,8 +740,8 @@ When porting option  `light` of method `conversion` to Perl,  I had to
 pay attention to attribute `hide` of some digits. The simple port
 
 ```
-      my $r2val = @l[1]<val>; if @l[1]<hide> { $r2val = ''; } # Raku
-      my $r2val = $l[1]{val}; if $l[1]{hide} { $r2val = ''; } # Perl
+      my $r2val = @l[1]<val>; if  @l[1]<hide>  { $r2val = ''; } # Raku
+      my $r2val = $l[1]{val}; if ($l[1]{hide}) { $r2val = ''; } # Perl
 ```
 
 would sometimes  autovivify a new  entry within  array `@l`. I  had to

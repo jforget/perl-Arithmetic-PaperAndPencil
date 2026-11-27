@@ -1573,7 +1573,7 @@ method division(%param) {
       $dvr_up     = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $dvr_up->value . '0' x ($divisor->chars - 1));
       $supplement = $divisor->unit($divisor->chars - 1)->complement($divisor->chars - 1);
     }
-    my $dvr_up_scaling = '0' x ($dvr_up->chars - 1);
+    my $dvr_up_scale = $dvr_up->chars - 1;
     $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV08', val1 => $dvr_up->value);
     push(@action, $action);
     $action = Arithmetic::PaperAndPencil::Action->new(level => 2, label => 'SUB03', val1 => $dvr_up->value, val2 => $divisor->value, val3 => $supplement->value);
@@ -1584,7 +1584,7 @@ method division(%param) {
     for my $pos (0 .. $supplement->chars - 1) {
       my Arithmetic::PaperAndPencil::Number $digit = $supplement->carry($pos)->unit;
       if ($digit->value ne '0') {
-        unshift @supplement, { digit => $digit, scaling => '0' x $pos, scaled_value => $digit->value . '0' x $pos };
+        unshift @supplement, { digit => $digit, scale => $pos, scaled_value => $digit->value . '0' x $pos };
       }
     }
 
@@ -1608,7 +1608,6 @@ method division(%param) {
       if ($compact && ($remainder ge $divisor)
                    && ($remainder lt $dvr_up || substr($dvr_up->value, 0, 1) eq '1')) {
         my $dvd_scale   = $remainder->chars - $divisor->chars;
-        my $dvd_scaling = '0' x $dvd_scale;
 
         # incrementing the quotient
         my Arithmetic::PaperAndPencil::Number $q = $quotient->carry($dvd_scale);
@@ -1616,12 +1615,12 @@ method division(%param) {
         $q += $one;
         $action   = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'ADD01', val1 => $old_value, val2 => '1', val3 => $q->value, r1l => $last_l, r1c => $c_quo, r1val => $old_value);
         push(@action, $action);
-        $quotient = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $q->value . $dvd_scaling);
+        $quotient = $q << $dvd_scale;
         $action   = Arithmetic::PaperAndPencil::Action->new(level => 5, label => 'DIV09', val1 => $quotient->value, w1l => $l + 1, w1c => $c_quo, w1val => $quotient->value);
         push(@action, $action);
 
         # subtracting the scaled divisor from the remainder
-        my Arithmetic::PaperAndPencil::Number $dvr_scaled = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor->value . $dvd_scaling);
+        my Arithmetic::PaperAndPencil::Number $dvr_scaled = $divisor << $dvd_scale;
         $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'WRI00', w1l => $l + 1, w1c => $c_dvd, w1val => $dvr_scaled->value );
         push(@action, $action);
         my $res = '';
@@ -1637,14 +1636,12 @@ method division(%param) {
       else {
 
         my $dvd_scale;
-        my $dvd_scaling;
         if ($dvr_up lt $remainder) {
           $dvd_scale = $remainder->chars - $dvr_up->chars;
         }
         else {
           $dvd_scale = $remainder->chars - $dvr_up->chars - 1;
         }
-        $dvd_scaling = '0' x $dvd_scale;
         $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'WRI00', w1l => $l, w1c => $c_op, w1val => '÷'
                                                                                       , w2l => $l, w2c => $c_eq, w2val => '=');
         push(@action, $action);
@@ -1654,7 +1651,7 @@ method division(%param) {
         my Arithmetic::PaperAndPencil::Number $op1       = $remainder->carry($dvd_scale + $dvr_up->chars - 1);
         my Arithmetic::PaperAndPencil::Number $op2       = $dvr_up   ->carry(             $dvr_up->chars - 1);
         my Arithmetic::PaperAndPencil::Number $cand1     = $op1 / $op2;
-        my Arithmetic::PaperAndPencil::Number $candidate = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $cand1->value . $dvd_scaling);
+        my Arithmetic::PaperAndPencil::Number $candidate = $cand1 << $dvd_scale;
         $action = Arithmetic::PaperAndPencil::Action->new(level => 6, label => 'DIV01'
                       , val1 => $op1->value, r1l => $l, r1c => $c_dvd - $dvd_scale - $dvr_up->chars + 1, r1val => $op1->value
                       , val2 => $op2->value, r2l => $l, r2c => $c_dvr              - $dvr_up->chars + 1, r2val => $op2->value
@@ -1689,7 +1686,7 @@ method division(%param) {
         $last_l = $l;
         $l++;
         $op1 = $op2 * $cand1;
-        my Arithmetic::PaperAndPencil::Number $prdt = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $op1->value . $dvd_scaling . $dvr_up_scaling);
+        my Arithmetic::PaperAndPencil::Number $prdt = $op1 << ($dvd_scale + $dvr_up_scale);
         $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'MUL01', val1 => $op2->value, val2 => $cand1->value, val3 => $op1->value
                                  , w1l => $l, w1c => $c_factors, w1val => $dvr_up->value
                                  , w2l => $l, w2c => $c_quo1   , w2val => $candidate->value
@@ -1726,7 +1723,7 @@ method division(%param) {
             $l++;
             $j++;
             $op1    = $supplement->{digit} * $cand1;
-            $prdt   = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $op1->value . $dvd_scaling . $supplement->{scaling});
+            $prdt   = $op1 << ($dvd_scale + $supplement->{scale});
             $action = Arithmetic::PaperAndPencil::Action->new(level => 7, label => 'MUL01', val1 => $supplement->{digit}->value, val2 => $cand1->value, val3 => $op1->value
                                      , w1l => $l, w1c => $c_factors, w1val => $supplement->{scaled_value}
                                      , w2l => $l, w2c => $c_quo1   , w2val => $candidate->value

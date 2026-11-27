@@ -755,8 +755,8 @@ fallu que je  tienne compte de l'attribut `hide`  (cacher) de certains
 chiffres. Le portage simple des lignes Raku telles que :
 
 ```
-      my $r2val = @l[1]<val>; if @l[1]<hide> { $r2val = ''; } # Raku
-      my $r2val = $l[1]{val}; if $l[1]{hide} { $r2val = ''; } # Perl
+      my $r2val = @l[1]<val>; if  @l[1]<hide>  { $r2val = ''; } # Raku
+      my $r2val = $l[1]{val}; if ($l[1]{hide}) { $r2val = ''; } # Perl
 ```
 
 provoquait parfois  l'autovivication d'un poste dans  le tableau `@l`.
