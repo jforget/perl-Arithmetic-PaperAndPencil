@@ -1890,10 +1890,10 @@ method square_root($number, %param) {
     my Arithmetic::PaperAndPencil::Number $theo_quo = $part_dvd1 / $part_dvr1; # theoretical quotient first candidate
     my Arithmetic::PaperAndPencil::Number $act_quo;                            # actual quotient first candidate and then all successive candidates
     my $label;
-    if ($partial_number <= $divisor) {
+    if ($partial_number <= ($divisor << 1)) {
       $theo_quo = $zero;
       $act_quo  = $zero;
-      $divisor1 = Arithmetic::PaperAndPencil::Number->new(radix => $radix, value => $divisor->value . '0');
+      $divisor1 = $divisor << 1;
     }
     elsif ($theo_quo->chars == 2) {
       $act_quo = max_unit($radix);
